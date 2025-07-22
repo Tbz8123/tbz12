@@ -19,7 +19,7 @@
   },
   "functions": {
     "dist/index.js": {
-      "runtime": "nodejs20.x"
+      "runtime": "nodejs20.x@1.0.0"
     }
   },
   "installCommand": "npm ci --legacy-peer-deps",
