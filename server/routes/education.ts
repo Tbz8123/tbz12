@@ -113,7 +113,7 @@ router.get('/categories', async (req: Request, res: Response) => {
       success: true,
       data: mockEducationCategories
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching education categories:', error);
     res.status(500).json({
       success: false,

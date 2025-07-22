@@ -49,7 +49,7 @@ router.post('/download/:templateId', trackTemplateDownload, async (req: Request,
       downloadType: downloadType
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error downloading template:', error);
     res.status(500).json({ error: 'Failed to download template' });
   }
@@ -81,7 +81,7 @@ router.get('/stats/:templateId', async (req: Request, res: Response) => {
       legacyDownloads: downloadCount
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error getting template stats:', error);
     res.status(500).json({ error: 'Failed to get template statistics' });
   }

@@ -104,7 +104,7 @@ router.get('/', async (req: Request, res: Response) => {
         totalPages: Math.ceil(totalCount / limit),
       }
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching import history:', error);
     res.status(500).json({ error: 'Failed to fetch import history' });
   }
@@ -156,7 +156,7 @@ router.post('/', async (req: Request, res: Response) => {
     });
 
     res.status(201).json(importRecord);
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: 'Validation error', details: error.errors });
     }
@@ -177,7 +177,7 @@ router.post('/:id/process', async (req: Request, res: Response) => {
     // Start processing in background
     setImmediate(() => processImportJob(id, job));
     res.json({ message: 'Import processing started on server' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error starting import processing:', error);
     res.status(500).json({ error: 'Failed to start import processing' });
   }
@@ -215,7 +215,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     };
 
     res.json(transformedRecord);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching import record:', error);
     res.status(500).json({ error: 'Failed to fetch import record' });
   }
@@ -269,7 +269,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     });
 
     res.json(updatedRecord);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating import record:', error);
     res.status(500).json({ error: 'Failed to update import record' });
   }
@@ -299,7 +299,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
 
     console.log(`Import record ${id} deleted successfully`);
     res.status(204).send();
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting import record:', error);
     res.status(500).json({ error: 'Failed to delete import record' });
   }
@@ -333,7 +333,7 @@ async function processImportJob(jobId: string, job: any) {
         where: { id: jobId },
         data: updateData
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to update import job:', error);
     }
   };
@@ -374,7 +374,7 @@ async function processImportJob(jobId: string, job: any) {
 
     console.log(`✅ Import job ${jobId} completed successfully`);
 
-  } catch (error) {
+  } catch (error: any) {
     console.error(`❌ Import job ${jobId} failed:`, error);
     await updateJob({
       status: 'failed',
@@ -398,7 +398,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
       deleteMissingTitles = Boolean(metadata.deleteMissingTitles);
     }
     console.log('🗑️ Delete missing titles setting:', deleteMissingTitles);
-  } catch (err) {
+  } catch (err: any) {
     console.error('Failed to get job metadata:', err);
   }
 
@@ -497,7 +497,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
       } else {
         console.log('✅ No job titles to delete (all existing titles are present in uploaded file)');
       }
-    } catch (deleteError) {
+    } catch (deleteError: any) {
       console.error('❌ Error during deletion process:', deleteError);
       // Continue with import even if deletion fails
     }
@@ -570,7 +570,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
           });
 
           console.log(`✅ Created job description with ID: ${newDescription.id}`);
-        } catch (error) {
+        } catch (error: any) {
           // Ignore duplicate descriptions
           if ((error as any)?.code !== 'P2002') {
             console.error(`❌ Failed to create description for ${titleInfo.title}:`, error);
@@ -582,7 +582,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
 
       console.log(`✅ Successfully processed ${descriptions.length} descriptions for ${titleInfo.title}`);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error processing ${titleInfo.title}:`, error);
     }
 
@@ -607,7 +607,7 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
   try {
     const testCount = await prisma.skillsJobTitle.count();
     console.log(`✅ Database connection test passed. Current SkillsJobTitle count: ${testCount}`);
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Database connection test failed:', error);
     throw new Error('Database connection failed');
   }
@@ -810,7 +810,7 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
 
           console.log(`✅ Created skill category with ID: ${newSkillCategory.id}`);
 
-        } catch (error) {
+        } catch (error: any) {
           console.error(`❌ Failed to create skill category "${skill.content}" for ${group.title}:`, error);
 
           // Log more details about the error
@@ -823,7 +823,7 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
 
       console.log(`✅ Successfully processed ${group.skills.length} skills for ${group.title}`);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(`❌ Error processing skills job title ${group.title}:`, error);
 
       // Log more details about the error
@@ -856,7 +856,7 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
   try {
     const testCount = await prisma.professionalSummaryJobTitle.count();
     console.log(`✅ Database connection test passed. Current ProfessionalSummaryJobTitle count: ${testCount}`);
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Database connection test failed:', error);
     throw new Error('Database connection failed');
   }
@@ -872,7 +872,7 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
       deleteMissingTitles = Boolean(metadata.deleteMissingTitles);
     }
     console.log('🗑️ Delete missing titles setting:', deleteMissingTitles);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to get job metadata:', error);
   }
 
@@ -973,7 +973,7 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
             await prisma.professionalSummaryJobTitle.delete({
               where: { id: title.id }
             });
-          } catch (delErr) {
+          } catch (delErr: any) {
             console.error(`❌ Failed to delete professional summary job title ${title.title}:`, delErr);
           }
         }
@@ -982,7 +982,7 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
       } else {
         console.log('✅ No professional summary job titles to delete');
       }
-    } catch (delError) {
+    } catch (delError: any) {
       console.error('❌ Error during deleteMissingTitles processing:', delError);
     }
   }
@@ -1060,7 +1060,7 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
 
           console.log(`✅ Created professional summary with ID: ${newProfessionalSummary.id}`);
 
-        } catch (error) {
+        } catch (error: any) {
           console.error(`❌ Failed to create professional summary "${summary.content.substring(0, 50)}..." for ${group.title}:`, error);
 
           // Log more details about the error
@@ -1073,7 +1073,7 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
 
       console.log(`✅ Successfully processed ${group.summaries.length} professional summaries for ${group.title}`);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(`❌ Error processing professional summary job title ${group.title}:`, error);
 
       // Log more details about the error

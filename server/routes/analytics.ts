@@ -13,7 +13,7 @@ try {
   prisma = new PrismaClient();
   analyticsService = new AnalyticsService(prisma);
   console.log('✅ Analytics service initialized successfully');
-} catch (error) {
+} catch (error: any) {
   console.error('❌ Failed to initialize analytics service:', error);
 }
 
@@ -39,7 +39,7 @@ router.get('/dashboard', async (req: Request, res: Response) => {
 
     const data = await analyticsService.getDashboardData(startDate, endDate);
     res.json(data);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error getting dashboard data:', error);
     res.status(500).json({ 
       error: 'Failed to fetch dashboard data',
@@ -53,7 +53,7 @@ router.get('/countries', async (req: Request, res: Response) => {
   try {
     const data = await analyticsService.getCountryAnalytics();
     res.json(data);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching country analytics:', error);
     res.status(500).json({ error: 'Failed to fetch country analytics' });
   }
@@ -67,7 +67,7 @@ router.get('/templates', async (req: Request, res: Response) => {
 
     const data = await analyticsService.getTemplateAnalytics(templateType);
     res.json(data);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching template analytics:', error);
     res.status(500).json({ error: 'Failed to fetch template analytics' });
   }
@@ -182,7 +182,7 @@ router.get('/visitors', async (req: Request, res: Response) => {
       unregistered,
       summary
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching visitor analytics:', error);
     res.status(500).json({ error: 'Failed to fetch visitor analytics' });
   }
@@ -209,7 +209,7 @@ router.get('/activities', async (req: Request, res: Response) => {
     const activities = memoryAnalytics.default.getRecentActivities(parseInt(limit as string));
 
     res.json(activities);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching activity logs:', error);
     res.status(500).json({ error: 'Failed to fetch activity logs' });
   }
@@ -244,7 +244,7 @@ router.get('/sessions', async (req, res) => {
     });
 
     res.json(sessions);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching session analytics:', error);
     res.status(500).json({ error: 'Failed to fetch session analytics' });
   }
@@ -270,7 +270,7 @@ router.get('/summary', async (req, res) => {
     });
 
     res.json(summaries);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching analytics summary:', error);
     res.status(500).json({ error: 'Failed to fetch analytics summary' });
   }
@@ -383,7 +383,7 @@ router.get('/realtime', async (req, res) => {
       topCountries,
       topTemplates
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching real-time statistics:', error);
     res.status(500).json({ error: 'Failed to fetch real-time statistics' });
   }
@@ -397,7 +397,7 @@ router.post('/generate-summary', async (req, res) => {
 
     const summary = await analyticsService.generateDailySummary(targetDate);
     res.json(summary);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error generating daily summary:', error);
     res.status(500).json({ error: 'Failed to generate daily summary' });
   }
@@ -425,7 +425,7 @@ router.get('/funnel', async (req, res) => {
     });
 
     // Group by funnel type and step
-    const funnelAnalysis = funnelData.reduce((acc, item) => {
+    const funnelAnalysis = funnelData.reduce((acc: any, item: any) => {
       const key = `${item.funnelType}-${item.step}`;
       if (!acc[key]) {
         acc[key] = {
@@ -452,7 +452,7 @@ router.get('/funnel', async (req, res) => {
     });
 
     res.json(Object.values(funnelAnalysis));
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching conversion funnel:', error);
     res.status(500).json({ error: 'Failed to fetch conversion funnel' });
   }
@@ -503,7 +503,7 @@ router.post('/track', async (req, res) => {
     });
 
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error tracking custom event:', error);
     res.status(500).json({ error: 'Failed to track event' });
   }
@@ -551,7 +551,7 @@ router.get('/real-time', async (req, res) => {
       recentActivity,
       timestamp: now.toISOString()
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching real-time statistics:', error);
     res.status(500).json({ error: 'Failed to fetch real-time statistics' });
   }

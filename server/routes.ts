@@ -1,8 +1,8 @@
 import express, { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { storage } from './storage.js';
-
-
+import { z } from 'zod';
+import { fromZodError } from 'zod-validation-error';
 import { Server } from 'http';
 
 // Import routers
@@ -1353,7 +1353,7 @@ export default function setupRoutes(app: express.Express): Server {
           new: newResumes
         },
         templateUsage,
-        usageStats: usageStats.reduce((acc, stat) => {
+        usageStats: usageStats.reduce((acc: any, stat: any) => {
           acc[stat.action] = stat._count.action;
           return acc;
         }, {} as Record<string, number>),
@@ -1416,7 +1416,7 @@ export default function setupRoutes(app: express.Express): Server {
         userId,
         timeframe,
         resumesCreated: userResumes,
-        actions: userStats.reduce((acc, stat) => {
+        actions: userStats.reduce((acc: any, stat: any) => {
           acc[stat.action] = stat._count.action;
           return acc;
         }, {} as Record<string, number>)
@@ -1804,7 +1804,7 @@ export default function setupRoutes(app: express.Express): Server {
           total: userStats[0],
           new: userStats[1],
           active: userStats[2],
-          byTier: userStats[3].reduce((acc, stat) => {
+          byTier: userStats[3].reduce((acc: any, stat: any) => {
             acc[stat.tier] = stat._count.tier;
             return acc;
           }, {} as Record<string, number>)
@@ -1822,7 +1822,7 @@ export default function setupRoutes(app: express.Express): Server {
         subscriptions: {
           total: subscriptionStats[0],
           active: subscriptionStats[1],
-          byStatus: subscriptionStats[2].reduce((acc, stat) => {
+          byStatus: subscriptionStats[2].reduce((acc: any, stat: any) => {
             acc[stat.status] = stat._count.status;
             return acc;
           }, {} as Record<string, number>)
@@ -1830,7 +1830,7 @@ export default function setupRoutes(app: express.Express): Server {
         support: {
           total: supportStats[0],
           open: supportStats[1],
-          byStatus: supportStats[2].reduce((acc, stat) => {
+          byStatus: supportStats[2].reduce((acc: any, stat: any) => {
             acc[stat.status] = stat._count.status;
             return acc;
           }, {} as Record<string, number>)

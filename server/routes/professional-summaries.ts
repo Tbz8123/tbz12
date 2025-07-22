@@ -83,7 +83,7 @@ professionalSummariesRouter.get("/jobtitles", async (req: Request, res: Response
         totalPages: Math.ceil(totalCount / limit),
       }
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching professional summary job titles:", error);
     return res.status(500).json({ error: "Failed to fetch professional summary job titles" });
   }
@@ -123,7 +123,7 @@ professionalSummariesRouter.get("/jobtitles/:id/summaries", async (req: Request,
     res.setHeader('Expires', '0');
 
     return res.json(summaries);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching professional summaries:", error);
     return res.status(500).json({ error: "Failed to fetch professional summaries" });
   }
@@ -174,7 +174,7 @@ professionalSummariesRouter.get("/summaries", async (req: Request, res: Response
     res.setHeader('Expires', '0');
 
     return res.json(summaries);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching professional summaries:", error);
     return res.status(500).json({ error: "Failed to fetch professional summaries" });
   }
@@ -198,7 +198,7 @@ professionalSummariesRouter.post("/jobtitles", async (req: Request, res: Respons
     });
 
     return res.status(201).json(newJobTitle);
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ errors: error.errors });
     }
@@ -251,7 +251,7 @@ professionalSummariesRouter.put("/jobtitles/:id", async (req: Request, res: Resp
     });
 
     return res.json(updatedJobTitle);
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ errors: error.errors });
     }
@@ -287,7 +287,7 @@ professionalSummariesRouter.delete("/jobtitles/:id", async (req: Request, res: R
     });
 
     return res.json({ message: "Professional summary job title deleted successfully" });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof Error && 'code' in error && (error as any).code === 'P2025') {
       return res.status(404).json({ error: "Professional summary job title not found" });
     }
@@ -316,7 +316,7 @@ professionalSummariesRouter.post("/summaries", async (req: Request, res: Respons
     });
 
     return res.status(201).json(newSummary);
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ errors: error.errors });
     }
@@ -356,7 +356,7 @@ professionalSummariesRouter.put("/summaries/:id", async (req: Request, res: Resp
     });
 
     return res.json(updatedSummary);
-  } catch (error) {    
+  } catch (error: any) {    
     if (error instanceof Error && 'code' in error && (error as any).code === 'P2025') {
       return res.status(404).json({ error: "Professional summary not found" });
     }
@@ -379,7 +379,7 @@ professionalSummariesRouter.delete("/summaries/:id", async (req: Request, res: R
     });
 
     return res.json({ message: "Professional summary deleted successfully" });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof Error && 'code' in error && (error as any).code === 'P2025') {
       return res.status(404).json({ error: "Professional summary not found" });
     }
@@ -463,7 +463,7 @@ professionalSummariesRouter.get("/export", async (req: Request, res: Response) =
       res.setHeader('Content-Disposition', 'attachment; filename="professional-summaries.csv"');
       return res.send(csvContent);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error exporting professional summaries:", error);
     return res.status(500).json({ 
       error: "Failed to export professional summaries", 

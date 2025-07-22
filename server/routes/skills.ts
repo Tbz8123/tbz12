@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { z } from "zod";
 
 const prisma = new PrismaClient();
@@ -151,15 +151,13 @@ router.post("/", async (req: Request, res: Response) => {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ errors: error.errors });
     }
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2002') {
-        return res.status(409).json({ 
-          error: "Duplicate skill", 
-          message: "A skill with this title already exists." 
-        });
-      }
+    if ((error as any).code === 'P2002') {
+      return res.status(409).json({ 
+        error: "Duplicate skill", 
+        message: "A skill with this title already exists." 
+      });
     }
-    console.error("Error creating skill:", error as any);
+    console.error("Error creating skill:", error);
     res.status(500).json({ error: "Failed to create skill" });
   }
 });
@@ -192,16 +190,14 @@ router.put("/:id", async (req: Request, res: Response) => {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ errors: error.errors });
     }
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2002') {
-        return res.status(409).json({ 
-          error: "Duplicate skill", 
-          message: "A skill with this title already exists." 
-        });
-      }
-      if (error.code === 'P2025') {
-        return res.status(404).json({ error: "Skill not found" });
-      }
+    if ((error as any).code === 'P2002') {
+      return res.status(409).json({ 
+        error: "Duplicate skill", 
+        message: "A skill with this title already exists." 
+      });
+    }
+    if ((error as any).code === 'P2025') {
+      return res.status(404).json({ error: "Skill not found" });
     }
     console.error("Error updating skill:", error as any);
     res.status(500).json({ error: "Failed to update skill" });
@@ -234,10 +230,8 @@ router.delete("/:id", async (req: Request, res: Response) => {
 
     res.status(204).send();
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2025') {
-        return res.status(404).json({ error: "Skill not found" });
-      }
+    if ((error as any).code === 'P2025') {
+      return res.status(404).json({ error: "Skill not found" });
     }
     console.error("Error deleting skill:", error as any);
     res.status(500).json({ error: "Failed to delete skill" });
@@ -263,10 +257,8 @@ router.post("/categories", async (req: Request, res: Response) => {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ errors: error.errors });
     }
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2003') { // Foreign key constraint failed
-        return res.status(400).json({ error: "Invalid skill ID provided." });
-      }
+    if ((error as any).code === 'P2003') { // Foreign key constraint failed
+      return res.status(400).json({ error: "Invalid skill ID provided." });
     }
     console.error("Error creating skill category:", error as any);
     res.status(500).json({ error: "Failed to create skill category" });
@@ -299,10 +291,8 @@ router.put("/categories/:id", async (req: Request, res: Response) => {
 
     res.json(updatedCategory);
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2025') {
-        return res.status(404).json({ error: "Skill category not found" });
-      }
+    if ((error as any).code === 'P2025') {
+      return res.status(404).json({ error: "Skill category not found" });
     }
     console.error("Error updating skill category:", error as any);
     res.status(500).json({ error: "Failed to update skill category" });
@@ -323,10 +313,8 @@ router.delete("/categories/:id", async (req: Request, res: Response) => {
 
     res.status(204).send();
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2025') {
-        return res.status(404).json({ error: "Skill category not found" });
-      }
+    if ((error as any).code === 'P2025') {
+      return res.status(404).json({ error: "Skill category not found" });
     }
     console.error("Error deleting skill category:", error as any);
     res.status(500).json({ error: "Failed to delete skill category" });
@@ -400,13 +388,11 @@ router.post("/skillsjobtitles", async (req: Request, res: Response) => {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ errors: error.errors });
     }
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2002') {
-        return res.status(409).json({ 
-          error: "Duplicate skill", 
-          message: "A skill with this title already exists." 
-        });
-      }
+    if ((error as any).code === 'P2002') {
+      return res.status(409).json({ 
+        error: "Duplicate skill", 
+        message: "A skill with this title already exists." 
+      });
     }
     console.error("Error creating skill job title:", error as any);
     res.status(500).json({ error: "Failed to create skill job title" });
@@ -440,16 +426,14 @@ router.put("/skillsjobtitles/:id", async (req: Request, res: Response) => {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ errors: error.errors });
     }
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2002') {
-        return res.status(409).json({ 
-          error: "Duplicate skill", 
-          message: "A skill with this title already exists." 
-        });
-      }
-      if (error.code === 'P2025') {
-        return res.status(404).json({ error: "Skill job title not found" });
-      }
+    if ((error as any).code === 'P2002') {
+      return res.status(409).json({ 
+        error: "Duplicate skill", 
+        message: "A skill with this title already exists." 
+      });
+    }
+    if ((error as any).code === 'P2025') {
+      return res.status(404).json({ error: "Skill job title not found" });
     }
     console.error("Error updating skill job title:", error as any);
     res.status(500).json({ error: "Failed to update skill job title" });
@@ -481,10 +465,8 @@ router.delete("/skillsjobtitles/:id", async (req: Request, res: Response) => {
 
     res.status(204).send();
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2025') {
-        return res.status(404).json({ error: "Skill job title not found" });
-      }
+    if ((error as any).code === 'P2025') {
+      return res.status(404).json({ error: "Skill job title not found" });
     }
     console.error("Error deleting skill job title:", error as any);
     res.status(500).json({ error: "Failed to delete skill job title" });

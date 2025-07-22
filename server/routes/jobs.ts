@@ -87,7 +87,7 @@ jobsRouter.get("/titles", async (req: Request, res: Response) => {
         totalPages: Math.ceil(totalCount / limit),
       }
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching job titles:", error);
     return res.status(500).json({ error: "Failed to fetch job titles" });
   }
@@ -114,7 +114,7 @@ jobsRouter.get("/titles/:id/descriptions", async (req: Request, res: Response) =
     res.setHeader('Expires', '0');
 
     return res.json(descriptions);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching job descriptions:", error);
     return res.status(500).json({ error: "Failed to fetch job descriptions" });
   }
@@ -165,7 +165,7 @@ jobsRouter.get("/descriptions", async (req: Request, res: Response) => {
     res.setHeader('Expires', '0');
 
     return res.json(descriptions);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching job descriptions:", error);
     return res.status(500).json({ error: "Failed to fetch job descriptions" });
   }
@@ -186,7 +186,7 @@ jobsRouter.post("/titles", async (req: Request, res: Response) => {
     });
 
     return res.status(201).json(newJobTitle);
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ errors: error.errors });
     }
@@ -228,7 +228,7 @@ jobsRouter.put("/titles/:id", async (req: Request, res: Response) => {
     });
 
     return res.json(updatedJobTitle);
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ errors: error.errors });
     }
@@ -264,7 +264,7 @@ jobsRouter.delete("/titles/:id", async (req: Request, res: Response) => {
     });
 
     return res.json({ message: "Job title deleted successfully" });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof Error && 'code' in error && error.code === 'P2025') {
       return res.status(404).json({ error: "Job title not found" });
     }
@@ -289,7 +289,7 @@ jobsRouter.post("/descriptions", async (req: Request, res: Response) => {
     });
 
     return res.status(201).json(newDescription);
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ errors: error.errors });
     }
@@ -329,7 +329,7 @@ jobsRouter.put("/descriptions/:id", async (req: Request, res: Response) => {
     });
 
     return res.json(updatedDescription);
-  } catch (error) {    
+  } catch (error: any) {    
     if (error instanceof Error && 'code' in error && error.code === 'P2025') {
       return res.status(404).json({ error: "Job description not found" });
     }
@@ -352,7 +352,7 @@ jobsRouter.delete("/descriptions/:id", async (req: Request, res: Response) => {
     });
 
     return res.json({ message: "Job description deleted successfully" });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof Error && 'code' in error && error.code === 'P2025') {
       return res.status(404).json({ error: "Job description not found" });
     }
@@ -467,7 +467,7 @@ async function initializeJobData() {
     }
 
     console.log("Sample job data initialized successfully");
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error initializing job data:", error);
   }
 }

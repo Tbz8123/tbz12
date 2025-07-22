@@ -29,7 +29,7 @@ prisma.$connect()
     // Make prisma available globally for middleware
     (global as any).prisma = prisma;
   })
-  .catch((error: Error) => {
+  .catch((error: any) => {
     console.error('❌ Database connection failed:', error);
     // Set a flag to skip database operations if connection fails
     (global as any).prisma = null;
@@ -43,7 +43,7 @@ async function startServer() {
   const app = express();
 
   // Add error handler middleware
-  app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  app.use((err: any, req: any, res: any, next: any) => {
     console.error('Express error:', err);
     res.status(500).json({ error: 'Internal server error' });
   });
@@ -90,7 +90,7 @@ async function startServer() {
   }
 
   // Use the HTTP server from setupRoutes instead of creating a new one
-  httpServer.listen(PORT, '0.0.0.0', () => {
+  httpServer.listen(PORT as number, '0.0.0.0', () => {
     console.log(`⚡️ Server listening on http://0.0.0.0:${PORT}`);
     console.log(`🔧 Frontend and API both served from port ${PORT}`);
   });
@@ -145,7 +145,7 @@ async function initialize() {
 
   } catch (error: any) {
     console.error('💀 Failed to start server:', error);
-    console.error('📋 Error details:', (error as Error).stack);
+    console.error('📋 Error details:', (error as any).stack);
     process.exit(1);
   }
 }
