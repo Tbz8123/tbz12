@@ -19,6 +19,7 @@ const NotFound = lazy(() => import('@/pages/not-found'));
 const AdminSnapPage = lazy(() => import('@/pages/AdminSnapPage'));
 const AdminProPage = lazy(() => import('@/pages/AdminProPage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
+const AuthPage = lazy(() => import('@/pages/AuthPage'));
 const DatabaseManagementPage = lazy(() => import('@/pages/DatabaseManagementPage'));
 const SnapTemplateEditor = lazy(() => import('@/pages/Admin/SnapTemplateEditor'));
 const ProTemplateEditor = lazy(() => import('@/pages/Admin/ProTemplateEditor'));
@@ -54,6 +55,9 @@ function Router() {
       
       {/* Login route - accessible without authentication */}
       <Route path="/login" component={LoginPage} />
+      
+      {/* Auth route - accessible without authentication */}
+      <Route path="/auth" component={AuthPage} />
       
       {/* All admin routes require authentication and admin privileges */}
       <Route path="/admin/snap">

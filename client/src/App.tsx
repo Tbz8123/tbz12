@@ -33,7 +33,7 @@ const SkillsSummaryPage = lazy(() => import('@/pages/SkillsSummaryPage'));
 const ProfessionalSummaryPage = lazy(() => import('@/pages/ProfessionalSummaryPage'));
 const AddSectionPage = lazy(() => import('@/pages/AddSectionPage'));
 const SectionDetailFormPage = lazy(() => import('@/pages/SectionDetailFormPage'));
-const AuthPage = lazy(() => import('@/pages/AuthPage'));
+// AuthPage removed - admin authentication should only be in client-admin application
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
 const FinalPage = lazy(() => import('@/pages/FinalPage'));
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
@@ -75,7 +75,7 @@ function Router() {
       <Route path="/professional-summary" component={ProfessionalSummaryPage} />
       <Route path="/add-section" component={AddSectionPage} />
       <Route path="/section/:sectionName" component={SectionDetailFormPage} />
-      <Route path="/auth" component={AuthPage} />
+      {/* /auth route removed - admin authentication only available in client-admin application */}
       <Route path="/final" component={FinalPage} />
       <Route path="/checkout" component={CheckoutPage} />
       <Route path="/order-success/:id" component={OrderSuccessPage} />
