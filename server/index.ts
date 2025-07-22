@@ -121,21 +121,29 @@ process.on('SIGINT', () => {
 // Start server with graceful error handling
 async function initialize() {
   try {
-    console.log('Starting TbzResumeBuilder server...');
+    console.log('🚀 Starting TbzResumeBuilder server...');
+    console.log('📍 Current working directory:', process.cwd());
+    console.log('🔧 Node version:', process.version);
+    console.log('🌍 Environment:', process.env.NODE_ENV);
+    console.log('🔌 Target port:', PORT);
+    
     const server = await startServer();
+    console.log('✅ Server initialization completed successfully');
 
     // Handle server errors
     server.on('error', (error: any) => {
+      console.error('❌ Server error occurred:', error);
       if (error.code === 'EADDRINUSE') {
-        console.error(`Port ${PORT} is already in use. Please wait for it to be freed or use a different port.`);
+        console.error(`🚫 Port ${PORT} is already in use. Please wait for it to be freed or use a different port.`);
         process.exit(1);
       } else {
-        console.error('Server error:', error);
+        console.error('💥 Unexpected server error:', error);
       }
     });
 
   } catch (error) {
-    console.error('Failed to start server:', error);
+    console.error('💀 Failed to start server:', error);
+    console.error('📋 Error details:', error.stack);
     process.exit(1);
   }
 }

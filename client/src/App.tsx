@@ -40,28 +40,7 @@ const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const CheckoutPage = lazy(() => import('@/pages/CheckoutPage'));
 const OrderSuccessPage = lazy(() => import('@/pages/OrderSuccessPage'));
 
-// Admin pages
-const AdminTierSelectionPage = lazy(() => import('@/pages/Admin/AdminTierSelectionPage'));
-const AdminSnapPage = lazy(() => import('@/pages/Admin/AdminSnapPage'));
-const AdminProPage = lazy(() => import('@/pages/Admin/AdminProPage'));
-const UserManagementPage = lazy(() => import('@/pages/Admin/UserManagementPage'));
-const DatabaseManagementPage = lazy(() => import('@/pages/Admin/DatabaseManagementPage'));
-const AdminPanel = lazy(() => import('@/components/AdminPanel'));
-
-// Admin sub-pages
-const TemplatesManagement = lazy(() => import('@/pages/Admin/TemplatesManagement'));
-const ProTemplatesManagement = lazy(() => import('@/pages/Admin/ProTemplatesManagement'));
-const JobTitlesManagement = lazy(() => import('@/pages/Admin/JobTitlesManagement'));
-const ImportHistoryPage = lazy(() => import('@/pages/Admin/ImportHistoryPage'));
-const SnapTemplateEditor = lazy(() => import('@/pages/Admin/SnapTemplateEditor'));
-const ProTemplateEditor = lazy(() => import('@/pages/Admin/ProTemplateEditor'));
-const EditTemplate = lazy(() => import('@/pages/Admin/EditTemplate'));
-const EditProTemplate = lazy(() => import('@/pages/Admin/EditProTemplate'));
-const ViewTemplate = lazy(() => import('@/pages/Admin/ViewTemplate'));
-const ViewProTemplate = lazy(() => import('@/pages/Admin/ViewProTemplate'));
-const SkillsManagement = lazy(() => import('@/pages/Admin/SkillsManagement'));
-const ProfessionalSummaryManagement = lazy(() => import('@/pages/Admin/ProfessionalSummaryManagement'));
-const SubscriptionManagement = lazy(() => import('@/pages/Admin/SubscriptionManagement'));
+// Admin components removed - they should only exist in client-admin application
 
 
 
@@ -101,32 +80,7 @@ function Router() {
       <Route path="/checkout" component={CheckoutPage} />
       <Route path="/order-success/:id" component={OrderSuccessPage} />
       
-      {/* Admin routes */}
-      <Route path="/admin/tier-selection" component={AdminTierSelectionPage} />
-      <Route path="/admin/snap" component={AdminSnapPage} />
-      <Route path="/admin/pro" component={AdminProPage} />
-      <Route path="/admin/users" component={UserManagementPage} />
-      <Route path="/admin/database" component={DatabaseManagementPage} />
-      
-      {/* Admin sub-routes */}
-      <Route path="/admin/snap/templates/management" component={TemplatesManagement} />
-      <Route path="/admin/pro/templates/management" component={ProTemplatesManagement} />
-      <Route path="/admin/templates/new" component={SnapTemplateEditor} />
-      <Route path="/admin/templates/edit/:id" component={EditTemplate} />
-      <Route path="/admin/templates/view/:id" component={ViewTemplate} />
-      <Route path="/admin/pro/templates/new" component={ProTemplateEditor} />
-      <Route path="/admin/templates/pro-editor" component={ProTemplateEditor} />
-      <Route path="/admin/pro/templates/edit/:id" component={EditProTemplate} />
-      <Route path="/admin/pro/templates/view/:id" component={ViewProTemplate} />
-      <Route path="/admin/jobs" component={JobTitlesManagement} />
-      <Route path="/admin/import-history" component={ImportHistoryPage} />
-      <Route path="/admin/skills" component={SkillsManagement} />
-      <Route path="/admin/summaries" component={ProfessionalSummaryManagement} />
-      <Route path="/admin/professional-summaries" component={ProfessionalSummaryManagement} />
-      <Route path="/admin/subscriptions" component={SubscriptionManagement} />
-      <Route path="/admin/subscription" component={SubscriptionManagement} />
-      
-      <Route path="/admin" component={AdminPanel} />
+      {/* Admin routes removed - they should only exist in client-admin application */}
       
       <Route component={NotFound} />
     </Switch>
