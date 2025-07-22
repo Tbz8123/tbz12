@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import { Prisma, PrismaClient } from '@prisma/client';
 import { z } from "zod";
 
@@ -18,7 +18,7 @@ const skillCategorySchema = z.object({
 });
 
 // Get all skills with pagination and search
-router.get("/", async (req, res) => {
+router.get("/", async (req: Request, res: Response) => {
   try {
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
@@ -27,7 +27,7 @@ router.get("/", async (req, res) => {
     const category = req.query.category as string || null;
     const searchQuery = req.query.search as string || null;
 
-    const where: Prisma.SkillsJobTitleWhereInput = {};
+    const where: any = {};
     if (category) {
       where.category = category;
     }
@@ -61,13 +61,13 @@ router.get("/", async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("Error fetching skills:", error);
+    console.error("Error fetching skills:", error as any);
     res.status(500).json({ error: "Failed to fetch skills" });
   }
 });
 
 // Get categories for a specific skill
-router.get("/:id/categories", async (req, res) => {
+router.get("/:id/categories", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -84,19 +84,19 @@ router.get("/:id/categories", async (req, res) => {
 
     res.json(categories);
   } catch (error) {
-    console.error("Error fetching skill categories:", error);
+    console.error("Error fetching skill categories:", error as any);
     res.status(500).json({ error: "Failed to fetch skill categories" });
   }
 });
 
 // Get all skill categories (optionally filtered by skillId or search term)
-router.get("/categories", async (req, res) => {
+router.get("/categories", async (req: Request, res: Response) => {
   try {
     const skillId = req.query.skillId ? parseInt(req.query.skillId as string) : null;
     const skillsJobTitleId = req.query.skillsJobTitleId ? parseInt(req.query.skillsJobTitleId as string) : null;
     const searchTerm = req.query.search as string || null;
 
-    const where: Prisma.SkillCategoryWhereInput = {};
+    const where: any = {};
     if (skillId) {
       where.skillsJobTitleId = skillId;
     }
@@ -133,7 +133,7 @@ router.get("/categories", async (req, res) => {
 });
 
 // Create a new skill
-router.post("/", async (req, res) => {
+router.post("/", async (req: Request, res: Response) => {
   try {
     const validatedData = skillSchema.parse(req.body);
 
@@ -159,13 +159,13 @@ router.post("/", async (req, res) => {
         });
       }
     }
-    console.error("Error creating skill:", error);
+    console.error("Error creating skill:", error as any);
     res.status(500).json({ error: "Failed to create skill" });
   }
 });
 
 // Update an existing skill
-router.put("/:id", async (req, res) => {
+router.put("/:id", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -203,13 +203,13 @@ router.put("/:id", async (req, res) => {
         return res.status(404).json({ error: "Skill not found" });
       }
     }
-    console.error("Error updating skill:", error);
+    console.error("Error updating skill:", error as any);
     res.status(500).json({ error: "Failed to update skill" });
   }
 });
 
 // Delete a skill
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -239,13 +239,13 @@ router.delete("/:id", async (req, res) => {
         return res.status(404).json({ error: "Skill not found" });
       }
     }
-    console.error("Error deleting skill:", error);
+    console.error("Error deleting skill:", error as any);
     res.status(500).json({ error: "Failed to delete skill" });
   }
 });
 
 // Create a new skill category
-router.post("/categories", async (req, res) => {
+router.post("/categories", async (req: Request, res: Response) => {
   try {
     const validatedData = skillCategorySchema.parse(req.body);
 
@@ -268,13 +268,13 @@ router.post("/categories", async (req, res) => {
         return res.status(400).json({ error: "Invalid skill ID provided." });
       }
     }
-    console.error("Error creating skill category:", error);
+    console.error("Error creating skill category:", error as any);
     res.status(500).json({ error: "Failed to create skill category" });
   }
 });
 
 // Update a skill category
-router.put("/categories/:id", async (req, res) => {
+router.put("/categories/:id", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -304,13 +304,13 @@ router.put("/categories/:id", async (req, res) => {
         return res.status(404).json({ error: "Skill category not found" });
       }
     }
-    console.error("Error updating skill category:", error);
+    console.error("Error updating skill category:", error as any);
     res.status(500).json({ error: "Failed to update skill category" });
   }
 });
 
 // Delete a skill category
-router.delete("/categories/:id", async (req, res) => {
+router.delete("/categories/:id", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -328,13 +328,13 @@ router.delete("/categories/:id", async (req, res) => {
         return res.status(404).json({ error: "Skill category not found" });
       }
     }
-    console.error("Error deleting skill category:", error);
+    console.error("Error deleting skill category:", error as any);
     res.status(500).json({ error: "Failed to delete skill category" });
   }
 });
 
 // Add skillsjobtitles routes for frontend compatibility
-router.get("/skillsjobtitles", async (req, res) => {
+router.get("/skillsjobtitles", async (req: Request, res: Response) => {
   try {
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
@@ -343,7 +343,7 @@ router.get("/skillsjobtitles", async (req, res) => {
     const category = req.query.category as string || null;
     const searchQuery = req.query.search as string || null;
 
-    const where: Prisma.SkillsJobTitleWhereInput = {};
+    const where: any = {};
     if (category && category !== 'all') {
       where.category = category;
     }
@@ -377,12 +377,12 @@ router.get("/skillsjobtitles", async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("Error fetching skills job titles:", error);
+    console.error("Error fetching skills job titles:", error as any);
     res.status(500).json({ error: "Failed to fetch skills job titles" });
   }
 });
 
-router.post("/skillsjobtitles", async (req, res) => {
+router.post("/skillsjobtitles", async (req: Request, res: Response) => {
   try {
     const validatedData = skillSchema.parse(req.body);
 
@@ -408,12 +408,12 @@ router.post("/skillsjobtitles", async (req, res) => {
         });
       }
     }
-    console.error("Error creating skill job title:", error);
+    console.error("Error creating skill job title:", error as any);
     res.status(500).json({ error: "Failed to create skill job title" });
   }
 });
 
-router.put("/skillsjobtitles/:id", async (req, res) => {
+router.put("/skillsjobtitles/:id", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -451,12 +451,12 @@ router.put("/skillsjobtitles/:id", async (req, res) => {
         return res.status(404).json({ error: "Skill job title not found" });
       }
     }
-    console.error("Error updating skill job title:", error);
+    console.error("Error updating skill job title:", error as any);
     res.status(500).json({ error: "Failed to update skill job title" });
   }
 });
 
-router.delete("/skillsjobtitles/:id", async (req, res) => {
+router.delete("/skillsjobtitles/:id", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -486,9 +486,9 @@ router.delete("/skillsjobtitles/:id", async (req, res) => {
         return res.status(404).json({ error: "Skill job title not found" });
       }
     }
-    console.error("Error deleting skill job title:", error);
+    console.error("Error deleting skill job title:", error as any);
     res.status(500).json({ error: "Failed to delete skill job title" });
   }
 });
 
-export { router as skillsRouter }; 
+export { router as skillsRouter };

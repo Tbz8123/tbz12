@@ -1,5 +1,5 @@
 
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import { PrismaClient } from '@prisma/client';
 import { z } from "zod";
 
@@ -31,7 +31,7 @@ const professionalSummarySchema = z.object({
 });
 
 // Get all professional summary job titles with pagination and search
-professionalSummariesRouter.get("/jobtitles", async (req, res) => {
+professionalSummariesRouter.get("/jobtitles", async (req: Request, res: Response) => {
   try {
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
@@ -90,7 +90,7 @@ professionalSummariesRouter.get("/jobtitles", async (req, res) => {
 });
 
 // Get professional summaries for a specific job title
-professionalSummariesRouter.get("/jobtitles/:id/summaries", async (req, res) => {
+professionalSummariesRouter.get("/jobtitles/:id/summaries", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -130,7 +130,7 @@ professionalSummariesRouter.get("/jobtitles/:id/summaries", async (req, res) => 
 });
 
 // Get all professional summaries (optionally filtered by professionalSummaryJobTitleId or search term)
-professionalSummariesRouter.get("/summaries", async (req, res) => {
+professionalSummariesRouter.get("/summaries", async (req: Request, res: Response) => {
   try {
     let professionalSummaryJobTitleId: number | null = null;
     if (req.query.professionalSummaryJobTitleId) {
@@ -181,7 +181,7 @@ professionalSummariesRouter.get("/summaries", async (req, res) => {
 });
 
 // Create a new professional summary job title
-professionalSummariesRouter.post("/jobtitles", async (req, res) => {
+professionalSummariesRouter.post("/jobtitles", async (req: Request, res: Response) => {
   try {
     const validatedData = professionalSummaryJobTitleSchema.parse(req.body);
 
@@ -228,7 +228,7 @@ professionalSummariesRouter.post("/jobtitles", async (req, res) => {
 });
 
 // Update an existing professional summary job title
-professionalSummariesRouter.put("/jobtitles/:id", async (req, res) => {
+professionalSummariesRouter.put("/jobtitles/:id", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -275,7 +275,7 @@ professionalSummariesRouter.put("/jobtitles/:id", async (req, res) => {
 });
 
 // Delete a professional summary job title (will cascade delete its summaries)
-professionalSummariesRouter.delete("/jobtitles/:id", async (req, res) => {
+professionalSummariesRouter.delete("/jobtitles/:id", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -298,7 +298,7 @@ professionalSummariesRouter.delete("/jobtitles/:id", async (req, res) => {
 });
 
 // Create a new professional summary
-professionalSummariesRouter.post("/summaries", async (req, res) => {
+professionalSummariesRouter.post("/summaries", async (req: Request, res: Response) => {
   try {
     const validatedData = professionalSummarySchema.parse(req.body);
 
@@ -332,7 +332,7 @@ professionalSummariesRouter.post("/summaries", async (req, res) => {
 });
 
 // Update an existing professional summary
-professionalSummariesRouter.put("/summaries/:id", async (req, res) => {
+professionalSummariesRouter.put("/summaries/:id", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -367,7 +367,7 @@ professionalSummariesRouter.put("/summaries/:id", async (req, res) => {
 });
 
 // Delete a professional summary
-professionalSummariesRouter.delete("/summaries/:id", async (req, res) => {
+professionalSummariesRouter.delete("/summaries/:id", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -390,7 +390,7 @@ professionalSummariesRouter.delete("/summaries/:id", async (req, res) => {
 });
 
 // Export professional summaries data
-professionalSummariesRouter.get("/export", async (req, res) => {
+professionalSummariesRouter.get("/export", async (req: Request, res: Response) => {
   try {
     const format = req.query.format as string || 'csv';
     console.log('Export requested for format:', format);
@@ -399,7 +399,7 @@ professionalSummariesRouter.get("/export", async (req, res) => {
     const validJobTitles = await prisma.professionalSummaryJobTitle.findMany({
       select: { id: true }
     });
-    const validJobTitleIds = validJobTitles.map(jt => jt.id);
+    const validJobTitleIds = validJobTitles.map((jt: any) => jt.id);
 
     const professionalSummaries = await prisma.professionalSummary.findMany({
       where: {
@@ -421,7 +421,7 @@ professionalSummariesRouter.get("/export", async (req, res) => {
     console.log('Found', professionalSummaries.length, 'professional summaries');
 
     // Transform data for export - simplified format for import compatibility
-    const exportData = professionalSummaries.map(summary => ({
+    const exportData = professionalSummaries.map((summary: any) => ({
       title: summary.professionalSummaryJobTitle.title,
       category: summary.professionalSummaryJobTitle.category,
       content: summary.content,
@@ -435,14 +435,14 @@ professionalSummariesRouter.get("/export", async (req, res) => {
     } else if (format === 'excel') {
       // For now, return CSV with .xlsx extension until Excel library is added
       const csvHeaders = ['title', 'category', 'content', 'isRecommended'];
-      const csvRows = exportData.map(row => [
+      const csvRows = exportData.map((row: any) => [
         `"${row.title.replace(/"/g, '""')}"`,
         `"${row.category.replace(/"/g, '""')}"`,
         `"${row.content.replace(/"/g, '""')}"`,
         row.isRecommended
       ]);
 
-      const csvContent = [csvHeaders.join(','), ...csvRows.map(row => row.join(','))].join('\n');
+      const csvContent = [csvHeaders.join(','), ...csvRows.map((row: any) => row.join(','))].join('\n');
 
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', 'attachment; filename="professional-summaries.xlsx"');

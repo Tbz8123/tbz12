@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const router = Router();
@@ -105,7 +105,7 @@ const mockEducationCategories = [
 ];
 
 // GET /api/education/categories
-router.get('/categories', async (req, res) => {
+router.get('/categories', async (req: Request, res: Response) => {
   try {
     // For now, return mock data
     // In the future, this could fetch from database

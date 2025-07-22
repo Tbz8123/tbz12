@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { PrismaClient } from '@prisma/client';
 
@@ -23,7 +23,7 @@ if (typeof window === "undefined") {
 const router = Router();
 
 // Get all import history records with pagination and filtering
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
@@ -75,7 +75,7 @@ router.get('/', async (req, res) => {
     });
 
     // Transform data to match frontend expectations
-    const transformedImports = imports.map(imp => ({
+    const transformedImports = imports.map((imp: any) => ({
       id: imp.id,
       fileName: imp.fileName,
       fileSize: imp.fileSize,
@@ -111,7 +111,7 @@ router.get('/', async (req, res) => {
 });
 
 // Create a new import record
-router.post('/', async (req, res) => {
+router.post('/', async (req: Request, res: Response) => {
   try {
     const createSchema = z.object({
       fileName: z.string(),
@@ -166,7 +166,7 @@ router.post('/', async (req, res) => {
 });
 
 // Trigger import processing on server side
-router.post('/:id/process', async (req, res) => {
+router.post('/:id/process', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     console.log(`Starting server-side processing for job: ${id}`);
@@ -184,7 +184,7 @@ router.post('/:id/process', async (req, res) => {
 });
 
 // Get a single import record by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -222,7 +222,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Update import record
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -276,7 +276,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete import record
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -1099,4 +1099,4 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
   console.log(`Professional summaries import completed successfully. Processed ${processedCount} professional summary job titles.`);
 }
 
-export { router as importHistoryRouter }; 
+export { router as importHistoryRouter };

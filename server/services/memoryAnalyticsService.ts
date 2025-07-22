@@ -153,7 +153,7 @@ class MemoryAnalyticsService extends EventEmitter {
     const activity: ActivityEvent = {
       id: this.generateId(),
       timestamp: Date.now(),
-      ...data
+      ...(data as any)
     };
 
     // Store activity
@@ -197,7 +197,7 @@ class MemoryAnalyticsService extends EventEmitter {
         isRegistered: !!activity.userId,
         firstSeen: activity.timestamp,
         lastSeen: activity.timestamp,
-        pageViews: 0,
+        pageViews: 1,
         activities: [],
         referrer: activity.metadata?.referrer,
         landingPage: activity.pageUrl
@@ -455,4 +455,4 @@ process.on('SIGINT', () => {
 process.on('SIGTERM', () => {
   memoryAnalytics.destroy();
   process.exit(0);
-}); 
+});

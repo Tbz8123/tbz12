@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { analyticsService } from '../services/analyticsService';
 import { trackTemplateDownload } from '../middleware/visitorTracking';
@@ -7,7 +7,7 @@ const router = Router();
 const prisma = new PrismaClient();
 
 // Enhanced template download endpoint with analytics
-router.post('/download/:templateId', trackTemplateDownload, async (req, res) => {
+router.post('/download/:templateId', trackTemplateDownload, async (req: Request, res: Response) => {
   try {
     const { templateId } = req.params;
     const { templateType = 'snap', downloadType = 'pdf' } = req.body;
@@ -56,7 +56,7 @@ router.post('/download/:templateId', trackTemplateDownload, async (req, res) => 
 });
 
 // Get template popularity statistics
-router.get('/stats/:templateId', async (req, res) => {
+router.get('/stats/:templateId', async (req: Request, res: Response) => {
   try {
     const { templateId } = req.params;
 
@@ -87,4 +87,4 @@ router.get('/stats/:templateId', async (req, res) => {
   }
 });
 
-export default router; 
+export default router;

@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import { PrismaClient } from '@prisma/client';
 import { z } from "zod";
 
@@ -35,7 +35,7 @@ const jobDescriptionSchema = z.object({
 
 
 // Get all job titles with pagination and search
-jobsRouter.get("/titles", async (req, res) => {
+jobsRouter.get("/titles", async (req: Request, res: Response) => {
   try {
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
@@ -94,7 +94,7 @@ jobsRouter.get("/titles", async (req, res) => {
 });
 
 // Get descriptions for a specific job title
-jobsRouter.get("/titles/:id/descriptions", async (req, res) => {
+jobsRouter.get("/titles/:id/descriptions", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -121,7 +121,7 @@ jobsRouter.get("/titles/:id/descriptions", async (req, res) => {
 });
 
 // Get all job descriptions (optionally filtered by jobTitleId or search term)
-jobsRouter.get("/descriptions", async (req, res) => {
+jobsRouter.get("/descriptions", async (req: Request, res: Response) => {
   try {
     let jobTitleId: number | null = null;
     if (req.query.jobTitleId) {
@@ -172,7 +172,7 @@ jobsRouter.get("/descriptions", async (req, res) => {
 });
 
 // Create a new job title
-jobsRouter.post("/titles", async (req, res) => {
+jobsRouter.post("/titles", async (req: Request, res: Response) => {
   try {
     const validatedData = jobTitleSchema.parse(req.body);
 
@@ -205,7 +205,7 @@ jobsRouter.post("/titles", async (req, res) => {
 });
 
 // Update an existing job title
-jobsRouter.put("/titles/:id", async (req, res) => {
+jobsRouter.put("/titles/:id", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -252,7 +252,7 @@ jobsRouter.put("/titles/:id", async (req, res) => {
 });
 
 // Delete a job title (will cascade delete its descriptions)
-jobsRouter.delete("/titles/:id", async (req, res) => {
+jobsRouter.delete("/titles/:id", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -275,7 +275,7 @@ jobsRouter.delete("/titles/:id", async (req, res) => {
 });
 
 // Create a new job description
-jobsRouter.post("/descriptions", async (req, res) => {
+jobsRouter.post("/descriptions", async (req: Request, res: Response) => {
   try {
     const validatedData = jobDescriptionSchema.parse(req.body);
 
@@ -305,7 +305,7 @@ jobsRouter.post("/descriptions", async (req, res) => {
 });
 
 // Update an existing job description
-jobsRouter.put("/descriptions/:id", async (req, res) => {
+jobsRouter.put("/descriptions/:id", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -340,7 +340,7 @@ jobsRouter.put("/descriptions/:id", async (req, res) => {
 });
 
 // Delete a job description
-jobsRouter.delete("/descriptions/:id", async (req, res) => {
+jobsRouter.delete("/descriptions/:id", async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {

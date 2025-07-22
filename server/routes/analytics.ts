@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 import { AnalyticsService } from '../services/analyticsService.js';
@@ -18,7 +18,7 @@ try {
 }
 
 // Get analytics dashboard data
-router.get('/dashboard', async (req, res) => {
+router.get('/dashboard', async (req: Request, res: Response) => {
   try {
     console.log('🔍 Analytics dashboard request received:');
     console.log('  startDate:', req.query.startDate);
@@ -49,7 +49,7 @@ router.get('/dashboard', async (req, res) => {
 });
 
 // Get country analytics
-router.get('/countries', async (req, res) => {
+router.get('/countries', async (req: Request, res: Response) => {
   try {
     const data = await analyticsService.getCountryAnalytics();
     res.json(data);
@@ -60,7 +60,7 @@ router.get('/countries', async (req, res) => {
 });
 
 // Get template analytics
-router.get('/templates', async (req, res) => {
+router.get('/templates', async (req: Request, res: Response) => {
   try {
     const { type } = req.query;
     const templateType = type as 'snap' | 'pro' | undefined;
@@ -74,7 +74,7 @@ router.get('/templates', async (req, res) => {
 });
 
 // Get visitor analytics
-router.get('/visitors', async (req, res) => {
+router.get('/visitors', async (req: Request, res: Response) => {
   try {
     // Check if prisma is initialized and has the visitorAnalytics model
     if (!prisma) {
@@ -133,12 +133,12 @@ router.get('/visitors', async (req, res) => {
     });
 
     // Separate registered and unregistered visitors
-    const registeredVisitors = visitors.filter(v => v.isRegistered && v.user);
-    const unregisteredVisitors = visitors.filter(v => !v.isRegistered || !v.user);
+    const registeredVisitors = visitors.filter((v: any) => v.isRegistered && v.user);
+    const unregisteredVisitors = visitors.filter((v: any) => !v.isRegistered || !v.user);
 
     // Count active users
-    const activeRegistered = activeVisitors.filter(v => v.isRegistered && v.user).length;
-    const activeUnregistered = activeVisitors.filter(v => v.isRegistered && v.user).length;
+    const activeRegistered = activeVisitors.filter((v: any) => v.isRegistered && v.user).length;
+    const activeUnregistered = activeVisitors.filter((v: any) => v.isRegistered && v.user).length;
 
     // Transform data for frontend
     const registered = registeredVisitors.map(v => ({
@@ -189,7 +189,7 @@ router.get('/visitors', async (req, res) => {
 });
 
 // Get activity logs
-router.get('/activities', async (req, res) => {
+router.get('/activities', async (req: Request, res: Response) => {
   try {
     const { startDate, endDate, activityType, limit = 100 } = req.query;
 

@@ -1,13 +1,9 @@
-import express from 'express';
-import PrismaClient from '../prisma';
-import { z } from 'zod';
-import { fromZodError } from '../utils';
-
-import { storage } from './storage.js';
+import express, { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { Express } from 'express';
+import { storage } from './storage.js';
+
+
 import { Server } from 'http';
-import { createServer } from 'http';
 
 // Import routers
 import { jobsRouter } from './routes/jobs.js';
@@ -18,9 +14,17 @@ import { importHistoryRouter } from './routes/import-history.js';
 
 const prisma = new PrismaClient();
 
-export function setupRoutes(app: Express): Server {
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
+    }
+  }
+}
+
+export default function setupRoutes(app: express.Express): Server {
   // Create a new order
-  app.post("/api/orders", async (req, res) => {
+  app.post("/api/orders", async (req: express.Request, res: express.Response) => {
     try {
       const { cart, billingInfo, paymentMethod, totals } = req.body;
 
@@ -130,7 +134,7 @@ export function setupRoutes(app: Express): Server {
           // TODO: Send confirmation email
           // TODO: Activate user subscription
 
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error processing payment:', error);
         }
       }, 2000); // Simulate 2 second processing time
@@ -145,14 +149,14 @@ export function setupRoutes(app: Express): Server {
         }
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating order:", error);
-      res.status(500).json({ error: "Failed to create order" });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Get order by ID
-  app.get("/api/orders/:id", async (req, res) => {
+  app.get("/api/orders/:id", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
 
@@ -170,14 +174,14 @@ export function setupRoutes(app: Express): Server {
       }
 
       res.json(order);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching order:", error);
-      res.status(500).json({ error: "Failed to fetch order" });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Get user's orders
-  app.get("/api/user/orders", async (req, res) => {
+  app.get("/api/user/orders", async (req: express.Request, res: express.Response) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -195,14 +199,14 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json(orders);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching user orders:", error);
-      res.status(500).json({ error: "Failed to fetch orders" });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Get order receipt/invoice
-  app.get("/api/orders/:id/receipt", async (req, res) => {
+  app.get("/api/orders/:id/receipt", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
 
@@ -296,16 +300,16 @@ export function setupRoutes(app: Express): Server {
 
       res.setHeader('Content-Type', 'text/html');
       res.send(receiptHtml);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating receipt:", error);
-      res.status(500).json({ error: "Failed to generate receipt" });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // User Management Routes
   
   // Create new user
-  app.post("/api/users", async (req, res) => {
+  app.post("/api/users", async (req: express.Request, res: express.Response) => {
     try {
       const userSchema = z.object({
         email: z.string().email(),
@@ -338,17 +342,17 @@ export function setupRoutes(app: Express): Server {
       // Don't return password hash
       const { passwordHash, ...userResponse } = user;
       res.status(201).json(userResponse);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: fromZodError(error).message });
+        return res.status(400).json({ error: fromZodError(error as any).message });
       }
       console.error("Error creating user:", error);
-      res.status(500).json({ error: "Failed to create user" });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Get user by ID
-  app.get("/api/users/:id", async (req, res) => {
+  app.get("/api/users/:id", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
 
@@ -371,14 +375,14 @@ export function setupRoutes(app: Express): Server {
       }
 
       res.json(user);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching user:", error);
-      res.status(500).json({ error: "Failed to fetch user" });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Update user
-  app.put("/api/users/:id", async (req, res) => {
+  app.put("/api/users/:id", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
       const updateSchema = z.object({
@@ -425,17 +429,17 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json(updatedUser);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: fromZodError(error).message });
+        return res.status(400).json({ error: fromZodError(error as any).message });
       }
       console.error("Error updating user:", error);
-      res.status(500).json({ error: "Failed to update user" });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Delete user
-  app.delete("/api/users/:id", async (req, res) => {
+  app.delete("/api/users/:id", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
 
@@ -452,14 +456,14 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json({ message: "User deleted successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting user:", error);
-      res.status(500).json({ error: "Failed to delete user" });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Get user profile
-  app.get("/api/users/:id/profile", async (req, res) => {
+  app.get("/api/users/:id/profile", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
 
@@ -498,14 +502,14 @@ export function setupRoutes(app: Express): Server {
       // Don't return password hash
       const { passwordHash, ...userProfile } = user;
       res.json(userProfile);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching user profile:", error);
-      res.status(500).json({ error: "Failed to fetch user profile" });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Update user profile
-  app.put("/api/users/:id/profile", async (req, res) => {
+  app.put("/api/users/:id/profile", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
       const profileSchema = z.object({
@@ -546,9 +550,9 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json(updatedUser);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: fromZodError(error).message });
+        return res.status(400).json({ error: fromZodError(error as any).message });
       }
       console.error("Error updating user profile:", error);
       res.status(500).json({ error: "Failed to update user profile" });
@@ -558,7 +562,7 @@ export function setupRoutes(app: Express): Server {
   // Resume Management Routes
   
   // Get all resumes for user
-  app.get("/api/resumes", async (req, res) => {
+  app.get("/api/resumes", async (req: express.Request, res: express.Response) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -585,14 +589,14 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json(resumes);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching resumes:", error);
-      res.status(500).json({ error: "Failed to fetch resumes" });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Create new resume
-  app.post("/api/resumes", async (req, res) => {
+  app.post("/api/resumes", async (req: express.Request, res: express.Response) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -636,17 +640,17 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.status(201).json(resume);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: fromZodError(error).message });
+        return res.status(400).json({ error: fromZodError(error as any).message });
       }
       console.error("Error creating resume:", error);
-      res.status(500).json({ error: "Failed to create resume" });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Get resume by ID
-  app.get("/api/resumes/:id", async (req, res) => {
+  app.get("/api/resumes/:id", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
       const userId = req.user?.id;
@@ -675,14 +679,14 @@ export function setupRoutes(app: Express): Server {
       }
 
       res.json(resume);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching resume:", error);
-      res.status(500).json({ error: "Failed to fetch resume" });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Update resume
-  app.put("/api/resumes/:id", async (req, res) => {
+  app.put("/api/resumes/:id", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
       const userId = req.user?.id;
@@ -726,17 +730,17 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json(updatedResume);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
       console.error("Error updating resume:", error);
-      res.status(500).json({ error: "Failed to update resume" });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Delete resume
-  app.delete("/api/resumes/:id", async (req, res) => {
+  app.delete("/api/resumes/:id", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
       const userId = req.user?.id;
@@ -762,14 +766,14 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json({ message: "Resume deleted successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting resume:", error);
-      res.status(500).json({ error: "Failed to delete resume" });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Duplicate resume
-  app.post("/api/resumes/:id/duplicate", async (req, res) => {
+  app.post("/api/resumes/:id/duplicate", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
       const userId = req.user?.id;
@@ -810,9 +814,9 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.status(201).json(duplicatedResume);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error duplicating resume:", error);
-      res.status(500).json({ error: "Failed to duplicate resume" });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
@@ -821,7 +825,7 @@ export function setupRoutes(app: Express): Server {
   // Snap Template Routes (ResumeTemplate model) - Must come before generic template routes
   
   // Get all snap templates
-  app.get("/api/templates/snap", async (req, res) => {
+  app.get("/api/templates/snap", async (req: express.Request, res: express.Response) => {
     try {
       const templates = await prisma.resumeTemplate.findMany({
         select: {
@@ -845,14 +849,14 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json(templates);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching snap templates:", error);
       res.status(500).json({ error: "Failed to fetch snap templates" });
     }
   });
 
   // Get snap template by ID
-  app.get("/api/templates/snap/:id", async (req, res) => {
+  app.get("/api/templates/snap/:id", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
       const templateId = parseInt(id, 10);
@@ -870,14 +874,14 @@ export function setupRoutes(app: Express): Server {
       }
 
       res.json(template);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching snap template:", error);
       res.status(500).json({ error: "Failed to fetch snap template" });
     }
   });
 
   // Delete snap template by ID (admin only)
-  app.delete("/api/templates/snap/:id", async (req, res) => {
+  app.delete("/api/templates/snap/:id", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
       const templateId = parseInt(id, 10);
@@ -901,14 +905,14 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json({ message: "Snap template deleted successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting snap template:", error);
       res.status(500).json({ error: "Failed to delete snap template" });
     }
    });
 
   // Get all templates
-  app.get("/api/templates", async (req, res) => {
+  app.get("/api/templates", async (req: express.Request, res: express.Response) => {
     try {
       const { isActive } = req.query;
       
@@ -938,14 +942,14 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json(templates);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching templates:", error);
       res.status(500).json({ error: "Failed to fetch templates" });
     }
   });
 
   // Get template by ID
-  app.get("/api/templates/:id", async (req, res) => {
+  app.get("/api/templates/:id", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
 
@@ -965,14 +969,14 @@ export function setupRoutes(app: Express): Server {
       }
 
       res.json(template);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching template:", error);
       res.status(500).json({ error: "Failed to fetch template" });
     }
   });
 
   // Create template (admin only)
-  app.post("/api/templates", async (req, res) => {
+  app.post("/api/templates", async (req: express.Request, res: express.Response) => {
     try {
       // TODO: Add admin authentication middleware
       const templateSchema = z.object({
@@ -997,7 +1001,7 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.status(201).json(template);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -1007,7 +1011,7 @@ export function setupRoutes(app: Express): Server {
   });
 
   // Update template (admin only)
-  app.put("/api/templates/:id", async (req, res) => {
+  app.put("/api/templates/:id", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
       // TODO: Add admin authentication middleware
@@ -1043,7 +1047,7 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json(updatedTemplate);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -1053,7 +1057,7 @@ export function setupRoutes(app: Express): Server {
   });
 
   // Delete template (admin only)
-  app.delete("/api/templates/:id", async (req, res) => {
+  app.delete("/api/templates/:id", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
       // TODO: Add admin authentication middleware
@@ -1073,7 +1077,7 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json({ message: "Template deleted successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting template:", error);
       res.status(500).json({ error: "Failed to delete template" });
     }
@@ -1082,18 +1086,18 @@ export function setupRoutes(app: Express): Server {
   // Pro Template Management Routes (using ProTemplate model)
   
   // Get all pro templates
-  app.get("/api/pro-templates", async (req, res) => {
+  app.get("/api/pro-templates", async (req: express.Request, res: express.Response) => {
     try {
       const templates = await storage.getAllProTemplates();
       res.json(templates);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching pro templates:", error);
       res.status(500).json({ error: "Failed to fetch pro templates" });
     }
   });
 
   // Get pro template by ID
-  app.get("/api/pro-templates/:id", async (req, res) => {
+  app.get("/api/pro-templates/:id", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
       const template = await storage.getProTemplateById(parseInt(id));
@@ -1103,14 +1107,14 @@ export function setupRoutes(app: Express): Server {
       }
 
       res.json(template);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching pro template:", error);
       res.status(500).json({ error: "Failed to fetch pro template" });
     }
   });
 
   // Create pro template (admin only)
-  app.post("/api/pro-templates", async (req, res) => {
+  app.post("/api/pro-templates", async (req: express.Request, res: express.Response) => {
     try {
       console.log('POST /api/pro-templates - Request received:', {
         body: req.body,
@@ -1141,7 +1145,7 @@ export function setupRoutes(app: Express): Server {
       console.log('POST /api/pro-templates - Template created successfully:', template);
 
       res.status(201).json(template);
-    } catch (error) {
+    } catch (error: any) {
       console.error('POST /api/pro-templates - Error occurred:', error);
       
       if (error instanceof z.ZodError) {
@@ -1166,7 +1170,7 @@ export function setupRoutes(app: Express): Server {
   });
 
   // Update pro template (admin only)
-  app.put("/api/pro-templates/:id", async (req, res) => {
+  app.put("/api/pro-templates/:id", async (req: express.Request, res: express.Response) => {
     try {
       const id = parseInt(req.params.id, 10);
       if (isNaN(id)) return res.status(400).json({ message: "Invalid pro template id" });
@@ -1202,14 +1206,14 @@ export function setupRoutes(app: Express): Server {
       const updatedTemplate = await storage.updateProTemplate(id, dataForStorage);
 
       res.json(updatedTemplate);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating pro template:", error);
       res.status(500).json({ message: "Failed to update pro template" });
     }
   });
 
   // Delete pro template (admin only)
-  app.delete("/api/pro-templates/:id", async (req, res) => {
+  app.delete("/api/pro-templates/:id", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
       // TODO: Add admin authentication middleware
@@ -1223,7 +1227,7 @@ export function setupRoutes(app: Express): Server {
       await storage.deleteProTemplate(parseInt(id));
 
       res.json({ message: "Pro template deleted successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting pro template:", error);
       res.status(500).json({ error: "Failed to delete pro template" });
     }
@@ -1234,7 +1238,7 @@ export function setupRoutes(app: Express): Server {
   // Analytics & Usage Statistics Routes
   
   // Track user actions
-  app.post("/api/analytics/track", async (req, res) => {
+  app.post("/api/analytics/track", async (req: express.Request, res: express.Response) => {
     try {
       const trackingSchema = z.object({
         userId: z.string().optional(),
@@ -1256,7 +1260,7 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.status(201).json({ success: true, id: usageStatistic.id });
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -1266,7 +1270,7 @@ export function setupRoutes(app: Express): Server {
   });
 
   // Get dashboard statistics
-  app.get("/api/analytics/dashboard", async (req, res) => {
+  app.get("/api/analytics/dashboard", async (req: express.Request, res: express.Response) => {
     try {
       const { timeframe = '30d' } = req.query;
       
@@ -1357,14 +1361,14 @@ export function setupRoutes(app: Express): Server {
       };
 
       res.json(statistics);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching dashboard statistics:", error);
       res.status(500).json({ error: "Failed to fetch dashboard statistics" });
     }
   });
 
   // Get user usage statistics
-  app.get("/api/analytics/usage/:userId", async (req, res) => {
+  app.get("/api/analytics/usage/:userId", async (req: express.Request, res: express.Response) => {
     try {
       const { userId } = req.params;
       const { timeframe = '30d' } = req.query;
@@ -1419,14 +1423,14 @@ export function setupRoutes(app: Express): Server {
       };
 
       res.json(statistics);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching user usage statistics:", error);
       res.status(500).json({ error: "Failed to fetch user usage statistics" });
     }
   });
 
   // Track resume creation
-  app.post("/api/analytics/resume-creation", async (req, res) => {
+  app.post("/api/analytics/resume-creation", async (req: express.Request, res: express.Response) => {
     try {
       const { userId, resumeId, templateId } = req.body;
       
@@ -1443,14 +1447,14 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error tracking resume creation:", error);
       res.status(500).json({ error: "Failed to track resume creation" });
     }
   });
 
   // Track resume download
-  app.post("/api/analytics/resume-download", async (req, res) => {
+  app.post("/api/analytics/resume-download", async (req: express.Request, res: express.Response) => {
     try {
       const { userId, resumeId, format } = req.body;
       
@@ -1467,14 +1471,14 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error tracking resume download:", error);
       res.status(500).json({ error: "Failed to track resume download" });
     }
   });
 
   // Track template usage
-  app.post("/api/analytics/template-usage", async (req, res) => {
+  app.post("/api/analytics/template-usage", async (req: express.Request, res: express.Response) => {
     try {
       const { userId, templateId, action } = req.body;
       
@@ -1491,14 +1495,14 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error tracking template usage:", error);
       res.status(500).json({ error: "Failed to track template usage" });
     }
   });
 
   // Track AI suggestion usage
-  app.post("/api/analytics/ai-suggestion", async (req, res) => {
+  app.post("/api/analytics/ai-suggestion", async (req: express.Request, res: express.Response) => {
     try {
       const { userId, suggestionType, accepted } = req.body;
       
@@ -1515,7 +1519,7 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error tracking AI suggestion:", error);
       res.status(500).json({ error: "Failed to track AI suggestion" });
     }
@@ -1524,7 +1528,7 @@ export function setupRoutes(app: Express): Server {
   // Admin Management Routes
   
   // Get all users (admin only)
-  app.get("/api/admin/users", async (req, res) => {
+  app.get("/api/admin/users", async (req: express.Request, res: express.Response) => {
     try {
       // TODO: Add admin authentication middleware
       const { page = 1, limit = 20, search, tier, isActive } = req.query;
@@ -1576,14 +1580,14 @@ export function setupRoutes(app: Express): Server {
           pages: Math.ceil(totalCount / Number(limit))
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching admin users:", error);
       res.status(500).json({ error: "Failed to fetch users" });
     }
   });
 
   // Get detailed user data (admin only)
-  app.get("/api/admin/users/:id", async (req, res) => {
+  app.get("/api/admin/users/:id", async (req: express.Request, res: express.Response) => {
     try {
       // TODO: Add admin authentication middleware
       const { id } = req.params;
@@ -1660,14 +1664,14 @@ export function setupRoutes(app: Express): Server {
       // Don't return password hash
       const { passwordHash, ...userDetails } = user;
       res.json(userDetails);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching admin user details:", error);
-      res.status(500).json({ error: "Failed to fetch user details" });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Update user tier (admin only)
-  app.put("/api/admin/users/:id/tier", async (req, res) => {
+  app.put("/api/admin/users/:id/tier", async (req: express.Request, res: express.Response) => {
     try {
       // TODO: Add admin authentication middleware
       const { id } = req.params;
@@ -1699,17 +1703,17 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json(updatedUser);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
       console.error("Error updating user tier:", error);
-      res.status(500).json({ error: "Failed to update user tier" });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Get admin statistics
-  app.get("/api/admin/statistics", async (req, res) => {
+  app.get("/api/admin/statistics", async (req: express.Request, res: express.Response) => {
     try {
       // TODO: Add admin authentication middleware
       const { timeframe = '30d' } = req.query;
@@ -1835,14 +1839,14 @@ export function setupRoutes(app: Express): Server {
       };
 
       res.json(statistics);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching admin statistics:", error);
       res.status(500).json({ error: "Failed to fetch admin statistics" });
     }
   });
 
   // Update database configuration (admin only)
-  app.put("/api/admin/database-config", async (req, res) => {
+  app.put("/api/admin/database-config", async (req: express.Request, res: express.Response) => {
     try {
       // TODO: Add admin authentication middleware
       // TODO: Add proper validation and security measures
@@ -1855,7 +1859,7 @@ export function setupRoutes(app: Express): Server {
         message: "Database configuration update requested",
         note: "This feature requires additional implementation for security"
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating database config:", error);
       res.status(500).json({ error: "Failed to update database configuration" });
     }
@@ -1864,7 +1868,7 @@ export function setupRoutes(app: Express): Server {
   // Notification Routes
   
   // Get user notifications
-  app.get("/api/notifications/:userId", async (req, res) => {
+  app.get("/api/notifications/:userId", async (req: express.Request, res: express.Response) => {
     try {
       const { userId } = req.params;
       const { page = 1, limit = 20, isRead } = req.query;
@@ -1895,14 +1899,14 @@ export function setupRoutes(app: Express): Server {
           pages: Math.ceil(totalCount / Number(limit))
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching notifications:", error);
       res.status(500).json({ error: "Failed to fetch notifications" });
     }
   });
 
   // Create notification
-  app.post("/api/notifications", async (req, res) => {
+  app.post("/api/notifications", async (req: express.Request, res: express.Response) => {
     try {
       const notificationSchema = z.object({
         userId: z.string(),
@@ -1928,7 +1932,7 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.status(201).json(notification);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -1938,7 +1942,7 @@ export function setupRoutes(app: Express): Server {
   });
 
   // Mark notification as read
-  app.put("/api/notifications/:id/read", async (req, res) => {
+  app.put("/api/notifications/:id/read", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
 
@@ -1959,14 +1963,14 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json(updatedNotification);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error marking notification as read:", error);
       res.status(500).json({ error: "Failed to mark notification as read" });
     }
   });
 
   // Delete notification
-  app.delete("/api/notifications/:id", async (req, res) => {
+  app.delete("/api/notifications/:id", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
 
@@ -1983,7 +1987,7 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json({ message: "Notification deleted successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting notification:", error);
       res.status(500).json({ error: "Failed to delete notification" });
     }
@@ -1992,7 +1996,7 @@ export function setupRoutes(app: Express): Server {
   // Support Ticket Routes
   
   // Get support tickets
-  app.get("/api/support/tickets", async (req, res) => {
+  app.get("/api/support/tickets", async (req: express.Request, res: express.Response) => {
     try {
       const { page = 1, limit = 20, status, priority, userId } = req.query;
       
@@ -2031,14 +2035,14 @@ export function setupRoutes(app: Express): Server {
           pages: Math.ceil(totalCount / Number(limit))
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching support tickets:", error);
       res.status(500).json({ error: "Failed to fetch support tickets" });
     }
   });
 
   // Create support ticket
-  app.post("/api/support/tickets", async (req, res) => {
+  app.post("/api/support/tickets", async (req: express.Request, res: express.Response) => {
     try {
       const ticketSchema = z.object({
         userId: z.string(),
@@ -2076,7 +2080,7 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.status(201).json(ticket);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -2086,7 +2090,7 @@ export function setupRoutes(app: Express): Server {
   });
 
   // Get ticket by ID
-  app.get("/api/support/tickets/:id", async (req, res) => {
+  app.get("/api/support/tickets/:id", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
 
@@ -2108,14 +2112,14 @@ export function setupRoutes(app: Express): Server {
       }
 
       res.json(ticket);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching support ticket:", error);
       res.status(500).json({ error: "Failed to fetch support ticket" });
     }
   });
 
   // Update ticket status
-  app.put("/api/support/tickets/:id", async (req, res) => {
+  app.put("/api/support/tickets/:id", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
       const updateSchema = z.object({
@@ -2153,7 +2157,7 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json(updatedTicket);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -2165,7 +2169,7 @@ export function setupRoutes(app: Express): Server {
   // Subscription Management Routes
   
   // Get user subscription
-  app.get("/api/subscriptions/:userId", async (req, res) => {
+  app.get("/api/subscriptions/:userId", async (req: express.Request, res: express.Response) => {
     try {
       const { userId } = req.params;
 
@@ -2182,14 +2186,14 @@ export function setupRoutes(app: Express): Server {
       }
 
       res.json(subscription);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching subscription:", error);
       res.status(500).json({ error: "Failed to fetch subscription" });
     }
   });
 
   // Create subscription
-  app.post("/api/subscriptions", async (req, res) => {
+  app.post("/api/subscriptions", async (req: express.Request, res: express.Response) => {
     try {
       const subscriptionSchema = z.object({
         userId: z.string(),
@@ -2234,7 +2238,7 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.status(201).json(subscription);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -2244,7 +2248,7 @@ export function setupRoutes(app: Express): Server {
   });
 
   // Update subscription
-  app.put("/api/subscriptions/:id", async (req, res) => {
+  app.put("/api/subscriptions/:id", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
       const updateSchema = z.object({
@@ -2279,7 +2283,7 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json(updatedSubscription);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -2289,7 +2293,7 @@ export function setupRoutes(app: Express): Server {
   });
 
   // Cancel subscription
-  app.delete("/api/subscriptions/:id", async (req, res) => {
+  app.delete("/api/subscriptions/:id", async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
 
@@ -2311,7 +2315,7 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.json(cancelledSubscription);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error cancelling subscription:", error);
       res.status(500).json({ error: "Failed to cancel subscription" });
     }
@@ -2320,7 +2324,7 @@ export function setupRoutes(app: Express): Server {
   // Discount Code Management Routes
   
   // Validate discount code
-  app.post("/api/discount-codes/validate", async (req, res) => {
+  app.post("/api/discount-codes/validate", async (req: express.Request, res: express.Response) => {
     try {
       const validateSchema = z.object({
         code: z.string().min(1),
@@ -2376,7 +2380,7 @@ export function setupRoutes(app: Express): Server {
           description: discountCode.description
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -2386,7 +2390,7 @@ export function setupRoutes(app: Express): Server {
   });
 
   // Apply discount code
-  app.post("/api/discount-codes/apply", async (req, res) => {
+  app.post("/api/discount-codes/apply", async (req: express.Request, res: express.Response) => {
     try {
       const applySchema = z.object({
         code: z.string().min(1),
@@ -2435,7 +2439,7 @@ export function setupRoutes(app: Express): Server {
           discountValue: discountCode.discountValue
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -2445,7 +2449,7 @@ export function setupRoutes(app: Express): Server {
   });
 
   // Create discount code (Admin only)
-  app.post("/api/discount-codes", async (req, res) => {
+  app.post("/api/discount-codes", async (req: express.Request, res: express.Response) => {
     try {
       const discountSchema = z.object({
         code: z.string().min(1).max(50),
@@ -2478,7 +2482,7 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.status(201).json(discountCode);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -2490,7 +2494,7 @@ export function setupRoutes(app: Express): Server {
   // Download Tracking Routes
   
   // Track resume download
-  app.post("/api/downloads/track", async (req, res) => {
+  app.post("/api/downloads/track", async (req: express.Request, res: express.Response) => {
     try {
       const downloadSchema = z.object({
         userId: z.string(),
@@ -2539,7 +2543,7 @@ export function setupRoutes(app: Express): Server {
       });
 
       res.status(201).json(download);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -2549,7 +2553,7 @@ export function setupRoutes(app: Express): Server {
   });
 
   // Get download history for user
-  app.get("/api/downloads/user/:userId", async (req, res) => {
+  app.get("/api/downloads/user/:userId", async (req: express.Request, res: express.Response) => {
     try {
       const { userId } = req.params;
       const { page = 1, limit = 20, format, resumeId } = req.query;
@@ -2587,14 +2591,14 @@ export function setupRoutes(app: Express): Server {
           pages: Math.ceil(totalCount / Number(limit))
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching download history:", error);
       res.status(500).json({ error: "Failed to fetch download history" });
     }
   });
 
   // Get download statistics
-  app.get("/api/downloads/stats", async (req, res) => {
+  app.get("/api/downloads/stats", async (req: express.Request, res: express.Response) => {
     try {
       const { timeframe = '30d', userId } = req.query;
       
@@ -2649,7 +2653,7 @@ export function setupRoutes(app: Express): Server {
           count: stat._count.downloadedAt
         }))
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching download statistics:", error);
       res.status(500).json({ error: "Failed to fetch download statistics" });
     }
@@ -2658,7 +2662,7 @@ export function setupRoutes(app: Express): Server {
   // User Permissions Routes
   
   // Get user permissions
-  app.get("/api/permissions/:userId", async (req, res) => {
+  app.get("/api/permissions/:userId", async (req: express.Request, res: express.Response) => {
     try {
       const { userId } = req.params;
 
@@ -2701,14 +2705,14 @@ export function setupRoutes(app: Express): Server {
         permissions,
         subscriptionStatus: activeSubscription?.status || 'NONE'
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching user permissions:", error);
-      res.status(500).json({ error: "Failed to fetch user permissions" });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Check specific permission
-  app.post("/api/permissions/check", async (req, res) => {
+  app.post("/api/permissions/check", async (req: express.Request, res: express.Response) => {
     try {
       const permissionSchema = z.object({
         userId: z.string(),
@@ -2782,7 +2786,7 @@ export function setupRoutes(app: Express): Server {
         planType,
         resourceId
       });
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
