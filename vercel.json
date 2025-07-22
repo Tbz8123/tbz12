@@ -1,13 +1,18 @@
 {
   "version": 2,
+  "functions": {
+    "dist/index.js": {
+      "runtime": "nodejs20.x"
+    }
+  },
   "routes": [
-    {
-      "src": "/admin/(.*)",
-      "dest": "/dist/admin/index.html"
-    },
     {
       "src": "/api/(.*)",
       "dest": "/dist/index.js"
+    },
+    {
+      "src": "/admin/(.*)",
+      "dest": "/dist/admin/index.html"
     },
     {
       "src": "/(.*)",
