@@ -1,0 +1,133 @@
+/* Mobile Compatibility CSS for iPhone XS and older iOS versions - RESUME BUILDER ONLY */
+
+/* ONLY target elements inside resume-builder container */
+@media (max-width: 768px) {
+    /* TAB BUTTONS - Content/Template and Fresher/Experienced */
+    .resume-builder [role="tablist"] {
+      background: rgba(0, 0, 0, 0.3) !important;
+      border-radius: 12px !important;
+      padding: 4px !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    /* ACTIVE tabs should have white text */
+    .resume-builder [role="tab"][data-state="active"] {
+      background: linear-gradient(135deg, rgba(147, 51, 234, 0.9), rgba(59, 130, 246, 0.9)) !important;
+      color: white !important;
+      font-weight: 700 !important;
+      border: 2px solid rgba(147, 51, 234, 0.7) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    /* INACTIVE tabs should have black text */
+    .resume-builder [role="tab"]:not([data-state="active"]) {
+      background: rgba(255, 255, 255, 0.8) !important;
+      color: #000000 !important;
+      font-weight: 500 !important;
+      border: 2px solid rgba(255, 255, 255, 0.3) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    /* Additional targeting for tab content - inactive tabs */
+    .resume-builder [role="tab"]:not([data-state="active"]) span,
+    .resume-builder [role="tab"]:not([data-state="active"]) div,
+    .resume-builder [role="tab"]:not([data-state="active"]) svg {
+      color: #000000 !important;
+      fill: #000000 !important;
+    }
+
+    /* Additional targeting for tab content - active tabs */
+    .resume-builder [role="tab"][data-state="active"] span,
+    .resume-builder [role="tab"][data-state="active"] div,
+    .resume-builder [role="tab"][data-state="active"] svg {
+      color: white !important;
+      fill: white !important;
+    }
+
+    /* Remove glassmorphism ONLY in resume builder */
+    .resume-builder .backdrop-blur-xl,
+    .resume-builder .backdrop-blur-sm,
+    .resume-builder .backdrop-blur-md {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    /* Empty state cards ONLY in resume builder */
+    .resume-builder .border-dashed {
+      background: linear-gradient(135deg, rgba(147, 51, 234, 0.6), rgba(59, 130, 246, 0.5)) !important;
+      border: 2px solid rgba(147, 51, 234, 0.9) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+  }
+
+  /* Global Logo fixes for ALL pages on mobile - target the specific Logo component classes */
+  @media (max-width: 768px) {
+    /* Fix the "Resume" text in Logo component that appears black on iPhone XS */
+    .text-gray-900.dark\:text-white {
+      color: white !important;
+    }
+
+    /* Additional targeting for Logo component */
+    header .text-gray-900,
+    nav .text-gray-900,
+    .logo .text-gray-900 {
+      color: white !important;
+    }
+
+    /* Ensure all brand text is visible on mobile */
+    .font-extrabold.tracking-tight .text-gray-900 {
+      color: white !important;
+    }
+
+    /* Target TabsList components that appear white on iPhone XS */
+    div[class*="bg-white/10"][class*="backdrop-blur"] {
+      background: linear-gradient(135deg, rgba(147, 51, 234, 0.6), rgba(59, 130, 246, 0.5)) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      border: 2px solid rgba(147, 51, 234, 0.7) !important;
+    }
+
+    /* Target the specific Content/Template and Fresher/Experienced tabs */
+    .grid.grid-cols-2[class*="bg-white/10"] {
+      background: linear-gradient(135deg, rgba(147, 51, 234, 0.6), rgba(59, 130, 246, 0.5)) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      border: 2px solid rgba(147, 51, 234, 0.7) !important;
+    }
+  }
+
+  /* iOS Safari specific fixes */
+  @supports (-webkit-touch-callout: none) {
+    @media (max-width: 768px) {
+      /* Fix webkit specific rendering issues */
+      .resume-builder .ios-fix-blur {
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+      }
+
+      /* Additional fix for Logo text inheritance issues on iOS */
+      .text-gray-900 {
+        color: white !important;
+      }
+    }
+  }
+
+  /* Fallback selectors in case .resume-builder class is missing */
+  @media (max-width: 768px) {
+    /* Broader tab selectors as fallback */
+    [role="tablist"] [role="tab"][data-state="active"] {
+      background: linear-gradient(135deg, rgba(147, 51, 234, 0.9), rgba(59, 130, 246, 0.9)) !important;
+      color: white !important;
+      font-weight: 700 !important;
+    }
+
+    [role="tablist"] [role="tab"]:not([data-state="active"]) {
+      background: rgba(255, 255, 255, 0.8) !important;
+      color: #000000 !important;
+      font-weight: 500 !important;
+    }
+  } 

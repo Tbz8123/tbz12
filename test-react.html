@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Test</title>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="module">
+        import { createRoot } from "https://esm.sh/react-dom@18/client";
+        import React from "https://esm.sh/react@18";
+
+        function TestApp() {
+            return React.createElement('div', {
+                style: { 
+                    padding: '20px', 
+                    backgroundColor: 'white', 
+                    color: 'black', 
+                    fontSize: '24px',
+                    fontFamily: 'Arial'
+                }
+            }, [
+                React.createElement('h1', { key: 'h1' }, 'React Test - TbzResumeBuilder'),
+                React.createElement('p', { key: 'p1' }, 'If you can see this, React is working correctly!'),
+                React.createElement('p', { key: 'p2' }, 'Current time: ' + new Date().toLocaleString())
+            ]);
+        }
+
+        try {
+            console.log("Starting React application...");
+            const rootElement = document.getElementById("root");
+            
+            if (!rootElement) {
+                console.error("Root element not found!");
+                document.body.innerHTML = "<h1>Error: Root element not found</h1>";
+            } else {
+                console.log("Root element found, creating React root...");
+                const root = createRoot(rootElement);
+                console.log("React root created, rendering app...");
+                root.render(React.createElement(TestApp));
+                console.log("App rendered successfully!");
+            }
+        } catch (error) {
+            console.error("Error starting React app:", error);
+            document.body.innerHTML = `<h1>Error starting app: ${error.message}</h1>`;
+        }
+    </script>
+</body>
+</html>

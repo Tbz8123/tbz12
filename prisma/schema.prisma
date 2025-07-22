@@ -1,0 +1,876 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String              @id @default(cuid())
+  firebaseUid        String?             @unique
+  email              String              @unique
+  name               String?
+  password           String?
+  profilePicture     String?
+  phoneNumber        String?
+  firstName          String?
+  lastName           String?
+  title              String?
+  company            String?
+  location           String?
+  bio                String?
+  website            String?
+  linkedinUrl        String?
+  isActive           Boolean             @default(true)
+  isEmailVerified    Boolean             @default(false)
+  lastLoginAt        DateTime?
+  currentTier        SubscriptionTier    @default(FREE)
+  subscriptionId     String?
+  customerId         String?
+  subscriptionStatus SubscriptionStatus  @default(INACTIVE)
+  subscriptionEndsAt DateTime?
+  role               UserRole            @default(USER)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  cartItems          CartItem[]
+  discountCodeUsages DiscountCodeUsage[]
+  downloads          Download[]
+  notifications      Notification[]
+  orders             Order[]
+  resumes            Resume[]
+  sessionAnalytics   SessionAnalytics[]
+  subscription       Subscription?
+  supportTickets     SupportTicket[]
+  usageStats         UsageStats?
+  permissions        UserPermission[]
+  userProfile        UserProfile?
+  templates          UserTemplate[]
+  visitorAnalytics   VisitorAnalytics[]
+
+  @@index([firebaseUid])
+  @@index([email])
+  @@index([currentTier])
+  @@index([subscriptionStatus])
+  @@index([role])
+}
+
+model UserProfile {
+  id                 String           @id @default(cuid())
+  userId             String           @unique
+  dateOfBirth        DateTime?
+  gender             String?
+  nationality        String?
+  address            String?
+  city               String?
+  state              String?
+  zipCode            String?
+  country            String?
+  currentJobTitle    String?
+  currentCompany     String?
+  experienceLevel    ExperienceLevel?
+  industry           String?
+  skills             Json?
+  preferredLanguage  String           @default("en")
+  timezone           String?
+  emailNotifications Boolean          @default(true)
+  marketingEmails    Boolean          @default(false)
+  defaultTemplate    String?
+  favoriteTemplates  Json?
+  autoSave           Boolean          @default(true)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([industry])
+  @@index([experienceLevel])
+}
+
+model Subscription {
+  id                    String               @id @default(cuid())
+  userId                String               @unique
+  stripeSubscriptionId  String?              @unique
+  stripeCustomerId      String?
+  stripePriceId         String?
+  subscriptionPackageId String?
+  tier                  SubscriptionTier
+  status                SubscriptionStatus
+  currentPeriodStart    DateTime
+  currentPeriodEnd      DateTime
+  cancelAtPeriodEnd     Boolean              @default(false)
+  canceledAt            DateTime?
+  amount                Int
+  currency              String               @default("usd")
+  interval              BillingInterval
+  trialStart            DateTime?
+  trialEnd              DateTime?
+  metadata              Json?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  subscriptionPackage   SubscriptionPackage? @relation(fields: [subscriptionPackageId], references: [id])
+  user                  User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([stripeSubscriptionId])
+  @@index([status])
+  @@index([tier])
+  @@index([subscriptionPackageId])
+}
+
+model UsageStats {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  resumesCreated        Int      @default(0)
+  resumesDownloaded     Int      @default(0)
+  templatesUsed         Int      @default(0)
+  monthlyResumes        Int      @default(0)
+  monthlyDownloads      Int      @default(0)
+  monthlyTemplateAccess Int      @default(0)
+  lastMonthlyReset      DateTime @default(now())
+  aiSuggestionsUsed     Int      @default(0)
+  proTemplatesAccessed  Int      @default(0)
+  snapTemplateDownloads Int      @default(0)
+  proTemplateDownloads  Int      @default(0)
+  monthlySnapDownloads  Int      @default(0)
+  monthlyProDownloads   Int      @default(0)
+  exportFormatsUsed     Json?
+  totalLoginDays        Int      @default(0)
+  lastActiveDate        DateTime @default(now())
+  averageSessionTime    Int?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([lastActiveDate])
+}
+
+model UserPermission {
+  id         String         @id @default(cuid())
+  userId     String
+  permission PermissionType
+  grantedAt  DateTime       @default(now())
+  grantedBy  String?
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permission])
+  @@index([userId])
+  @@index([permission])
+}
+
+model UserTemplate {
+  id           String    @id @default(cuid())
+  userId       String
+  templateId   String
+  templateType String
+  accessType   String
+  purchasedAt  DateTime  @default(now())
+  expiresAt    DateTime?
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, templateId])
+  @@index([userId])
+  @@index([templateId])
+  @@index([templateType])
+}
+
+model Notification {
+  id         String           @id @default(cuid())
+  userId     String
+  title      String
+  message    String
+  type       NotificationType
+  isRead     Boolean          @default(false)
+  actionUrl  String?
+  actionData Json?
+  createdAt  DateTime         @default(now())
+  readAt     DateTime?
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model SupportTicket {
+  id          String         @id @default(cuid())
+  userId      String
+  subject     String
+  description String
+  status      TicketStatus   @default(OPEN)
+  priority    TicketPriority @default(MEDIUM)
+  category    String?
+  assignedTo  String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  resolvedAt  DateTime?
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
+}
+
+model Resume {
+  id           String   @id @default(cuid())
+  userId       String
+  title        String?
+  content      Json
+  templateId   String?
+  templateType String?
+  isPublic     Boolean  @default(false)
+  tags         Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([templateId])
+  @@index([isPublic])
+  @@index([createdAt])
+}
+
+model Download {
+  id           String   @id @default(cuid())
+  templateId   String
+  templateType String   @default("snap")
+  templateName String?
+  downloadedAt DateTime @default(now())
+  userId       String?
+  anonymousId  String?
+  downloadType String?
+  fileSize     Int?
+  ipAddress    String?
+  userAgent    String?
+  user         User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([anonymousId])
+  @@index([templateId])
+  @@index([templateType])
+  @@index([downloadedAt])
+}
+
+model ResumeTemplate {
+  id                     Int      @id @default(autoincrement())
+  name                   String
+  description            String?
+  code                   String
+  structure              Json
+  thumbnailUrl           String?
+  enhanced3DThumbnailUrl String?
+  thumbnailType          String?  @default("standard")
+  thumbnailFormat        String?
+  thumbnailMetadata      Json?
+  isDefault              Boolean  @default(false)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  displayMode            String?  @default("thumbnail")
+  uploadedImageUrl       String?
+}
+
+model ProTemplate {
+  id                     Int      @id @default(autoincrement())
+  name                   String
+  description            String?
+  code                   String
+  structure              Json
+  thumbnailUrl           String?
+  enhanced3DThumbnailUrl String?
+  uploadedImageUrl       String?
+  thumbnailType          String?  @default("standard")
+  displayMode            String?  @default("thumbnail")
+  thumbnailFormat        String?
+  thumbnailMetadata      Json?
+  isDefault              Boolean  @default(false)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}
+
+model Template {
+  id                     Int      @id @default(autoincrement())
+  name                   String
+  description            String?
+  code                   String
+  structure              Json?
+  thumbnailUrl           String?
+  enhanced3DThumbnailUrl String?
+  thumbnailType          String?  @default("standard")
+  thumbnailFormat        String?
+  thumbnailMetadata      Json?
+  isDefault              Boolean  @default(false)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  displayMode            String?  @default("thumbnail")
+  uploadedImageUrl       String?
+}
+
+model JobTitle {
+  id           Int              @id @default(autoincrement())
+  title        String           @unique
+  category     String
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  descriptions JobDescription[]
+
+  @@index([title])
+  @@index([category])
+}
+
+model JobDescription {
+  id            Int      @id @default(autoincrement())
+  jobTitleId    Int
+  content       String
+  isRecommended Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  jobTitle      JobTitle @relation(fields: [jobTitleId], references: [id], onDelete: Cascade)
+
+  @@index([jobTitleId])
+  @@index([isRecommended])
+}
+
+model SkillsJobTitle {
+  id              Int             @id @default(autoincrement())
+  title           String          @unique
+  category        String
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  skillCategories SkillCategory[]
+
+  @@index([title])
+  @@index([category])
+}
+
+model SkillCategory {
+  id               Int            @id @default(autoincrement())
+  skillsJobTitleId Int
+  content          String
+  isRecommended    Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  skillsJobTitle   SkillsJobTitle @relation(fields: [skillsJobTitleId], references: [id], onDelete: Cascade)
+
+  @@index([skillsJobTitleId])
+  @@index([isRecommended])
+}
+
+model ProfessionalSummaryJobTitle {
+  id                    Int                   @id @default(autoincrement())
+  title                 String                @unique
+  category              String
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  professionalSummaries ProfessionalSummary[]
+
+  @@index([title])
+  @@index([category])
+}
+
+model ProfessionalSummary {
+  id                            Int                         @id @default(autoincrement())
+  professionalSummaryJobTitleId Int
+  content                       String
+  isRecommended                 Boolean                     @default(false)
+  createdAt                     DateTime                    @default(now())
+  updatedAt                     DateTime                    @updatedAt
+  professionalSummaryJobTitle   ProfessionalSummaryJobTitle @relation(fields: [professionalSummaryJobTitleId], references: [id], onDelete: Cascade)
+
+  @@index([professionalSummaryJobTitleId])
+  @@index([isRecommended])
+}
+
+model ImportHistory {
+  id               String    @id @default(cuid())
+  fileName         String
+  fileSize         Int
+  fileType         String
+  importType       String
+  status           String    @default("pending")
+  progress         Int       @default(0)
+  totalRecords     Int?
+  processedRecords Int?      @default(0)
+  successCount     Int?      @default(0)
+  errorCount       Int?      @default(0)
+  errors           Json?
+  metadata         Json?
+  startedAt        DateTime  @default(now())
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([importType])
+  @@index([status])
+  @@index([startedAt])
+}
+
+model SubscriptionPackage {
+  id                   String              @id @default(cuid())
+  name                 String
+  tier                 SubscriptionTier
+  description          String?
+  features             Json
+  monthlyPrice         Int
+  yearlyPrice          Int
+  discountMonthlyPrice Int?
+  discountYearlyPrice  Int?
+  discountValidFrom    DateTime?
+  discountValidUntil   DateTime?
+  discountDescription  String?
+  stripePriceIdMonthly String?
+  stripePriceIdYearly  String?
+  isActive             Boolean             @default(true)
+  isPopular            Boolean             @default(false)
+  displayOrder         Int                 @default(0)
+  maxResumes           Int?
+  maxDownloads         Int?
+  maxTemplates         Int?
+  hasAIFeatures        Boolean             @default(false)
+  hasPrioritySupport   Boolean             @default(false)
+  customBranding       Boolean             @default(false)
+  teamCollaboration    Boolean             @default(false)
+  analyticsAccess      Boolean             @default(false)
+  exportFormats        Json?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  cartItems            CartItem[]
+  discountCodes        DiscountCodeUsage[]
+  orders               Order[]
+  pricingHistory       PricingHistory[]
+  subscriptions        Subscription[]
+
+  @@index([tier])
+  @@index([isActive])
+  @@index([displayOrder])
+}
+
+model DiscountCode {
+  id              String              @id @default(cuid())
+  code            String              @unique
+  name            String
+  description     String?
+  type            DiscountType
+  value           Int
+  minAmount       Int?
+  maxDiscount     Int?
+  isActive        Boolean             @default(true)
+  usageLimit      Int?
+  usageCount      Int                 @default(0)
+  validFrom       DateTime            @default(now())
+  validUntil      DateTime?
+  applicableTiers Json?
+  firstTimeOnly   Boolean             @default(false)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  cartItems       CartItem[]
+  usages          DiscountCodeUsage[]
+  orders          Order[]
+
+  @@index([code])
+  @@index([isActive])
+  @@index([validFrom])
+  @@index([validUntil])
+}
+
+model DiscountCodeUsage {
+  id                    String              @id @default(cuid())
+  discountCodeId        String
+  userId                String
+  subscriptionPackageId String
+  discountAmount        Int
+  usedAt                DateTime            @default(now())
+  discountCode          DiscountCode        @relation(fields: [discountCodeId], references: [id], onDelete: Cascade)
+  subscriptionPackage   SubscriptionPackage @relation(fields: [subscriptionPackageId], references: [id], onDelete: Cascade)
+  user                  User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([discountCodeId, userId])
+  @@index([discountCodeId])
+  @@index([userId])
+  @@index([usedAt])
+}
+
+model PricingHistory {
+  id                    String              @id @default(cuid())
+  subscriptionPackageId String
+  oldMonthlyPrice       Int
+  newMonthlyPrice       Int
+  oldYearlyPrice        Int
+  newYearlyPrice        Int
+  changedBy             String
+  reason                String?
+  effectiveDate         DateTime            @default(now())
+  createdAt             DateTime            @default(now())
+  subscriptionPackage   SubscriptionPackage @relation(fields: [subscriptionPackageId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionPackageId])
+  @@index([effectiveDate])
+}
+
+model Order {
+  id                    String              @id @default(cuid())
+  userId                String
+  orderNumber           String              @unique
+  subscriptionPackageId String
+  billingInterval       BillingInterval
+  subtotal              Int
+  discountAmount        Int                 @default(0)
+  taxAmount             Int                 @default(0)
+  total                 Int
+  currency              String              @default("USD")
+  status                OrderStatus         @default(PENDING)
+  discountCodeId        String?
+  customerEmail         String
+  customerName          String?
+  billingAddress        Json?
+  notes                 String?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  completedAt           DateTime?
+  invoice               Invoice?
+  discountCode          DiscountCode?       @relation(fields: [discountCodeId], references: [id])
+  subscriptionPackage   SubscriptionPackage @relation(fields: [subscriptionPackageId], references: [id], onDelete: Cascade)
+  user                  User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payment               Payment?
+
+  @@index([userId])
+  @@index([orderNumber])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Payment {
+  id               String        @id @default(cuid())
+  orderId          String        @unique
+  paymentIntentId  String?
+  amount           Int
+  currency         String        @default("USD")
+  status           PaymentStatus @default(PENDING)
+  method           PaymentMethod
+  stripeCustomerId String?
+  stripeChargeId   String?
+  paymentMethodId  String?
+  failureReason    String?
+  receiptUrl       String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  processedAt      DateTime?
+  order            Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([status])
+  @@index([paymentIntentId])
+  @@index([stripeCustomerId])
+}
+
+model Invoice {
+  id             String    @id @default(cuid())
+  orderId        String    @unique
+  invoiceNumber  String    @unique
+  customerEmail  String
+  customerName   String?
+  billingAddress Json?
+  items          Json
+  subtotal       Int
+  discountAmount Int       @default(0)
+  taxAmount      Int       @default(0)
+  total          Int
+  currency       String    @default("USD")
+  issuedAt       DateTime  @default(now())
+  dueAt          DateTime?
+  paidAt         DateTime?
+  sentAt         DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  order          Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([invoiceNumber])
+  @@index([customerEmail])
+  @@index([issuedAt])
+}
+
+model CartItem {
+  id                    String              @id @default(cuid())
+  userId                String
+  subscriptionPackageId String
+  billingInterval       BillingInterval
+  quantity              Int                 @default(1)
+  discountCodeId        String?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  discountCode          DiscountCode?       @relation(fields: [discountCodeId], references: [id])
+  subscriptionPackage   SubscriptionPackage @relation(fields: [subscriptionPackageId], references: [id], onDelete: Cascade)
+  user                  User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, subscriptionPackageId, billingInterval])
+  @@index([userId])
+  @@index([subscriptionPackageId])
+}
+
+model VisitorAnalytics {
+  id              String             @id @default(cuid())
+  sessionId       String             @unique
+  userId          String?
+  ipAddress       String?
+  userAgent       String?
+  country         String?
+  city            String?
+  region          String?
+  deviceType      String?
+  browserName     String?
+  browserVersion  String?
+  osName          String?
+  osVersion       String?
+  referrer        String?
+  landingPage     String?
+  isRegistered    Boolean            @default(false)
+  firstVisit      DateTime           @default(now())
+  lastSeen        DateTime           @default(now())
+  totalSessions   Int                @default(1)
+  totalPageViews  Int                @default(1)
+  sessionDuration Int?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  sessions        SessionAnalytics[]
+  user            User?              @relation(fields: [userId], references: [id])
+
+  @@index([sessionId])
+  @@index([userId])
+  @@index([country])
+  @@index([isRegistered])
+  @@index([firstVisit])
+  @@index([lastSeen])
+}
+
+model SessionAnalytics {
+  id             String           @id @default(cuid())
+  sessionId      String
+  visitorId      String
+  userId         String?
+  startTime      DateTime         @default(now())
+  endTime        DateTime?
+  duration       Int?
+  pageViews      Int              @default(0)
+  pagesVisited   Json?
+  bounceRate     Boolean          @default(false)
+  exitPage       String?
+  conversionType String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  user           User?            @relation(fields: [userId], references: [id])
+  visitor        VisitorAnalytics @relation(fields: [visitorId], references: [id])
+
+  @@index([sessionId])
+  @@index([visitorId])
+  @@index([userId])
+  @@index([startTime])
+  @@index([conversionType])
+}
+
+model TemplateAnalytics {
+  id                String   @id @default(cuid())
+  templateId        String
+  templateName      String
+  templateType      String
+  totalViews        Int      @default(0)
+  totalDownloads    Int      @default(0)
+  uniqueVisitors    Int      @default(0)
+  registeredUsers   Int      @default(0)
+  unregisteredUsers Int      @default(0)
+  conversionRate    Float    @default(0.0)
+  avgRating         Float?
+  popularityScore   Float    @default(0.0)
+  lastViewedAt      DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([templateId, templateType])
+  @@index([templateId])
+  @@index([templateType])
+  @@index([totalViews])
+  @@index([totalDownloads])
+  @@index([popularityScore])
+}
+
+model GeographicAnalytics {
+  id                 String   @id @default(cuid())
+  country            String   @unique
+  countryCode        String
+  totalVisitors      Int      @default(0)
+  registeredUsers    Int      @default(0)
+  unregisteredUsers  Int      @default(0)
+  snapDownloads      Int      @default(0)
+  proDownloads       Int      @default(0)
+  totalDownloads     Int      @default(0)
+  subscriptions      Int      @default(0)
+  conversionRate     Float    @default(0.0)
+  avgSessionDuration Float    @default(0.0)
+  topTemplates       Json?
+  lastUpdated        DateTime @default(now())
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([country])
+  @@index([countryCode])
+  @@index([totalVisitors])
+  @@index([registeredUsers])
+  @@index([totalDownloads])
+}
+
+model AnalyticsSummary {
+  id                 String   @id @default(cuid())
+  date               DateTime @unique
+  totalVisitors      Int      @default(0)
+  newVisitors        Int      @default(0)
+  returningVisitors  Int      @default(0)
+  registeredUsers    Int      @default(0)
+  unregisteredUsers  Int      @default(0)
+  newRegistrations   Int      @default(0)
+  snapDownloads      Int      @default(0)
+  proDownloads       Int      @default(0)
+  totalDownloads     Int      @default(0)
+  newSubscriptions   Int      @default(0)
+  totalSubscriptions Int      @default(0)
+  conversionRate     Float    @default(0.0)
+  avgSessionDuration Float    @default(0.0)
+  bounceRate         Float    @default(0.0)
+  topCountries       Json?
+  topTemplates       Json?
+  topPages           Json?
+  revenue            Float    @default(0.0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([date])
+  @@index([totalVisitors])
+  @@index([newRegistrations])
+  @@index([totalDownloads])
+}
+
+model ConversionFunnel {
+  id              String   @id @default(cuid())
+  sessionId       String
+  visitorId       String
+  userId          String?
+  funnelType      String
+  step            String
+  stepOrder       Int
+  completedAt     DateTime @default(now())
+  timeToComplete  Int?
+  dropoffPoint    String?
+  conversionValue Float?
+  createdAt       DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([visitorId])
+  @@index([userId])
+  @@index([funnelType])
+  @@index([step])
+  @@index([completedAt])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+  MODERATOR
+}
+
+enum SubscriptionTier {
+  FREE
+  BASIC
+  PREMIUM
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELED
+  PAST_DUE
+  UNPAID
+  TRIALING
+}
+
+enum BillingInterval {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum ExperienceLevel {
+  ENTRY_LEVEL
+  MID_LEVEL
+  SENIOR_LEVEL
+  EXECUTIVE
+}
+
+enum PermissionType {
+  CREATE_RESUME
+  DOWNLOAD_RESUME
+  ACCESS_PRO_TEMPLATES
+  UNLIMITED_DOWNLOADS
+  AI_SUGGESTIONS
+  PRIORITY_SUPPORT
+  EXPORT_MULTIPLE_FORMATS
+  CUSTOM_BRANDING
+  TEAM_COLLABORATION
+  ANALYTICS_ACCESS
+  ADMIN_PANEL
+}
+
+enum NotificationType {
+  SYSTEM
+  SUBSCRIPTION
+  FEATURE
+  MARKETING
+  SUPPORT
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  STRIPE
+  PAYPAL
+  BANK_TRANSFER
+  CREDIT_CARD
+}
