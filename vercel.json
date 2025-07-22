@@ -7,8 +7,16 @@
       "dest": "/dist/index.js"
     },
     {
+      "src": "/admin/assets/(.*)",
+      "dest": "/dist/admin/assets/$1"
+    },
+    {
       "src": "/admin/(.*)",
       "dest": "/dist/admin/index.html"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/dist/public/assets/$1"
     },
     {
       "src": "/(.*)",

@@ -12,7 +12,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist"),
+    outDir: path.resolve(import.meta.dirname, "..", "dist", "admin"),
     emptyOutDir: true,
     sourcemap: process.env.NODE_ENV === 'development',
     minify: process.env.NODE_ENV === 'production',
