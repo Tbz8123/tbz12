@@ -76,6 +76,11 @@ function Router() {
       <Route path="/add-section" component={AddSectionPage} />
       <Route path="/section/:sectionName" component={SectionDetailFormPage} />
       {/* /auth route removed - admin authentication only available in client-admin application */}
+      <Route path="/auth" component={() => {
+        // Redirect to admin application on port 5174
+        window.location.href = 'http://localhost:5174/auth';
+        return <div>Redirecting to admin portal...</div>;
+      }} />
       <Route path="/final" component={FinalPage} />
       <Route path="/checkout" component={CheckoutPage} />
       <Route path="/order-success/:id" component={OrderSuccessPage} />
