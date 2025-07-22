@@ -1,31 +1,46 @@
 {
   "version": 2,
-
+  "builds": [
+    {
+      "src": "server/index.ts",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "client/vite.config.ts",
+      "use": "@vercel/static",
+      "config": {
+        "distDir": "dist/client"
+      }
+    },
+    {
+      "src": "client-admin/vite.config.ts",
+      "use": "@vercel/static",
+      "config": {
+        "distDir": "dist/admin"
+      }
+    }
+  ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/index.js"
-    },
-    {
-      "src": "/admin/assets/(.*)",
-      "dest": "/admin/assets/$1"
+      "dest": "server/index.ts"
     },
     {
       "src": "/admin/(.*)",
-      "dest": "/admin/index.html"
+      "dest": "/dist/admin/index.html"
     },
     {
       "src": "/assets/(.*)",
-      "dest": "/public/assets/$1"
+      "dest": "/dist/client/assets/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "/public/index.html"
+      "dest": "/dist/client/index.html"
     }
   ],
   "env": {
     "NODE_ENV": "production"
   },
-  "installCommand": "rm -rf package-lock.json node_modules && npm install --legacy-peer-deps",
+  "installCommand": "npm install --legacy-peer-deps",
   "buildCommand": "npm run build"
 }
