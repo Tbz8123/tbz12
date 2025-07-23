@@ -88,28 +88,28 @@ class MemoryAnalyticsService extends EventEmitter {
     const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
 
     // Clean up old activities (keep only last 24 hours)
-    for (const [id, activity] of this.activities.entries()) {
+    for (const [id, activity] of Array.from(this.activities.entries())) {
       if (activity.timestamp < oneDayAgo) {
         this.activities.delete(id);
       }
     }
 
     // Clean up old sessions (keep only last 24 hours)
-    for (const [sessionId, session] of this.sessions.entries()) {
+    for (const [sessionId, session] of Array.from(this.sessions.entries())) {
       if (session.lastSeen < oneDayAgo) {
         this.sessions.delete(sessionId);
       }
     }
 
     // Clean up old template stats (reset daily)
-    for (const [templateId, stats] of this.templateStats.entries()) {
+    for (const [templateId, stats] of Array.from(this.templateStats.entries())) {
       if (stats.lastActivity < oneDayAgo) {
         this.templateStats.delete(templateId);
       }
     }
 
     // Clean up old country stats (reset daily)
-    for (const [country, stats] of this.countryStats.entries()) {
+    for (const [country, stats] of Array.from(this.countryStats.entries())) {
       if (stats.lastActivity < oneDayAgo) {
         this.countryStats.delete(country);
       }

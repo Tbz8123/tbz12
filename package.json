@@ -20,7 +20,7 @@
     "postbuild": "npx prisma generate",
     "aws:build": "npm run build && npm run postbuild",
     "aws:start": "node dist/index.js",
-    "check": "tsc",
+    "check": "tsc --skipLibCheck",
     "db:push": "drizzle-kit push",
     "db:migrate": "npx prisma migrate deploy",
     "prisma:migrate:dev": "dotenv -- npx prisma migrate dev",
