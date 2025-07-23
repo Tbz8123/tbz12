@@ -231,7 +231,7 @@ export default function Header() {
                 <>
                   <Button
                     variant="outline"
-                    onClick={() => setLocation('/dashboard')}
+                    onClick={() => setLocation('/admin/pro')}
                     className="bg-white/10 border-white/20 text-purple-600 hover:bg-white/20 hover:border-white/30"
                   >
                     <LayoutDashboard className="w-4 h-4 mr-2" />
@@ -259,7 +259,7 @@ export default function Header() {
                         </p>
                       </div>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => setLocation('/dashboard')}>
+                      <DropdownMenuItem onClick={() => setLocation('/admin/pro')}>
                         <LayoutDashboard className="mr-2 h-4 w-4" />
                         Dashboard
                       </DropdownMenuItem>
@@ -334,7 +334,7 @@ export default function Header() {
                           <Button
                             variant="outline"
                             onClick={() => {
-                              setLocation('/dashboard');
+                              setLocation('/admin/pro');
                               setIsMobileMenuOpen(false);
                             }}
                             className="w-full mb-2"

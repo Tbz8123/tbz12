@@ -1,16 +1,112 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import gaService from './googleAnalyticsService';
 import memoryAnalytics from './memoryAnalyticsService';
 
-const prisma = new PrismaClient() as any;
+// Type definitions
+interface TrackVisitorData {
+  sessionId: string;
+  userId?: string;
+  ipAddress?: string;
+  userAgent?: string;
+  referrer?: string;
+  landingPage?: string;
+}
+
+interface TrackSessionData {
+  sessionId: string;
+  visitorId: string;
+  userId?: string;
+  startTime?: Date;
+}
+
+interface TrackActivityData {
+  sessionId: string;
+  visitorId: string;
+  userId?: string;
+  activityType: string;
+  activityName: string;
+  description?: string;
+  metadata?: Record<string, any>;
+  templateId?: string;
+  templateType?: string;
+  templateName?: string;
+  downloadType?: string;
+  pageUrl?: string;
+  tier?: string;
+  value?: number;
+  duration?: number;
+  successful?: boolean;
+  errorMessage?: string;
+  userTier?: string;
+  country?: string;
+  deviceType?: string;
+  referrer?: string;
+  userAgent?: string;
+}
+
+interface TrackTemplateDownloadData {
+  sessionId: string;
+  visitorId: string;
+  userId?: string;
+  templateId: string;
+  templateType: 'snap' | 'pro';
+  templateName: string;
+  downloadType: string;
+  successful?: boolean;
+}
+
+interface TrackUserRegistrationData {
+  sessionId: string;
+  visitorId: string;
+  userId: string;
+  conversionValue?: number;
+}
+
+interface TrackSubscriptionData {
+  sessionId: string;
+  visitorId: string;
+  userId: string;
+  subscriptionTier: string;
+  value: number;
+}
+
+interface SessionContext {
+  userTier?: string;
+  country?: string;
+  deviceType?: string;
+  referrer?: string;
+  userAgent?: string;
+}
+
+interface GeoData {
+  country: string;
+  countryCode: string;
+  city?: string;
+  region?: string;
+}
+
+interface UserAgentData {
+  deviceType: string;
+  browserName: string;
+  browserVersion: string;
+  osName: string;
+  osVersion: string;
+}
+
+const prisma = new PrismaClient();
 
 // Helper function to get country from IP
-const getCountryFromIP = async (ip: string): Promise<{ country: string; countryCode: string; city?: string; region?: string }> => {
+const getCountryFromIP = async (ip: string): Promise<GeoData> => {
   try {
     // In production, you'd use a service like IP2Location, MaxMind, or ipapi.co
     // For now, we'll use a simple fallback
     const response = await fetch(`http://ip-api.com/json/${ip}`);
-    const data = await response.json();
+    const data = await response.json() as {
+      country?: string;
+      countryCode?: string;
+      city?: string;
+      regionName?: string;
+    };
 
     return {
       country: data.country || 'Unknown',
@@ -25,7 +121,7 @@ const getCountryFromIP = async (ip: string): Promise<{ country: string; countryC
 };
 
 // Helper function to parse user agent
-const parseUserAgent = (userAgent: string) => {
+const parseUserAgent = (userAgent: string): UserAgentData => {
   const deviceType = /Mobile|Android|iPhone|iPad/.test(userAgent) ? 'mobile' : 
                     /Tablet|iPad/.test(userAgent) ? 'tablet' : 'desktop';
 
@@ -67,14 +163,7 @@ const parseUserAgent = (userAgent: string) => {
 
 export class AnalyticsService {
   // Track a new visitor or update existing visitor
-  async trackVisitor(data: {
-    sessionId: string;
-    userId?: string;
-    ipAddress?: string;
-    userAgent?: string;
-    referrer?: string;
-    landingPage?: string;
-  }) {
+  async trackVisitor(data: TrackVisitorData): Promise<Prisma.VisitorAnalytics> {
     try {
       const { sessionId, userId, ipAddress, userAgent, referrer, landingPage } = data;
 
@@ -96,10 +185,10 @@ export class AnalyticsService {
       }
 
       // Get geographic data
-      const geoData = ipAddress ? await getCountryFromIP(ipAddress) : { country: 'Unknown', countryCode: 'XX' };
+      const geoData: GeoData = ipAddress ? await getCountryFromIP(ipAddress) : { country: 'Unknown', countryCode: 'XX' };
 
       // Parse user agent
-      const userAgentData = userAgent ? parseUserAgent(userAgent) : {} as any;
+      const userAgentData: UserAgentData = userAgent ? parseUserAgent(userAgent) : { deviceType: 'unknown', browserName: 'unknown', browserVersion: '', osName: 'unknown', osVersion: '' };
 
       // Create new visitor
       const visitor = await prisma.visitorAnalytics.create({
@@ -129,12 +218,7 @@ export class AnalyticsService {
   }
 
   // Track a session
-  async trackSession(data: {
-    sessionId: string;
-    visitorId: string;
-    userId?: string;
-    startTime?: Date;
-  }) {
+  async trackSession(data: TrackSessionData): Promise<Prisma.SessionAnalytics> {
     try {
       const { sessionId, visitorId, userId, startTime } = data;
 
@@ -153,7 +237,7 @@ export class AnalyticsService {
   }
 
   // End a session
-  async endSession(sessionId: string) {
+  async endSession(sessionId: string): Promise<void> {
     try {
       const session = await prisma.sessionAnalytics.findFirst({
         where: { sessionId }
@@ -179,30 +263,7 @@ export class AnalyticsService {
   }
 
   // Track an activity - Now using Google Analytics and Memory Analytics instead of database
-  async trackActivity(data: {
-    sessionId: string;
-    visitorId: string;
-    userId?: string;
-    activityType: string;
-    activityName: string;
-    description?: string;
-    metadata?: any;
-    templateId?: string;
-    templateType?: string;
-    templateName?: string;
-    downloadType?: string;
-    pageUrl?: string;
-    tier?: string;
-    value?: number;
-    duration?: number;
-    successful?: boolean;
-    errorMessage?: string;
-    userTier?: string;
-    country?: string;
-    deviceType?: string;
-    referrer?: string;
-    userAgent?: string;
-  }) {
+  async trackActivity(data: TrackActivityData): Promise<void> {
     try {
       console.log('📊 Tracking activity:', data.activityType, data.activityName);
 
@@ -366,13 +427,7 @@ export class AnalyticsService {
   }
 
   // Get session context for enhanced tracking
-  private async getSessionContext(sessionId: string): Promise<{
-    userTier?: string;
-    country?: string;
-    deviceType?: string;
-    referrer?: string;
-    userAgent?: string;
-  } | null> {
+  private async getSessionContext(sessionId: string): Promise<SessionContext | null> {
     try {
       const visitor = await prisma.visitorAnalytics.findUnique({
         where: { sessionId },
@@ -401,16 +456,7 @@ export class AnalyticsService {
   }
 
   // Track template download
-  async trackTemplateDownload(data: {
-    sessionId: string;
-    visitorId: string;
-    userId?: string;
-    templateId: string;
-    templateType: 'snap' | 'pro';
-    templateName: string;
-    downloadType: string;
-    successful?: boolean;
-  }) {
+  async trackTemplateDownload(data: TrackTemplateDownloadData) {
     try {
       // Track the activity
       await this.trackActivity({
@@ -450,12 +496,7 @@ export class AnalyticsService {
   }
 
   // Track user registration
-  async trackUserRegistration(data: {
-    sessionId: string;
-    visitorId: string;
-    userId: string;
-    conversionValue?: number;
-  }) {
+  async trackUserRegistration(data: TrackUserRegistrationData) {
     try {
       await this.trackActivity({
         sessionId: data.sessionId,
@@ -493,13 +534,7 @@ export class AnalyticsService {
   }
 
   // Track subscription
-  async trackSubscription(data: {
-    sessionId: string;
-    visitorId: string;
-    userId: string;
-    subscriptionTier: string;
-    value: number;
-  }) {
+  async trackSubscription(data: TrackSubscriptionData) {
     try {
       await this.trackActivity({
         sessionId: data.sessionId,
@@ -562,7 +597,7 @@ export class AnalyticsService {
       });
 
       if (existing) {
-        const updateData: any = { lastViewedAt: new Date() };
+        const updateData: Prisma.TemplateAnalyticsUpdateInput = { lastViewedAt: new Date() };
 
         if (activityType === 'TEMPLATE_VIEW') {
           updateData.totalViews = { increment: 1 };
@@ -600,7 +635,7 @@ export class AnalyticsService {
       });
 
       if (existing) {
-        const updateData: any = { resumesDownloaded: { increment: 1 } };
+        const updateData: Prisma.UsageStatsUpdateInput = { resumesDownloaded: { increment: 1 } };
 
         if (templateType === 'snap') {
           updateData.snapTemplateDownloads = { increment: 1 };
@@ -639,7 +674,7 @@ export class AnalyticsService {
       });
 
       if (existing) {
-        const updateData: any = {
+        const updateData: Prisma.GeographicAnalyticsUpdateInput = {
           totalVisitors: { increment: 1 },
           lastUpdated: new Date()
         };
@@ -678,7 +713,7 @@ export class AnalyticsService {
       });
 
       if (existing) {
-        const updateData: any = {
+        const updateData: Prisma.GeographicAnalyticsUpdateInput = {
           totalDownloads: { increment: 1 },
           lastUpdated: new Date()
         };
@@ -707,13 +742,15 @@ export class AnalyticsService {
       });
 
       if (existing) {
+        const updateData: Prisma.GeographicAnalyticsUpdateInput = {
+          registeredUsers: { increment: 1 },
+          unregisteredUsers: { decrement: 1 },
+          lastUpdated: new Date()
+        };
+
         await prisma.geographicAnalytics.update({
           where: { country },
-          data: {
-            registeredUsers: { increment: 1 },
-            unregisteredUsers: { decrement: 1 },
-            lastUpdated: new Date()
-          }
+          data: updateData
         });
       }
     } catch (error) {
@@ -729,12 +766,14 @@ export class AnalyticsService {
       });
 
       if (existing) {
+        const updateData: Prisma.GeographicAnalyticsUpdateInput = {
+          subscriptions: { increment: 1 },
+          lastUpdated: new Date()
+        };
+
         await prisma.geographicAnalytics.update({
           where: { country },
-          data: {
-            subscriptions: { increment: 1 },
-            lastUpdated: new Date()
-          }
+          data: updateData
         });
       }
     } catch (error) {

@@ -1,7 +1,7 @@
 
-import { Router, Request, Response } from "express";
-import { PrismaClient } from '@prisma/client';
-import { z } from "zod";
+import { Router, Request, Response } from 'express';
+import { PrismaClient, Prisma } from '@prisma/client';
+import { z } from 'zod';
 
 // Use global prisma instance
 declare global {
@@ -102,7 +102,7 @@ professionalSummariesRouter.get("/jobtitles/:id/summaries", async (req: Request,
     const searchTerm = req.query.search as string || null;
 
     // Build where clause
-    const where: any = { professionalSummaryJobTitleId: id };
+    const where: Prisma.ProfessionalSummaryWhereInput = { professionalSummaryJobTitleId: id };
     if (searchTerm) {
       where.content = {
         contains: searchTerm,
@@ -143,7 +143,7 @@ professionalSummariesRouter.get("/summaries", async (req: Request, res: Response
     const searchTerm = req.query.search as string || null;
 
     // Build where clause
-    const where: any = {};
+    const where: Prisma.ProfessionalSummaryWhereInput = {};
     if (professionalSummaryJobTitleId) {
       where.professionalSummaryJobTitleId = professionalSummaryJobTitleId;
     }

@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 // Use global prisma instance to ensure consistency with other routes
 declare global {
@@ -37,7 +37,7 @@ router.get('/', async (req: Request, res: Response) => {
     const importType = req.query.importType as string || null;
 
     // Build where clause
-    const where: any = {};
+    const where: Prisma.ImportHistoryWhereInput = {};
     if (status && status !== 'all') {
       where.status = status;
     }

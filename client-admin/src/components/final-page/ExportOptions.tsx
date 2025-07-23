@@ -151,7 +151,7 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ onOpenModal }) => {
 
         // Navigate to dashboard
         setTimeout(() => {
-          setLocation('/dashboard');
+          setLocation('/admin/pro');
         }, 1000);
       } else {
         throw new Error('Failed to save resume');

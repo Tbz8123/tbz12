@@ -29,8 +29,8 @@ import { Eye, EyeOff, Mail, Lock, User, Chrome } from 'lucide-react';
 
 // Schema for login form validation
 const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 // Schema for registration form validation
@@ -50,13 +50,13 @@ const LoginPage: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [_, setLocation] = useLocation();
-  const { login, signup, loginWithGoogle, currentUser } = useAuth();
+  const { login, loginWithGoogle, signup, currentUser, mockLogin, mockSignup } = useAuth();
   const { toast } = useToast();
 
   // Redirect if already logged in
   useEffect(() => {
     if (currentUser) {
-      setLocation('/dashboard');
+      setLocation('/admin/pro');
     }
   }, [currentUser, setLocation]);
 
@@ -81,17 +81,19 @@ const LoginPage: React.FC = () => {
   const onLoginSubmit = async (values: z.infer<typeof loginSchema>) => {
     setIsLoading(true);
     try {
-      await login(values.email, values.password);
+      // Use mock login for admin client
+      await mockLogin(values.email, values.password);
       toast({
-        title: 'Success!',
-        description: 'You have been logged in successfully.',
+        title: "Login Successful",
+        description: "Welcome back to the admin panel!",
       });
-      setLocation('/dashboard');
+      setLocation('/admin/pro');
     } catch (error: any) {
+      console.error('Login error:', error);
       toast({
-        title: 'Login Failed',
-        description: error.message || 'Please check your credentials and try again.',
-        variant: 'destructive',
+        title: "Login Failed",
+        description: error.message || "Invalid admin credentials. Use 'admin' / 'admin123'",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -101,17 +103,19 @@ const LoginPage: React.FC = () => {
   const onRegisterSubmit = async (values: z.infer<typeof registerSchema>) => {
     setIsLoading(true);
     try {
-      await signup(values.email, values.password, values.displayName);
+      // Use mock signup for admin client
+      await mockSignup(values.email, values.password, values.displayName);
       toast({
-        title: 'Account Created!',
-        description: 'Your account has been created successfully.',
+        title: "Account Created!",
+        description: "Your admin account has been created successfully.",
       });
-      setLocation('/dashboard');
+      setLocation('/admin/pro');
     } catch (error: any) {
+      console.error('Signup error:', error);
       toast({
-        title: 'Registration Failed',
-        description: error.message || 'Please try again.',
-        variant: 'destructive',
+        title: "Registration Failed",
+        description: error.message || "Please try again.",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -126,7 +130,7 @@ const LoginPage: React.FC = () => {
         title: 'Success!',
         description: 'You have been logged in with Google.',
       });
-      setLocation('/dashboard');
+      setLocation('/admin/pro');
     } catch (error: any) {
       console.error('Google login error:', error);
       
@@ -236,14 +240,14 @@ const LoginPage: React.FC = () => {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-700 font-medium">Email Address</FormLabel>
+                        <FormLabel className="text-gray-700 font-medium">Username</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                            <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                             <Input 
                               className="pl-10 h-12 border-gray-300 focus:border-purple-500 focus:ring-purple-500 rounded-lg" 
-                              placeholder="Enter your email" 
-                              type="email"
+                              placeholder="Enter admin username" 
+                              type="text"
                               {...field} 
                             />
                           </div>
@@ -433,4 +437,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage; 
+export default LoginPage;

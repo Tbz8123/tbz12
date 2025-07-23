@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { storage } from './storage.js';
 import { z } from 'zod';
 import { fromZodError } from 'zod-validation-error';
-import { Server } from 'http';
+import { Server, createServer } from 'http';
 
 // Import routers
 import { jobsRouter } from './routes/jobs.js';
@@ -1249,7 +1249,7 @@ export default function setupRoutes(app: express.Express): Server {
 
       const validatedData = trackingSchema.parse(req.body);
 
-      const usageStatistic = await prisma.usageStatistic.create({
+      const usageStatistic = await prisma.usageStats.create({
         data: {
           userId: validatedData.userId,
           action: validatedData.action,
@@ -1311,27 +1311,35 @@ export default function setupRoutes(app: express.Express): Server {
         }
       });
 
-      // Get template usage
+      // Get template usage (simplified since there's no direct relation)
       const templateUsage = await prisma.template.findMany({
         select: {
           id: true,
-          name: true,
-          _count: {
-            select: {
-              resumes: true
-            }
-          }
-        },
-        orderBy: {
-          resumes: {
-            _count: 'desc'
-          }
+          name: true
         },
         take: 10
       });
 
+      // Get template usage counts manually
+      const templateUsageCounts = await Promise.all(
+        templateUsage.map(async (template) => {
+          const count = await prisma.resume.count({
+            where: {
+              templateId: template.id.toString()
+            }
+          });
+          return {
+            ...template,
+            _count: { resumes: count }
+          };
+        })
+      );
+
+      // Sort by usage count
+      templateUsageCounts.sort((a, b) => b._count.resumes - a._count.resumes);
+
       // Get usage statistics
-      const usageStats = await prisma.usageStatistic.groupBy({
+      const usageStats = await prisma.usageStats.groupBy({
         by: ['action'],
         where: {
           timestamp: {
@@ -1352,7 +1360,7 @@ export default function setupRoutes(app: express.Express): Server {
           total: totalResumes,
           new: newResumes
         },
-        templateUsage,
+        templateUsage: templateUsageCounts,
         usageStats: usageStats.reduce((acc: any, stat: any) => {
           acc[stat.action] = stat._count.action;
           return acc;
@@ -1390,7 +1398,7 @@ export default function setupRoutes(app: express.Express): Server {
           startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       }
 
-      const userStats = await prisma.usageStatistic.groupBy({
+      const userStats = await prisma.usageStats.groupBy({
         by: ['action'],
         where: {
           userId,
@@ -1434,7 +1442,7 @@ export default function setupRoutes(app: express.Express): Server {
     try {
       const { userId, resumeId, templateId } = req.body;
       
-      await prisma.usageStatistic.create({
+      await prisma.usageStats.create({
         data: {
           userId,
           action: 'RESUME_CREATION',
@@ -1458,7 +1466,7 @@ export default function setupRoutes(app: express.Express): Server {
     try {
       const { userId, resumeId, format } = req.body;
       
-      await prisma.usageStatistic.create({
+      await prisma.usageStats.create({
         data: {
           userId,
           action: 'RESUME_DOWNLOAD',
@@ -1482,7 +1490,7 @@ export default function setupRoutes(app: express.Express): Server {
     try {
       const { userId, templateId, action } = req.body;
       
-      await prisma.usageStatistic.create({
+      await prisma.usageStats.create({
         data: {
           userId,
           action: 'TEMPLATE_USAGE',
@@ -1506,7 +1514,7 @@ export default function setupRoutes(app: express.Express): Server {
     try {
       const { userId, suggestionType, accepted } = req.body;
       
-      await prisma.usageStatistic.create({
+      await prisma.usageStats.create({
         data: {
           userId,
           action: 'AI_SUGGESTION',
@@ -1559,8 +1567,7 @@ export default function setupRoutes(app: express.Express): Server {
             lastLoginAt: true,
             _count: {
               select: {
-                resumes: true,
-                subscriptions: true
+                resumes: true
               }
             }
           },
@@ -1599,31 +1606,27 @@ export default function setupRoutes(app: express.Express): Server {
             select: {
               id: true,
               title: true,
+              templateId: true,
+              templateType: true,
               createdAt: true,
-              updatedAt: true,
-              template: {
-                select: {
-                  name: true
-                }
-              }
+              updatedAt: true
             },
             orderBy: { createdAt: 'desc' }
           },
-          subscriptions: {
+          subscription: {
             select: {
               id: true,
               status: true,
-              startDate: true,
-              endDate: true,
+              currentPeriodStart: true,
+              currentPeriodEnd: true,
               subscriptionPackage: {
                 select: {
                   name: true,
                   tier: true,
-                  price: true
+                  monthlyPrice: true
                 }
               }
-            },
-            orderBy: { createdAt: 'desc' }
+            }
           },
           supportTickets: {
             select: {
@@ -1645,14 +1648,17 @@ export default function setupRoutes(app: express.Express): Server {
             orderBy: { createdAt: 'desc' },
             take: 10
           },
-          usageStatistics: {
+          usageStats: {
             select: {
-              action: true,
-              timestamp: true,
-              metadata: true
-            },
-            orderBy: { timestamp: 'desc' },
-            take: 50
+              resumesCreated: true,
+              resumesDownloaded: true,
+              templatesUsed: true,
+              monthlyResumes: true,
+              monthlyDownloads: true,
+              lastActiveDate: true,
+              createdAt: true,
+              updatedAt: true
+            }
           }
         }
       });
@@ -1661,8 +1667,8 @@ export default function setupRoutes(app: express.Express): Server {
         return res.status(404).json({ error: "User not found" });
       }
 
-      // Don't return password hash
-      const { passwordHash, ...userDetails } = user;
+      // Don't return password
+      const { password, ...userDetails } = user;
       res.json(userDetails);
     } catch (error: any) {
       console.error("Error fetching admin user details:", error);
@@ -2248,7 +2254,7 @@ export default function setupRoutes(app: express.Express): Server {
   });
 
   // Update subscription
-  app.put("/api/subscriptions/:id", async (req: express.Request, res: express.Response) => {
+  app.put("/api/subscriptions/:id", async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const updateSchema = z.object({
@@ -2293,7 +2299,7 @@ export default function setupRoutes(app: express.Express): Server {
   });
 
   // Cancel subscription
-  app.delete("/api/subscriptions/:id", async (req: express.Request, res: express.Response) => {
+  app.delete("/api/subscriptions/:id", async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -2324,7 +2330,7 @@ export default function setupRoutes(app: express.Express): Server {
   // Discount Code Management Routes
   
   // Validate discount code
-  app.post("/api/discount-codes/validate", async (req: express.Request, res: express.Response) => {
+  app.post("/api/discount-codes/validate", async (req: Request, res: Response) => {
     try {
       const validateSchema = z.object({
         code: z.string().min(1),
@@ -2390,7 +2396,7 @@ export default function setupRoutes(app: express.Express): Server {
   });
 
   // Apply discount code
-  app.post("/api/discount-codes/apply", async (req: express.Request, res: express.Response) => {
+  app.post("/api/discount-codes/apply", async (req: Request, res: Response) => {
     try {
       const applySchema = z.object({
         code: z.string().min(1),
@@ -2533,7 +2539,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       // Track analytics
-      await prisma.usageStatistics.create({
+      await prisma.usageStats.create({
         data: {
           userId: validatedData.userId,
           action: 'DOWNLOAD',
@@ -2644,11 +2650,11 @@ export default function setupRoutes(app: express.Express): Server {
 
       res.json({
         totalDownloads,
-        formatBreakdown: formatStats.map(stat => ({
+        formatBreakdown: formatStats.map((stat: any) => ({
           format: stat.format,
           count: stat._count.format
         })),
-        dailyBreakdown: dailyStats.map(stat => ({
+        dailyBreakdown: dailyStats.map((stat: any) => ({
           date: stat.downloadedAt,
           count: stat._count.downloadedAt
         }))
@@ -2851,6 +2857,4 @@ export default function setupRoutes(app: express.Express): Server {
   
   const server = createServer(app);
   return server;
-};
-
-export default setupRoutes;
+}

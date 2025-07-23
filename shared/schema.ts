@@ -38,4 +38,102 @@ export type NewUser = typeof users.$inferInsert;
 export type Resume = typeof resumes.$inferSelect;
 export type NewResume = typeof resumes.$inferInsert;
 export type Template = typeof templates.$inferSelect;
-export type NewTemplate = typeof templates.$inferInsert; 
+export type NewTemplate = typeof templates.$inferInsert;
+
+// Additional types for frontend components
+export interface PersonalInfo {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+  title: string;
+  summary: string;
+  contactDetails: Record<string, any>;
+}
+
+export interface Experience {
+  id: string;
+  company: string;
+  position: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  description: string;
+  dbJobTitleId?: number;
+}
+
+export interface Education {
+  id: string;
+  school: string;
+  degree: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  description: string;
+}
+
+export interface Skill {
+  name: string;
+  level: string;
+}
+
+export interface Language {
+  name: string;
+  proficiency: string;
+}
+
+export interface Certification {
+  id: string;
+  name: string;
+  issuer: string;
+  date: string;
+}
+
+export interface CustomSection {
+  title: string;
+  content: string;
+}
+
+export interface ColorCustomization {
+  primary: string;
+  secondary: string;
+  accent: string;
+  text: string;
+  background: string;
+}
+
+export interface ResumeData {
+  id: string;
+  personalInfo: PersonalInfo;
+  education: Education[];
+  experience: Experience[];
+  skills: Skill[];
+  certifications: Certification[];
+  languages: Language[];
+  customSections: CustomSection[];
+  templateId: string;
+  createdAt: string;
+  updatedAt: string;
+  customization?: {
+    colors?: ColorCustomization;
+  };
+  sectionOrder?: string[];
+}
+
+export interface ResumeTemplateRecord {
+  id: number;
+  name: string;
+  description?: string | null;
+  code: string;
+  thumbnailUrl?: string | null;
+  enhanced3DThumbnailUrl?: string | null;
+  uploadedImageUrl?: string | null;
+  previewImageUrl?: string | null;
+  thumbnailType?: 'standard' | 'enhanced3d' | null;
+  displayMode?: 'thumbnail' | 'uploaded_image' | null;
+  enhanced3DMetadata?: any | null;
+  isDefault?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}

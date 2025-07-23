@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LayoutGrid, FileText, Users, Settings, Database, Shield, Server, Palette, Layers, BookText } from "lucide-react";
+import AuthDebug from '@/components/debug/AuthDebug';
 
 const AdminProPage = () => {
   const [, setLocation] = useLocation();
@@ -107,8 +108,9 @@ const AdminProPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white pt-20">
+      <AuthDebug />
       {/* Background Pattern */}
-      <div className="fixed inset-0 opacity-5 pt-20">
+      <div className="fixed inset-0 opacity-5">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(147,51,234,0.1),transparent)]"></div>
         <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_35%,rgba(147,51,234,0.03)_50%,transparent_65%)]"></div>
       </div>
@@ -216,4 +218,4 @@ const AdminProPage = () => {
   );
 };
 
-export default AdminProPage; 
+export default AdminProPage;

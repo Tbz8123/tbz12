@@ -99,20 +99,15 @@ function App() {
   }, []);
 
   return (
-    <TooltipProvider>
-      <AuthProvider>
-        <Toaster />
-        <div className="flex flex-col min-h-screen">
+    <Suspense fallback={<div>Loading...</div>}>
+      <TooltipProvider>
+        <AuthProvider>
           <Header />
-          <main className="flex-grow">
-            <Suspense fallback={<div>Loading...</div>}>
-              <Router />
-            </Suspense>
-          </main>
-          {/* <Footer /> */}
-        </div>
-      </AuthProvider>
-    </TooltipProvider>
+          <Router />
+          <Toaster />
+        </AuthProvider>
+      </TooltipProvider>
+    </Suspense>
   );
 }
 

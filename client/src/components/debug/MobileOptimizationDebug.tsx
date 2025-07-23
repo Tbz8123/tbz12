@@ -48,36 +48,6 @@ export const MobileOptimizationDebug: React.FC = () => {
           </div>
         )}
       </div>
-    </div>iv>
-
-        <div>Device: <span className="text-blue-400">{deviceCapabilities.deviceType}{forceMobileMode ? ' (FORCED MOBILE)' : ''}</span></div>
-        <div>Score: <span className="text-yellow-400">{performanceScore}</span></div>
-        <div>Mobile: <span className={isMobile ? 'text-green-400' : 'text-red-400'}>{isMobile ? 'YES' : 'NO'}</span></div>
-        <div>Tablet: <span className={isTablet ? 'text-green-400' : 'text-red-400'}>{isTablet ? 'YES' : 'NO'}</span></div>
-
-        <div className="mt-2 text-orange-400">Active Optimizations ({activeOptimizations.length}/10):</div>
-        {activeOptimizations.length > 0 ? (
-          <div className="max-h-32 overflow-y-auto">
-            {activeOptimizations.map(opt => (
-              <div key={opt.key} className="text-green-300">
-                #{opt.priority}: {opt.key}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-red-400">No optimizations active!</div>
-        )}
-
-        <div className="mt-2 text-purple-400">CSS Classes:</div>
-        <div className="text-xs bg-gray-800 p-1 rounded max-h-20 overflow-y-auto">
-          {mobileOptimizationClasses || 'None applied'}
-        </div>
-
-        <div className="mt-2 text-cyan-400">Device Info:</div>
-        <div className="text-xs">
-          {deviceCapabilities.deviceAge} | {deviceCapabilities.memoryLevel}MB | {deviceCapabilities.cpuLevel} CPU
-        </div>
-      </div>
     </div>
   );
-}; 
+};

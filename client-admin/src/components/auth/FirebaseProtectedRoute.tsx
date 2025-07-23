@@ -19,16 +19,37 @@ const FirebaseProtectedRoute: React.FC<FirebaseProtectedRouteProps> = ({
 
   useEffect(() => {
     if (!loading) {
-      if (!currentUser) {
-        // Redirect to login if not authenticated
+      // Check for mock user in localStorage first
+      const mockUserData = localStorage.getItem('mockUser');
+      let hasMockAuth = false;
+      
+      if (mockUserData) {
+        try {
+          const parsedData = JSON.parse(mockUserData);
+          if (parsedData.isAdmin && parsedData.role === 'ADMIN') {
+            hasMockAuth = true;
+          }
+        } catch (error) {
+          console.error('Error parsing mock user data:', error);
+          localStorage.removeItem('mockUser');
+        }
+      }
+
+      // If no mock auth and no current user, redirect to login
+      if (!hasMockAuth && !currentUser) {
         setLocation('/login');
         return;
       }
 
-      if (requireAdmin && !currentUser.isAdmin) {
-        // Redirect to dashboard if admin required but user is not admin
-        setLocation('/dashboard');
-        return;
+      // If admin required, check both mock auth and Firebase auth
+      if (requireAdmin) {
+        const isAdminViaMock = hasMockAuth;
+        const isAdminViaFirebase = currentUser && currentUser.role === 'ADMIN';
+        
+        if (!isAdminViaMock && !isAdminViaFirebase) {
+          setLocation('/login');
+          return;
+        }
       }
     }
   }, [currentUser, loading, requireAdmin, setLocation]);
@@ -50,12 +71,29 @@ const FirebaseProtectedRoute: React.FC<FirebaseProtectedRouteProps> = ({
     );
   }
 
-  // Don't render children if not authenticated or not admin (when required)
-  if (!currentUser || (requireAdmin && !currentUser.isAdmin)) {
+  // Check authentication status
+  const mockUserData = localStorage.getItem('mockUser');
+  let hasMockAuth = false;
+  
+  if (mockUserData) {
+    try {
+      const parsedData = JSON.parse(mockUserData);
+      if (parsedData.isAdmin && parsedData.role === 'ADMIN') {
+        hasMockAuth = true;
+      }
+    } catch (error) {
+      console.error('Error parsing mock user data:', error);
+    }
+  }
+
+  // Allow access if user has mock admin auth or Firebase admin auth
+  const hasAccess = hasMockAuth || (currentUser && (!requireAdmin || currentUser.role === 'ADMIN'));
+  
+  if (!hasAccess) {
     return null;
   }
 
   return <>{children}</>;
 };
 
-export default FirebaseProtectedRoute; 
+export default FirebaseProtectedRoute;

@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { AnalyticsService } from '../services/analyticsService.js';
 
@@ -89,7 +89,7 @@ router.get('/visitors', async (req: Request, res: Response) => {
 
     const { startDate, endDate, limit = 50 } = req.query;
 
-    const whereClause: any = {};
+    const whereClause: Prisma.VisitorAnalyticsWhereInput = {};
     if (startDate && endDate) {
       whereClause.createdAt = {
         gte: new Date(startDate as string),
@@ -193,7 +193,7 @@ router.get('/activities', async (req: Request, res: Response) => {
   try {
     const { startDate, endDate, activityType, limit = 100 } = req.query;
 
-    const whereClause: any = {};
+    const whereClause: Prisma.ActivityLogWhereInput = {};
     if (startDate && endDate) {
       whereClause.timestamp = {
         gte: new Date(startDate as string),
@@ -216,11 +216,11 @@ router.get('/activities', async (req: Request, res: Response) => {
 });
 
 // Get session analytics
-router.get('/sessions', async (req, res) => {
+router.get('/sessions', async (req: Request, res: Response) => {
   try {
-    const { startDate, endDate, limit = 50 } = req.query;
+    const { startDate, endDate, limit = '50' } = req.query;
 
-    const whereClause: any = {};
+    const whereClause: Prisma.SessionAnalyticsWhereInput = {};
     if (startDate && endDate) {
       whereClause.startTime = {
         gte: new Date(startDate as string),

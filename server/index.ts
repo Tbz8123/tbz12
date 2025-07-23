@@ -90,7 +90,7 @@ async function startServer() {
   }
 
   // Use the HTTP server from setupRoutes instead of creating a new one
-  httpServer.listen(PORT as number, '0.0.0.0', () => {
+  httpServer.listen(PORT, '0.0.0.0', () => {
     console.log(`⚡️ Server listening on http://0.0.0.0:${PORT}`);
     console.log(`🔧 Frontend and API both served from port ${PORT}`);
   });
@@ -145,7 +145,7 @@ async function initialize() {
 
   } catch (error: any) {
     console.error('💀 Failed to start server:', error);
-    console.error('📋 Error details:', (error as any).stack);
+    console.error('📋 Error details:', error.stack);
     process.exit(1);
   }
 }

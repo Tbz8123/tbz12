@@ -106,6 +106,10 @@ interface AuthContextType {
   hasPermission: (permission: string) => boolean;
   canAccessFeature: (feature: string) => boolean;
   getRemainingUsage: (type: string) => number;
+
+  // Mock auth methods for admin
+  mockLogin: (username: string, password: string) => Promise<void>;
+  mockSignup: (username: string, password: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -127,6 +131,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  // Removed duplicate useEffect - consolidated into single auth handler below
+
   const signup = async (email: string, password: string, displayName: string) => {
     try {
       const result = await signUp(email, password, displayName);
@@ -147,6 +153,67 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } catch (error) {
       console.error('Signup error:', error);
+      throw error;
+    }
+  };
+
+  const mockLogin = async (username: string, password: string) => {
+    try {
+      // Mock admin login validation
+      if (username === 'admin' && password === 'admin123') {
+        const mockUser = {
+          uid: 'mock-admin-uid',
+          email: 'admin@tbzresumebuilder.com',
+          displayName: 'Admin User',
+          emailVerified: true,
+          isAnonymous: false,
+          metadata: {
+            creationTime: new Date().toISOString(),
+            lastSignInTime: new Date().toISOString()
+          },
+          providerData: [],
+          refreshToken: 'mock-refresh-token',
+          tenantId: null,
+          delete: async () => {},
+          getIdToken: async () => 'mock-id-token',
+          getIdTokenResult: async () => ({ token: 'mock-id-token' } as any),
+          reload: async () => {},
+          toJSON: () => ({}),
+          phoneNumber: null,
+          photoURL: null,
+          providerId: 'mock',
+          role: 'ADMIN',
+          currentTier: 'ENTERPRISE',
+          subscriptionStatus: 'ACTIVE'
+        } as ExtendedUser;
+
+        setCurrentUser(mockUser);
+        setUserData({ role: 'ADMIN', currentTier: 'ENTERPRISE' });
+        
+        // Store in localStorage for persistence
+        localStorage.setItem('mockUser', JSON.stringify({ 
+          username, 
+          isAdmin: true, 
+          role: 'ADMIN',
+          tier: 'ENTERPRISE'
+        }));
+        
+        console.log('✅ Mock admin login successful');
+      } else {
+        throw new Error('Invalid admin credentials');
+      }
+    } catch (error) {
+      console.error('Mock login error:', error);
+      throw error;
+    }
+  };
+
+  const mockSignup = async (username: string, password: string) => {
+    try {
+      // For admin client, redirect to login instead of creating new accounts
+      throw new Error('Admin registration is not allowed. Please contact system administrator.');
+    } catch (error) {
+      console.error('Mock signup error:', error);
       throw error;
     }
   };
@@ -336,8 +403,64 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Single authentication state management with mock auth support
   useEffect(() => {
+    console.log('🔍 AuthContext: Initializing authentication...');
+    
+    // Check for existing mock user first
+    const mockUser = localStorage.getItem('mockUser');
+    if (mockUser) {
+      try {
+        const parsedUser = JSON.parse(mockUser);
+        console.log('🔍 AuthContext: Found mock user:', parsedUser);
+        
+        if (parsedUser.role === 'ADMIN' || parsedUser.isAdmin) {
+          console.log('✅ AuthContext: Setting up mock admin user');
+          
+          const adminUser = {
+            uid: 'mock-admin-uid',
+            email: 'admin@tbzresumebuilder.com',
+            displayName: 'Admin User',
+            emailVerified: true,
+            isAnonymous: false,
+            metadata: {
+              creationTime: new Date().toISOString(),
+              lastSignInTime: new Date().toISOString()
+            },
+            providerData: [],
+            refreshToken: 'mock-refresh-token',
+            tenantId: null,
+            delete: async () => {},
+            getIdToken: async () => 'mock-id-token',
+            getIdTokenResult: async () => ({ token: 'mock-id-token' } as any),
+            reload: async () => {},
+            toJSON: () => ({}),
+            phoneNumber: null,
+            photoURL: null,
+            providerId: 'mock',
+            role: 'ADMIN',
+            currentTier: 'ENTERPRISE',
+            subscriptionStatus: 'ACTIVE'
+          } as ExtendedUser;
+          
+          setCurrentUser(adminUser);
+          setUserData({ role: 'ADMIN', currentTier: 'ENTERPRISE' });
+          setLoading(false);
+          console.log('✅ AuthContext: Mock admin authentication complete');
+          return;
+        }
+      } catch (error) {
+        console.error('❌ AuthContext: Error parsing mock user:', error);
+        localStorage.removeItem('mockUser');
+      }
+    }
+
+    console.log('🔍 AuthContext: No mock user found, setting up Firebase auth listener');
+    
+    // Fallback to Firebase auth state listener
     const unsubscribe = onAuthStateChange(async (user) => {
+      console.log('🔍 AuthContext: Firebase auth state changed:', user ? 'User found' : 'No user');
+      
       if (user) {
         try {
           // Get comprehensive user data
@@ -349,6 +472,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             getUserNotifications(user.uid, true), // unread only
             getUserPermissions(user.uid)
           ]);
+
+          // Check if user has admin role
+          if (userData?.role !== 'ADMIN') {
+            console.warn('❌ AuthContext: Non-admin user attempting to access admin client');
+            await logOut();
+            setCurrentUser(null);
+            setUserData(null);
+            setLoading(false);
+            return;
+          }
 
           // Combine Firebase user with additional data
           const extendedUser: ExtendedUser = {
@@ -365,16 +498,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
           setCurrentUser(extendedUser);
           setUserData(userData);
-
-          // Also store in localStorage for backward compatibility
-          localStorage.setItem('mockUser', JSON.stringify({
-            id: user.uid,
-            email: user.email,
-            name: user.displayName,
-            tier: userData?.currentTier || 'FREE'
-          }));
+          console.log('✅ AuthContext: Firebase admin authentication complete');
         } catch (error) {
-          console.error('Error loading user data:', error);
+          console.error('❌ AuthContext: Error loading user data:', error);
           // Set basic user data if comprehensive data fails
           setCurrentUser(user as ExtendedUser);
           setUserData(null);
@@ -382,7 +508,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else {
         setCurrentUser(null);
         setUserData(null);
-        localStorage.removeItem('mockUser');
       }
       setLoading(false);
     });
@@ -403,8 +528,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     trackUsage,
     hasPermission,
     canAccessFeature,
-    getRemainingUsage
+    getRemainingUsage,
+    mockLogin,
+    mockSignup
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}; 
+};

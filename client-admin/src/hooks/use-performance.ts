@@ -15,6 +15,8 @@ interface PerformanceSettings {
   simplifiedGraphics: boolean;
   lowMemoryMode: boolean;
   reducedAnimations: boolean;
+  lowGraphicsMode: boolean;
+  veryLowGraphicsMode: boolean;
 }
 
 export function usePerformance() {
@@ -24,9 +26,15 @@ export function usePerformance() {
     simplifiedGraphics: false,
     lowMemoryMode: false,
     reducedAnimations: false,
+    lowGraphicsMode: false,
+    veryLowGraphicsMode: false,
   });
   const [performanceScore, setPerformanceScore] = useState(100);
   const [forceMobileMode, setForceMobileMode] = useState(false);
+  const [isVeryLowPowerDevice, setIsVeryLowPowerDevice] = useState(false);
+  const [isThermalThrottling, setIsThermalThrottling] = useState(false);
+  const [batteryOptimizationActive, setBatteryOptimizationActive] = useState(false);
+  const [isLowPower, setIsLowPower] = useState(false);
 
   useEffect(() => {
     const capabilities: DeviceCapabilities = {
@@ -55,7 +63,18 @@ export function usePerformance() {
         simplifiedGraphics: true,
         lowMemoryMode: true,
         reducedAnimations: true,
+        lowGraphicsMode: true,
+        veryLowGraphicsMode: score < 40,
       });
+      setIsVeryLowPowerDevice(score < 40);
+      setIsLowPower(score < 60);
+    }
+    
+    // Check for battery optimization
+    if ('getBattery' in navigator) {
+      (navigator as any).getBattery().then((battery: any) => {
+        setBatteryOptimizationActive(battery.charging === false && battery.level < 0.2);
+      }).catch(() => {});
     }
   }, []);
 
@@ -65,6 +84,10 @@ export function usePerformance() {
     performanceScore,
     forceMobileMode,
     setForceMobileMode,
+    isVeryLowPowerDevice,
+    isThermalThrottling,
+    batteryOptimizationActive,
+    isLowPower,
   };
 }
 
@@ -94,5 +117,11 @@ export function usePerformanceCSS() {
     return () => window.removeEventListener('resize', checkDevice);
   }, []);
 
-  return { mobileOptimizationClasses, isMobile, isTablet };
+  return { 
+    mobileOptimizationClasses, 
+    isMobile, 
+    isTablet,
+    isLowPower: false,
+    performanceScore: 100,
+  };
 }

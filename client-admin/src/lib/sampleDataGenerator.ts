@@ -62,6 +62,7 @@ const sampleExperiences = [
 
 const sampleEducation = [
   {
+    id: '1',
     school: "Stanford University",
     degree: "Master of Science in Computer Science",
     location: "Stanford, CA",
@@ -71,6 +72,7 @@ const sampleEducation = [
     description: "Specialized in Machine Learning and Artificial Intelligence. Completed thesis on neural network optimization."
   },
   {
+    id: '2',
     school: "University of California, Berkeley",
     degree: "Bachelor of Science in Computer Science",
     location: "Berkeley, CA",
@@ -80,6 +82,7 @@ const sampleEducation = [
     description: "Graduated Magna Cum Laude. Relevant coursework: Data Structures, Algorithms, Software Engineering, Database Systems."
   },
   {
+    id: '3',
     school: "MIT",
     degree: "Bachelor of Engineering in Software Engineering",
     location: "Cambridge, MA",
@@ -89,6 +92,7 @@ const sampleEducation = [
     description: "Dean's List for 6 semesters. Senior project focused on distributed systems and cloud computing."
   },
   {
+    id: '4',
     school: "Carnegie Mellon University",
     degree: "Master of Information Systems",
     location: "Pittsburgh, PA",
@@ -119,24 +123,32 @@ const sampleSkills = [
 
 const sampleCertifications = [
   {
+    id: '1',
     name: "AWS Certified Solutions Architect",
-    issuer: "Amazon Web Services",
-    date: "2023"
+    issuingOrganization: "Amazon Web Services",
+    date: "2023",
+    credentialId: "AWS-SAA-2023-001"
   },
   {
+    id: '2',
     name: "Google Cloud Professional Developer",
-    issuer: "Google Cloud",
-    date: "2022"
+    issuingOrganization: "Google Cloud",
+    date: "2022",
+    credentialId: "GCP-PD-2022-002"
   },
   {
+    id: '3',
     name: "Certified Kubernetes Administrator",
-    issuer: "Cloud Native Computing Foundation",
-    date: "2023"
+    issuingOrganization: "Cloud Native Computing Foundation",
+    date: "2023",
+    credentialId: "CKA-2023-003"
   },
   {
+    id: '4',
     name: "Microsoft Azure Developer Associate",
-    issuer: "Microsoft",
-    date: "2022"
+    issuingOrganization: "Microsoft",
+    date: "2022",
+    credentialId: "AZ-204-2022-004"
   }
 ];
 
@@ -151,18 +163,15 @@ const sampleLanguages = [
 const sampleCustomSections = [
   {
     title: "Projects",
-    content: "• E-commerce Platform: Built a full-stack e-commerce solution with React and Node.js\n• Task Management App: Developed a collaborative task management application\n• Data Visualization Tool: Created interactive dashboards using D3.js and Python",
-    placement: "main"
+    content: "• E-commerce Platform: Built a full-stack e-commerce solution with React and Node.js\n• Task Management App: Developed a collaborative task management application\n• Data Visualization Tool: Created interactive dashboards using D3.js and Python"
   },
   {
     title: "Achievements",
-    content: "• Employee of the Month (3 times)\n• Led team that won company hackathon\n• Published technical article with 10k+ views\n• Speaker at 2 tech conferences",
-    placement: "main"
+    content: "• Employee of the Month (3 times)\n• Led team that won company hackathon\n• Published technical article with 10k+ views\n• Speaker at 2 tech conferences"
   },
   {
     title: "Interests",
-    content: "Technology, Open Source, Machine Learning, Photography, Hiking, Chess",
-    placement: "sidebar"
+    content: "Technology, Open Source, Machine Learning, Photography, Hiking, Chess"
   }
 ];
 
@@ -234,4 +243,4 @@ export const getMaximalSampleConfig = (): SampleDataConfig => ({
   includeCertifications: true,
   includeLanguages: true,
   includeCustomSections: true
-}); 
+});

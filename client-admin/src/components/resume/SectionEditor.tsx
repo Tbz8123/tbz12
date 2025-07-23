@@ -401,7 +401,7 @@ export default function SectionEditor({ resumeData, onChange, editorMode, active
   };
 
   const addEducation = () => {
-    onChange({ education: [...(resumeData.education || []), { school: '', degree: '', location: '', startDate: '', endDate: '', description: '' }] });
+    onChange({ education: [...(resumeData.education || []), { id: crypto.randomUUID(), school: '', degree: '', location: '', startDate: '', endDate: '', description: '' }] });
   };
 
   const updateEducation = (index: number, field: string, value: string) => {
@@ -427,7 +427,7 @@ export default function SectionEditor({ resumeData, onChange, editorMode, active
   };
 
   const addExperience = () => {
-    onChange({ experience: [...(resumeData.experience || []), { company: '', position: '', location: '', startDate: '', endDate: '', description: '' }] });
+    onChange({ experience: [...(resumeData.experience || []), { id: crypto.randomUUID(), company: '', position: '', location: '', startDate: '', endDate: '', description: '' }] });
   };
 
   const updateExperience = (index: number, field: string, value: string) => {
@@ -483,7 +483,7 @@ export default function SectionEditor({ resumeData, onChange, editorMode, active
   };
 
   const addCertification = () => {
-    const newCertification: any = { name: '', issuingOrganization: '', date: '', credentialId: '' };
+    const newCertification: any = { id: crypto.randomUUID(), name: '', issuingOrganization: '', date: '', credentialId: '' };
     onChange({ certifications: [...(resumeData.certifications as any[] || []), newCertification] });
   };
 
@@ -528,7 +528,7 @@ export default function SectionEditor({ resumeData, onChange, editorMode, active
   };
 
   const addCustomSection = () => {
-    onChange({ customSections: [...(resumeData.customSections || []), { title: 'New Section', content: '', placement: 'sidebar' }] });
+    onChange({ customSections: [...(resumeData.customSections || []), { title: 'New Section', content: '' }] });
   };
 
   const updateCustomSection = (index: number, field: string, value: string) => {

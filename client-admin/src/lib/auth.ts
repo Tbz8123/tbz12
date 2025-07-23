@@ -1,7 +1,20 @@
 import jwt from 'jsonwebtoken';
 import prisma from './prisma';
-import { NextApiRequest, NextApiResponse } from 'next';
 import { User } from '@prisma/client'; // Import User type from Prisma
+
+// Define request/response types for non-Next.js environment
+interface ApiRequest {
+  headers: {
+    authorization?: string;
+    cookie?: string;
+  };
+}
+
+interface ApiResponse {
+  status: (code: number) => ApiResponse;
+  json: (data: any) => void;
+  setHeader: (name: string, value: string) => void;
+}
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -11,7 +24,7 @@ if (!JWT_SECRET) {
 
 export interface UserPayload {
   sub: string; // User ID
-  tier: number;
+  currentTier: string;
   // You can add other fields to the JWT payload if needed, like email or roles
 }
 
@@ -31,7 +44,7 @@ export function verifyJwt(token: string): UserPayload | null {
 }
 
 // Middleware to protect Tier 2 routes
-export async function requireTier2(req: NextApiRequest, res: NextApiResponse): Promise<User | null> {
+export async function requireTier2(req: ApiRequest, res: ApiResponse): Promise<User | null> {
   const authHeader = req.headers.authorization;
   let token: string | undefined;
 
@@ -63,7 +76,7 @@ export async function requireTier2(req: NextApiRequest, res: NextApiResponse): P
     return null;
   }
 
-  if (user.tier < 2) {
+  if (user.currentTier === 'FREE') {
     res.status(403).json({ error: "Forbidden: Tier 2 access required" });
     return null;
   }
@@ -72,7 +85,7 @@ export async function requireTier2(req: NextApiRequest, res: NextApiResponse): P
 }
 
 // Utility to set the JWT as an HttpOnly cookie
-export function setJwtCookie(res: NextApiResponse, token: string) {
+export function setJwtCookie(res: ApiResponse, token: string) {
   const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -85,6 +98,6 @@ export function setJwtCookie(res: NextApiResponse, token: string) {
   res.setHeader('Set-Cookie', `token=${token}; ${Object.entries(cookieOptions).map(([key, value]) => `${key === 'maxAge' ? 'Max-Age' : key}=${value}`).join('; ')}`);
 }
 
-export function clearJwtCookie(res: NextApiResponse) {
+export function clearJwtCookie(res: ApiResponse) {
   res.setHeader('Set-Cookie', `token=; HttpOnly; Path=/; Max-Age=0; SameSite=Strict; Secure=${process.env.NODE_ENV === 'production'}`);
-} 
+}

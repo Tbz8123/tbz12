@@ -455,4 +455,4 @@ process.on('SIGINT', () => {
 process.on('SIGTERM', () => {
   memoryAnalytics.destroy();
   process.exit(0);
-});
+}); 

@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from "react";
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route, useLocation, Redirect } from "wouter";
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -48,10 +48,9 @@ function Router() {
   return (
     <Switch>
       {/* Redirect root to admin dashboard */}
-      <Route path="/" component={() => {
-        window.location.href = '/admin/pro';
-        return null;
-      }} />
+      <Route path="/">
+        <Redirect to="/admin/pro" />
+      </Route>
       
       {/* Login route - accessible without authentication */}
       <Route path="/login" component={LoginPage} />
@@ -180,24 +179,42 @@ function Router() {
 }
 
 function App() {
+  const [location] = useLocation();
+  
   // Initialize Google Analytics 4
   useEffect(() => {
-    initGA();
-    enableEnhancedMeasurement();
+    // initGA();
+    // enableEnhancedMeasurement();
 
-    // Enable debug mode in development
-    if (import.meta.env.DEV) {
-      enableDebugMode();
+    // // Enable debug mode in development
+    // if (import.meta.env.DEV) {
+    //   enableDebugMode();
+    // }
+
+    // For testing: Set mock admin user if not exists
+    const mockUser = localStorage.getItem('mockUser');
+    if (!mockUser) {
+      console.log('Setting mock admin user for testing...');
+      localStorage.setItem('mockUser', JSON.stringify({
+        username: 'admin',
+        isAdmin: true,
+        role: 'ADMIN',
+        role: 'ADMIN',
+        tier: 'ENTERPRISE'
+      }));
     }
   }, []);
+
+  // Don't show header on login and auth pages
+  const hideHeader = location === '/login' || location === '/auth';
 
   return (
     <TooltipProvider>
       <AuthProvider>
         <Toaster />
         <div className="flex flex-col min-h-screen">
-          <Header />
-          <main className="flex-grow">
+          {!hideHeader && <Header />}
+          <main className={hideHeader ? "min-h-screen" : "flex-grow"}>
             <Suspense fallback={<div>Loading...</div>}>
               <Router />
             </Suspense>
