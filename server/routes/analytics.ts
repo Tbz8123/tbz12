@@ -37,7 +37,7 @@ router.get('/dashboard', async (req: Request, res: Response) => {
     const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
     const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
 
-    const data = await analyticsService.getDashboardData(startDate, endDate);
+    const data = await analyticsService.getDashboardData(startDate && endDate ? { start: startDate, end: endDate } : undefined);
     res.json(data);
   } catch (error: any) {
     console.error('Error getting dashboard data:', error);

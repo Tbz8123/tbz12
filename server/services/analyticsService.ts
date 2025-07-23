@@ -283,7 +283,26 @@ export class AnalyticsService {
       };
 
       // Track in memory analytics for real-time dashboard
-      memoryAnalytics.trackActivity(enhancedData);
+      const memoryData = {
+        sessionId: enhancedData.sessionId,
+        userId: enhancedData.userId,
+        activityType: enhancedData.activityType,
+        activityName: enhancedData.activityName,
+        description: enhancedData.description,
+        metadata: enhancedData.metadata,
+        templateId: enhancedData.templateId,
+        templateType: enhancedData.templateType,
+        templateName: enhancedData.templateName,
+        downloadType: enhancedData.downloadType,
+        pageUrl: enhancedData.pageUrl,
+        tier: enhancedData.tier,
+        userTier: enhancedData.userTier,
+        country: enhancedData.country,
+        deviceType: enhancedData.deviceType,
+        successful: enhancedData.successful,
+        errorMessage: enhancedData.errorMessage
+      };
+      memoryAnalytics.trackActivity(memoryData);
 
       // Track in Google Analytics based on activity type
       let gaSuccess = false;
