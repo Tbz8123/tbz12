@@ -162,6 +162,12 @@ const parseUserAgent = (userAgent: string): UserAgentData => {
 };
 
 export class AnalyticsService {
+  private prisma: PrismaClient;
+
+  constructor(prismaClient?: PrismaClient) {
+    this.prisma = prismaClient || new PrismaClient();
+  }
+
   // Track a new visitor or update existing visitor
   async trackVisitor(data: TrackVisitorData): Promise<any> {
     try {
@@ -277,7 +283,7 @@ export class AnalyticsService {
       };
 
       // Track in memory analytics for real-time dashboard
-      const memoryActivity = memoryAnalytics.trackActivity(enhancedData);
+      memoryAnalytics.trackActivity(enhancedData);
 
       // Track in Google Analytics based on activity type
       let gaSuccess = false;
@@ -418,8 +424,6 @@ export class AnalyticsService {
       }
 
       console.log(`📊 Activity tracked - GA: ${gaSuccess ? '✅' : '❌'}, Memory: ✅`);
-
-      return memoryActivity;
     } catch (error) {
       console.error('Error tracking activity:', error);
       throw error;
@@ -608,7 +612,7 @@ export class AnalyticsService {
 
         await prisma.templateAnalytics.update({
           where: { templateId_templateType: { templateId, templateType } },
-          data: updateData
+          data: updateData as any
         });
       } else {
         await prisma.templateAnalytics.create({
@@ -647,7 +651,7 @@ export class AnalyticsService {
 
         await prisma.usageStats.update({
           where: { userId },
-          data: updateData
+          data: updateData as any
         });
       } else {
         await prisma.usageStats.create({
@@ -667,7 +671,7 @@ export class AnalyticsService {
   }
 
   // Update geographic analytics
-  private async updateGeographicAnalytics(country: string, countryCode: string, isRegistered: boolean) {
+  private async updateGeographicAnalytics(country: string, countryCode: any, isRegistered: boolean) {
     try {
       const existing = await prisma.geographicAnalytics.findUnique({
         where: { country }
@@ -687,7 +691,7 @@ export class AnalyticsService {
 
         await prisma.geographicAnalytics.update({
           where: { country },
-          data: updateData
+          data: updateData as any
         });
       } else {
         await prisma.geographicAnalytics.create({
@@ -706,7 +710,7 @@ export class AnalyticsService {
   }
 
   // Update geographic downloads
-  private async updateGeographicDownloads(country: string, countryCode: string, templateType: 'snap' | 'pro') {
+  private async updateGeographicDownloads(country: string, countryCode: any, templateType: 'snap' | 'pro') {
     try {
       const existing = await prisma.geographicAnalytics.findUnique({
         where: { country }
@@ -726,7 +730,7 @@ export class AnalyticsService {
 
         await prisma.geographicAnalytics.update({
           where: { country },
-          data: updateData
+          data: updateData as any
         });
       }
     } catch (error) {
@@ -735,7 +739,7 @@ export class AnalyticsService {
   }
 
   // Update geographic registrations
-  private async updateGeographicRegistrations(country: string, countryCode: string) {
+  private async updateGeographicRegistrations(country: string, countryCode: any) {
     try {
       const existing = await prisma.geographicAnalytics.findUnique({
         where: { country }
@@ -750,7 +754,7 @@ export class AnalyticsService {
 
         await prisma.geographicAnalytics.update({
           where: { country },
-          data: updateData
+          data: updateData as any
         });
       }
     } catch (error) {
@@ -759,7 +763,7 @@ export class AnalyticsService {
   }
 
   // Update geographic subscriptions
-  private async updateGeographicSubscriptions(country: string, countryCode: string) {
+  private async updateGeographicSubscriptions(country: string, countryCode: any) {
     try {
       const existing = await prisma.geographicAnalytics.findUnique({
         where: { country }
@@ -773,7 +777,7 @@ export class AnalyticsService {
 
         await prisma.geographicAnalytics.update({
           where: { country },
-          data: updateData
+          data: updateData as any
         });
       }
     } catch (error) {
@@ -797,10 +801,10 @@ export class AnalyticsService {
       let registeredUsers = 0;
       
       try {
-        totalVisitors = await (this.prisma.visitorAnalytics as any).count({ 
+        totalVisitors = await (prisma.visitorAnalytics as any).count({ 
           where: { firstVisit: { gte: last24Hours } } 
         });
-        registeredUsers = await (this.prisma.visitorAnalytics as any).count({ 
+        registeredUsers = await (prisma.visitorAnalytics as any).count({ 
           where: { 
             firstVisit: { gte: last24Hours },
             isRegistered: true 
@@ -947,8 +951,8 @@ export class AnalyticsService {
       }
 
       const topTemplates = templateDownloads.map((template: any) => ({
-        templateId: template.templateId,
-        templateName: template.templateName || `Template ${template.templateId}`,
+         templateId: template.templateId,
+         templateName: template.templateName || `Template ${template.templateId}`,
         templateType: template.templateType,
         totalDownloads: template._count.templateId,
         totalViews: template._count.templateId * 2,
@@ -1070,20 +1074,20 @@ export class AnalyticsService {
       const snapDownloads = await prisma.download.count({
         where: { 
           templateType: 'snap',
-          downloadedAt: whereClause.timestamp || whereClause.createdAt
+          downloadedAt: { gte: startOfDay, lte: endOfDay }
         }
       });
 
       const proDownloads = await prisma.download.count({
         where: { 
           templateType: 'pro',
-          downloadedAt: whereClause.timestamp || whereClause.createdAt
+          downloadedAt: { gte: startOfDay, lte: endOfDay }
         }
       });
 
       const newRegistrations = await prisma.user.count({
         where: { 
-          createdAt: whereClause.timestamp || whereClause.createdAt
+          createdAt: { gte: startOfDay, lte: endOfDay }
         }
       });
 
@@ -1131,4 +1135,4 @@ export class AnalyticsService {
   }
 }
 
-export const analyticsService = new AnalyticsService(prisma);
+export const analyticsService = new AnalyticsService();

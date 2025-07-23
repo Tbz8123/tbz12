@@ -11,7 +11,7 @@ let analyticsService: AnalyticsService;
 
 try {
   prisma = new PrismaClient();
-  analyticsService = new AnalyticsService(prisma);
+  analyticsService = new AnalyticsService();
   console.log('✅ Analytics service initialized successfully');
 } catch (error: any) {
   console.error('❌ Failed to initialize analytics service:', error);
@@ -478,14 +478,18 @@ router.post('/track', async (req, res) => {
       errorMessage
     } = req.body;
 
-    if (!req.sessionId || !req.visitorId) {
+    const sessionId = (req as any).sessionId;
+    const visitorId = (req as any).visitorId;
+    const userId = (req as any).userId;
+
+    if (!sessionId || !visitorId) {
       return res.status(400).json({ error: 'Session not found' });
     }
 
     await analyticsService.trackActivity({
-      sessionId: req.sessionId,
-      visitorId: req.visitorId,
-      userId: req.userId,
+      sessionId,
+      visitorId,
+      userId,
       activityType,
       activityName,
       description,

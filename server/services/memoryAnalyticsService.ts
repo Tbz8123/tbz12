@@ -338,7 +338,7 @@ class MemoryAnalyticsService extends EventEmitter {
   }
 
   // Get template statistics
-  getTemplateStats(): TemplateStats[] {
+  getTemplateStats(): any[] {
     return Array.from(this.templateStats.values())
       .map(stats => ({
         ...stats,
@@ -455,4 +455,4 @@ process.on('SIGINT', () => {
 process.on('SIGTERM', () => {
   memoryAnalytics.destroy();
   process.exit(0);
-}); 
+});
