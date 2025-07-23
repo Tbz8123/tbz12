@@ -291,9 +291,9 @@ export class AnalyticsService {
         description: enhancedData.description,
         metadata: enhancedData.metadata,
         templateId: enhancedData.templateId,
-        templateType: enhancedData.templateType,
+        templateType: enhancedData.templateType as 'snap' | 'pro' | undefined,
         templateName: enhancedData.templateName,
-        downloadType: enhancedData.downloadType,
+        downloadType: enhancedData.downloadType as 'pdf' | 'docx' | 'txt' | undefined,
         pageUrl: enhancedData.pageUrl,
         tier: enhancedData.tier,
         userTier: enhancedData.userTier,
@@ -508,7 +508,7 @@ export class AnalyticsService {
       });
 
       if (visitor && visitor.country) {
-        await this.updateGeographicDownloads(visitor.country, visitor.countryCode || 'XX', data.templateType);
+        await this.updateGeographicDownloads(visitor.country, 'XX', data.templateType);
       }
 
       return true;
@@ -546,7 +546,7 @@ export class AnalyticsService {
       });
 
       if (visitor && visitor.country) {
-        await this.updateGeographicRegistrations(visitor.country, visitor.countryCode || 'XX');
+        await this.updateGeographicRegistrations(visitor.country, 'XX');
       }
 
       return true;
@@ -576,7 +576,7 @@ export class AnalyticsService {
       });
 
       if (visitor && visitor.country) {
-        await this.updateGeographicSubscriptions(visitor.country, visitor.countryCode || 'XX');
+        await this.updateGeographicSubscriptions(visitor.country, 'XX');
       }
 
       return true;
