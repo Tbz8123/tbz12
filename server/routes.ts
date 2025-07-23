@@ -1322,7 +1322,7 @@ export default function setupRoutes(app: express.Express): Server {
 
       // Get template usage counts manually
       const templateUsageCounts = await Promise.all(
-        templateUsage.map(async (template) => {
+        templateUsage.map(async (template: any) => {
           const count = await prisma.resume.count({
             where: {
               templateId: template.id.toString()

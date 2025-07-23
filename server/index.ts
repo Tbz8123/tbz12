@@ -133,7 +133,7 @@ async function initialize() {
     console.log('✅ Server initialization completed successfully');
 
     // Handle server errors
-    server.on('error', (error: Error) => {
+    server.on('error', (error: NodeJS.ErrnoException) => {
       console.error('❌ Server error occurred:', error);
       if (error.code === 'EADDRINUSE') {
         console.error(`🚫 Port ${PORT} is already in use. Please wait for it to be freed or use a different port.`);

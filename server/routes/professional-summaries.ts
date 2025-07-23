@@ -102,7 +102,7 @@ professionalSummariesRouter.get("/jobtitles/:id/summaries", async (req: Request,
     const searchTerm = req.query.search as string || null;
 
     // Build where clause
-    const where: Prisma.ProfessionalSummaryWhereInput = { professionalSummaryJobTitleId: id };
+    const where: any = { professionalSummaryJobTitleId: id };
     if (searchTerm) {
       where.content = {
         contains: searchTerm,
@@ -143,7 +143,7 @@ professionalSummariesRouter.get("/summaries", async (req: Request, res: Response
     const searchTerm = req.query.search as string || null;
 
     // Build where clause
-    const where: Prisma.ProfessionalSummaryWhereInput = {};
+    const where: any = {};
     if (professionalSummaryJobTitleId) {
       where.professionalSummaryJobTitleId = professionalSummaryJobTitleId;
     }
@@ -450,14 +450,14 @@ professionalSummariesRouter.get("/export", async (req: Request, res: Response) =
     } else {
       // CSV format (default)
       const csvHeaders = ['title', 'category', 'content', 'isRecommended'];
-      const csvRows = exportData.map(row => [
+      const csvRows = exportData.map((row: any) => [
         `"${row.title.replace(/"/g, '""')}"`,
         `"${row.category.replace(/"/g, '""')}"`,
         `"${row.content.replace(/"/g, '""')}"`,
         row.isRecommended
       ]);
 
-      const csvContent = [csvHeaders.join(','), ...csvRows.map(row => row.join(','))].join('\n');
+      const csvContent = [csvHeaders.join(','), ...csvRows.map((row: any) => row.join(','))].join('\n');
 
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader('Content-Disposition', 'attachment; filename="professional-summaries.csv"');

@@ -37,7 +37,7 @@ router.get('/', async (req: Request, res: Response) => {
     const importType = req.query.importType as string || null;
 
     // Build where clause
-    const where: Prisma.ImportHistoryWhereInput = {};
+    const where: any = {};
     if (status && status !== 'all') {
       where.status = status;
     }
@@ -473,11 +473,11 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
       );
 
       // Identify titles that are NOT in the uploaded file
-      const titlesToDelete = existingTitles.filter(t => !uploadedTitleSet.has(t.title.toLowerCase().trim()));
+      const titlesToDelete = existingTitles.filter((t: any) => !uploadedTitleSet.has(t.title.toLowerCase().trim()));
 
       if (titlesToDelete.length > 0) {
         console.log(`🗑️ Deleting ${titlesToDelete.length} job titles not present in uploaded file:`);
-        titlesToDelete.forEach(t => console.log(`  - "${t.title}" (ID: ${t.id})`));
+        titlesToDelete.forEach((t: any) => console.log(`  - "${t.title}" (ID: ${t.id})`));
 
         // Delete job descriptions first, then job titles
         for (const title of titlesToDelete) {
@@ -489,7 +489,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
 
         const deletedTitles = await prisma.jobTitle.deleteMany({
           where: {
-            id: { in: titlesToDelete.map(t => t.id) }
+            id: { in: titlesToDelete.map((t: any) => t.id) }
           }
         });
 
@@ -707,11 +707,11 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
       );
 
       // Identify titles that are NOT in the uploaded file
-      const titlesToDelete = existingTitles.filter(t => !uploadedTitleSet.has(t.title.toLowerCase().trim()));
+      const titlesToDelete = existingTitles.filter((t: any) => !uploadedTitleSet.has(t.title.toLowerCase().trim()));
 
       if (titlesToDelete.length > 0) {
         console.log(`🗑️ Deleting ${titlesToDelete.length} skills job titles not present in uploaded file:`);
-        titlesToDelete.forEach(t => console.log(`  - "${t.title}" (ID: ${t.id})`));
+        titlesToDelete.forEach((t: any) => console.log(`  - "${t.title}" (ID: ${t.id})`));
 
         // Delete skill categories first, then job titles
         for (const title of titlesToDelete) {
@@ -723,7 +723,7 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
 
         const deletedTitles = await prisma.skillsJobTitle.deleteMany({
           where: {
-            id: { in: titlesToDelete.map(t => t.id) }
+            id: { in: titlesToDelete.map((t: any) => t.id) }
           }
         });
 
@@ -956,7 +956,7 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
       );
 
       // Identify titles that are NOT in the uploaded file
-      const titlesToDelete = existingTitles.filter(t => 
+      const titlesToDelete = existingTitles.filter((t: any) => 
         !uploadedTitleSet.has(t.title.toLowerCase().trim())
       );
 

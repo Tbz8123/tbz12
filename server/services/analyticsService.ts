@@ -163,7 +163,7 @@ const parseUserAgent = (userAgent: string): UserAgentData => {
 
 export class AnalyticsService {
   // Track a new visitor or update existing visitor
-  async trackVisitor(data: TrackVisitorData): Promise<Prisma.VisitorAnalytics> {
+  async trackVisitor(data: TrackVisitorData): Promise<any> {
     try {
       const { sessionId, userId, ipAddress, userAgent, referrer, landingPage } = data;
 
@@ -218,7 +218,7 @@ export class AnalyticsService {
   }
 
   // Track a session
-  async trackSession(data: TrackSessionData): Promise<Prisma.SessionAnalytics> {
+  async trackSession(data: TrackSessionData): Promise<any> {
     try {
       const { sessionId, visitorId, userId, startTime } = data;
 
@@ -597,7 +597,7 @@ export class AnalyticsService {
       });
 
       if (existing) {
-        const updateData: Prisma.TemplateAnalyticsUpdateInput = { lastViewedAt: new Date() };
+        const updateData: any = { lastViewedAt: new Date() };
 
         if (activityType === 'TEMPLATE_VIEW') {
           updateData.totalViews = { increment: 1 };
@@ -635,7 +635,7 @@ export class AnalyticsService {
       });
 
       if (existing) {
-        const updateData: Prisma.UsageStatsUpdateInput = { resumesDownloaded: { increment: 1 } };
+        const updateData: any = { resumesDownloaded: { increment: 1 } };
 
         if (templateType === 'snap') {
           updateData.snapTemplateDownloads = { increment: 1 };
@@ -674,7 +674,7 @@ export class AnalyticsService {
       });
 
       if (existing) {
-        const updateData: Prisma.GeographicAnalyticsUpdateInput = {
+        const updateData: any = {
           totalVisitors: { increment: 1 },
           lastUpdated: new Date()
         };
@@ -713,7 +713,7 @@ export class AnalyticsService {
       });
 
       if (existing) {
-        const updateData: Prisma.GeographicAnalyticsUpdateInput = {
+        const updateData: any = {
           totalDownloads: { increment: 1 },
           lastUpdated: new Date()
         };
@@ -742,7 +742,7 @@ export class AnalyticsService {
       });
 
       if (existing) {
-        const updateData: Prisma.GeographicAnalyticsUpdateInput = {
+        const updateData: any = {
           registeredUsers: { increment: 1 },
           unregisteredUsers: { decrement: 1 },
           lastUpdated: new Date()
@@ -766,7 +766,7 @@ export class AnalyticsService {
       });
 
       if (existing) {
-        const updateData: Prisma.GeographicAnalyticsUpdateInput = {
+        const updateData: any = {
           subscriptions: { increment: 1 },
           lastUpdated: new Date()
         };
@@ -946,7 +946,7 @@ export class AnalyticsService {
         });
       }
 
-      const topTemplates = templateDownloads.map(template => ({
+      const topTemplates = templateDownloads.map((template: any) => ({
         templateId: template.templateId,
         templateName: template.templateName || `Template ${template.templateId}`,
         templateType: template.templateType,
@@ -1026,7 +1026,7 @@ export class AnalyticsService {
       });
 
       // Transform to match expected format
-      return templateDownloads.map(template => ({
+      return templateDownloads.map((template: any) => ({
         templateId: template.templateId,
         templateName: template.templateName || `Template ${template.templateId}`,
         templateType: template.templateType,

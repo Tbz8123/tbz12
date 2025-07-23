@@ -89,7 +89,7 @@ router.get('/visitors', async (req: Request, res: Response) => {
 
     const { startDate, endDate, limit = 50 } = req.query;
 
-    const whereClause: Prisma.VisitorAnalyticsWhereInput = {};
+    const whereClause: any = {};
     if (startDate && endDate) {
       whereClause.createdAt = {
         gte: new Date(startDate as string),
@@ -141,7 +141,7 @@ router.get('/visitors', async (req: Request, res: Response) => {
     const activeUnregistered = activeVisitors.filter((v: any) => v.isRegistered && v.user).length;
 
     // Transform data for frontend
-    const registered = registeredVisitors.map(v => ({
+    const registered = registeredVisitors.map((v: any) => ({
       id: v.userId || v.id,
       name: v.user?.name || 'Unknown',
       email: v.user?.email || 'Unknown',
@@ -158,7 +158,7 @@ router.get('/visitors', async (req: Request, res: Response) => {
       recentDownloads: []
     }));
 
-    const unregistered = unregisteredVisitors.map(v => ({
+    const unregistered = unregisteredVisitors.map((v: any) => ({
       anonymousId: v.sessionId,
       userAgent: v.userAgent || 'Unknown',
       country: v.country || 'Unknown',
@@ -193,7 +193,7 @@ router.get('/activities', async (req: Request, res: Response) => {
   try {
     const { startDate, endDate, activityType, limit = 100 } = req.query;
 
-    const whereClause: Prisma.ActivityLogWhereInput = {};
+    const whereClause: any = {};
     if (startDate && endDate) {
       whereClause.timestamp = {
         gte: new Date(startDate as string),
@@ -220,7 +220,7 @@ router.get('/sessions', async (req: Request, res: Response) => {
   try {
     const { startDate, endDate, limit = '50' } = req.query;
 
-    const whereClause: Prisma.SessionAnalyticsWhereInput = {};
+    const whereClause: any = {};
     if (startDate && endDate) {
       whereClause.startTime = {
         gte: new Date(startDate as string),
