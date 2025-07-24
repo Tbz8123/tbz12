@@ -552,7 +552,10 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
   });
 
   for (const [titleKey, group] of Array.from(groupedData.entries())) {
-    const { titleInfo, descriptions } = group;
+    const { titleInfo, descriptions } = group as {
+      titleInfo: { title: string; category: string };
+      descriptions: Array<{ content: string; isRecommended: boolean }>;
+    };
     processedCount++;
 
     const currentProgress = (processedCount / totalGroups) * 100;
@@ -787,7 +790,7 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
   });
 
   // Process each skills job title group
-  for (const [titleKey, group] of Array.from(groupedData.entries())) {
+  for (const [titleKey, group] of Array.from(groupedData.entries()) as Array<[string, { title: string; category: string; skills: Array<{ content: string; isRecommended: boolean }> }]>) {
     processedCount++;
 
     const currentProgress = Math.round((processedCount / totalGroups) * 100);
@@ -1037,7 +1040,7 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
   });
 
   // Process each professional summary job title group
-  for (const [titleKey, group] of Array.from(groupedData.entries())) {
+  for (const [titleKey, group] of Array.from(groupedData.entries()) as Array<[string, { title: string; category: string; summaries: Array<{ content: string; isRecommended: boolean }> }]>) {
     processedCount++;
 
     const currentProgress = Math.round((processedCount / totalGroups) * 100);

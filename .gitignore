@@ -15,3 +15,4 @@ testsprite_tests/TC007_get_job_listings.py
 testsprite_tests/TC008_create_new_job.py
 testsprite_tests/TC009_get_skills_list.py
 testsprite_tests/TC010_add_new_skill.py
+VERCEL_404_FIX_PLAN.md
