@@ -2,6 +2,10 @@ import { PrismaClient, Prisma } from '@prisma/client';
 import gaService from './googleAnalyticsService';
 import memoryAnalytics from './memoryAnalyticsService';
 
+// Type definitions for analytics payloads
+type VisitorAnalyticsGetPayload<T extends Prisma.VisitorAnalyticsDefaultArgs> = Prisma.VisitorAnalyticsGetPayload<T>;
+type SessionAnalyticsGetPayload<T extends Prisma.SessionAnalyticsDefaultArgs> = Prisma.SessionAnalyticsGetPayload<T>;
+
 // Type definitions
 interface TrackVisitorData {
   sessionId: string;
@@ -169,7 +173,7 @@ export class AnalyticsService {
   }
 
   // Track a new visitor or update existing visitor
-  async trackVisitor(data: TrackVisitorData): Promise<any> {
+  async trackVisitor(data: TrackVisitorData): Promise<Prisma.VisitorAnalyticsGetPayload<{}>> {
     try {
       const { sessionId, userId, ipAddress, userAgent, referrer, landingPage } = data;
 
@@ -224,7 +228,7 @@ export class AnalyticsService {
   }
 
   // Track a session
-  async trackSession(data: TrackSessionData): Promise<any> {
+  async trackSession(data: TrackSessionData): Promise<Prisma.SessionAnalyticsGetPayload<{}>> {
     try {
       const { sessionId, visitorId, userId, startTime } = data;
 
@@ -619,7 +623,7 @@ export class AnalyticsService {
       });
 
       if (existing) {
-        const updateData: any = { lastViewedAt: new Date() };
+        const updateData: Prisma.GeographicAnalyticsUpdateInput = { lastViewedAt: new Date() };
 
         if (activityType === 'TEMPLATE_VIEW') {
           updateData.totalViews = { increment: 1 };
@@ -657,7 +661,7 @@ export class AnalyticsService {
       });
 
       if (existing) {
-        const updateData: any = { resumesDownloaded: { increment: 1 } };
+        const updateData: Prisma.GeographicAnalyticsUpdateInput = { resumesDownloaded: { increment: 1 } };
 
         if (templateType === 'snap') {
           updateData.snapTemplateDownloads = { increment: 1 };
@@ -689,14 +693,14 @@ export class AnalyticsService {
   }
 
   // Update geographic analytics
-  private async updateGeographicAnalytics(country: string, countryCode: any, isRegistered: boolean) {
+  private async updateGeographicAnalytics(country: string, countryCode: string, isRegistered: boolean) {
     try {
       const existing = await this.prisma.geographicAnalytics.findUnique({
         where: { country }
       });
 
       if (existing) {
-        const updateData: any = {
+        const updateData: Prisma.GeographicAnalyticsUpdateInput = {
           totalVisitors: { increment: 1 },
           lastUpdated: new Date()
         };
@@ -728,14 +732,14 @@ export class AnalyticsService {
   }
 
   // Update geographic downloads
-  private async updateGeographicDownloads(country: string, countryCode: any, templateType: 'snap' | 'pro') {
+  private async updateGeographicDownloads(country: string, countryCode: string, templateType: 'snap' | 'pro') {
     try {
       const existing = await this.prisma.geographicAnalytics.findUnique({
         where: { country }
       });
 
       if (existing) {
-        const updateData: any = {
+        const updateData: Prisma.GeographicAnalyticsUpdateInput = {
           totalDownloads: { increment: 1 },
           lastUpdated: new Date()
         };
@@ -757,14 +761,14 @@ export class AnalyticsService {
   }
 
   // Update geographic registrations
-  private async updateGeographicRegistrations(country: string, countryCode: any) {
+  private async updateGeographicRegistrations(country: string, countryCode: string) {
     try {
       const existing = await this.prisma.geographicAnalytics.findUnique({
         where: { country }
       });
 
       if (existing) {
-        const updateData: any = {
+        const updateData: Prisma.GeographicAnalyticsUpdateInput = {
           registeredUsers: { increment: 1 },
           unregisteredUsers: { decrement: 1 },
           lastUpdated: new Date()
@@ -781,14 +785,14 @@ export class AnalyticsService {
   }
 
   // Update geographic subscriptions
-  private async updateGeographicSubscriptions(country: string, countryCode: any) {
+  private async updateGeographicSubscriptions(country: string, countryCode: string) {
     try {
       const existing = await this.prisma.geographicAnalytics.findUnique({
         where: { country }
       });
 
       if (existing) {
-        const updateData: any = {
+        const updateData: Prisma.GeographicAnalyticsUpdateInput = {
           subscriptions: { increment: 1 },
           lastUpdated: new Date()
         };

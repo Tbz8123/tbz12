@@ -1,7 +1,33 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { AnalyticsService } from '../services/analyticsService';
+
+// Type definitions for analytics
+type VisitorAnalyticsWithUser = Prisma.VisitorAnalyticsGetPayload<{
+  include: {
+    user: {
+      select: {
+        id: true;
+        name: true;
+        email: true;
+        currentTier: true;
+      }
+    }
+  }
+}>;
+
+type SessionAnalyticsWithUser = Prisma.SessionAnalyticsGetPayload<{
+  include: {
+    user: {
+      select: {
+        id: true;
+        name: true;
+        email: true;
+      }
+    }
+  }
+}>;
 
 // Extended Request interface for analytics tracking
 interface ExtendedRequest extends Request {
@@ -93,7 +119,7 @@ router.get('/visitors', async (req: Request, res: Response) => {
 
     const { startDate, endDate, limit = 50 } = req.query;
 
-    const whereClause: Record<string, any> = {};
+    const whereClause: Prisma.VisitorAnalyticsWhereInput = {};
     if (startDate && endDate) {
       whereClause.createdAt = {
         gte: new Date(startDate as string),
@@ -137,15 +163,15 @@ router.get('/visitors', async (req: Request, res: Response) => {
     });
 
     // Separate registered and unregistered visitors
-    const registeredVisitors = visitors.filter((v: any) => v.isRegistered && v.user);
-    const unregisteredVisitors = visitors.filter((v: any) => !v.isRegistered || !v.user);
+    const registeredVisitors = visitors.filter((v: VisitorAnalyticsWithUser) => v.isRegistered && v.user);
+    const unregisteredVisitors = visitors.filter((v: VisitorAnalyticsWithUser) => !v.isRegistered || !v.user);
 
     // Count active users
-    const activeRegistered = activeVisitors.filter((v: any) => v.isRegistered && v.user).length;
-    const activeUnregistered = activeVisitors.filter((v: any) => !v.isRegistered || !v.user).length;
+    const activeRegistered = activeVisitors.filter((v: VisitorAnalyticsWithUser) => v.isRegistered && v.user).length;
+    const activeUnregistered = activeVisitors.filter((v: VisitorAnalyticsWithUser) => !v.isRegistered || !v.user).length;
 
     // Transform data for frontend
-    const registered = registeredVisitors.map((v: any) => ({
+    const registered = registeredVisitors.map((v: VisitorAnalyticsWithUser) => ({
       id: v.userId || v.id,
       name: v.user?.name || 'Unknown',
       email: v.user?.email || 'Unknown',
@@ -162,7 +188,7 @@ router.get('/visitors', async (req: Request, res: Response) => {
       recentDownloads: []
     }));
 
-    const unregistered = unregisteredVisitors.map((v: any) => ({
+    const unregistered = unregisteredVisitors.map((v: VisitorAnalyticsWithUser) => ({
       anonymousId: v.sessionId,
       userAgent: v.userAgent || 'Unknown',
       country: v.country || 'Unknown',
@@ -228,7 +254,7 @@ router.get('/sessions', async (req: Request, res: Response) => {
   try {
     const { startDate, endDate, limit = '50' } = req.query;
 
-    const whereClause: Record<string, any> = {};
+    const whereClause: Prisma.SessionAnalyticsWhereInput = {};
     if (startDate && endDate) {
       whereClause.startTime = {
         gte: new Date(startDate as string),
@@ -263,7 +289,7 @@ router.get('/summary', async (req: Request, res: Response) => {
   try {
     const { startDate, endDate } = req.query;
 
-    const whereClause: Record<string, any> = {};
+    const whereClause: Prisma.AnalyticsSummaryWhereInput = {};
     if (startDate && endDate) {
       whereClause.date = {
         gte: new Date(startDate as string),
@@ -416,7 +442,7 @@ router.get('/funnel', async (req: Request, res: Response) => {
   try {
     const { funnelType, startDate, endDate } = req.query;
 
-    const whereClause: Record<string, any> = {};
+    const whereClause: Prisma.ConversionFunnelWhereInput = {};
     if (funnelType) {
       whereClause.funnelType = funnelType;
     }
@@ -442,7 +468,7 @@ router.get('/funnel', async (req: Request, res: Response) => {
       avgTime: number;
     }
 
-    const funnelAnalysis = funnelData.reduce((acc: Record<string, FunnelAnalysisItem>, item: { funnelType: string; step: string; stepOrder: number; timeToComplete?: number }) => {
+    const funnelAnalysis = funnelData.reduce((acc: Record<string, FunnelAnalysisItem>, item: Prisma.ConversionFunnelGetPayload<{}>) => {
       const key = `${item.funnelType}-${item.step}`;
       if (!acc[key]) {
         acc[key] = {

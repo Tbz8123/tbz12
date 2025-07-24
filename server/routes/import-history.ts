@@ -37,7 +37,7 @@ router.get('/', async (req: Request, res: Response) => {
     const importType = req.query.importType as string || null;
 
     // Build where clause
-    const where: any = {};
+    const where: Record<string, unknown> = {};
     if (status && status !== 'all') {
       where.status = status;
     }
@@ -75,7 +75,7 @@ router.get('/', async (req: Request, res: Response) => {
     });
 
     // Transform data to match frontend expectations
-    const transformedImports = imports.map((imp: any) => ({
+    const transformedImports = imports.map((imp: ImportHistoryRecord) => ({
       id: imp.id,
       fileName: imp.fileName,
       fileSize: imp.fileSize,
@@ -87,8 +87,8 @@ router.get('/', async (req: Request, res: Response) => {
       errorCount: imp.errorCount || 0,
       errors: imp.errors ? (Array.isArray(imp.errors) ? imp.errors : []) : [],
       progress: imp.progress || 0,
-      currentOperation: (imp.metadata as Record<string, any>)?.currentOperation || null,
-      uploadedBy: (imp.metadata as Record<string, any>)?.uploadedBy || 'admin',
+      currentOperation: (imp.metadata as Record<string, unknown>)?.currentOperation || null,
+      uploadedBy: (imp.metadata as Record<string, unknown>)?.uploadedBy || 'admin',
       uploadedAt: imp.startedAt.toISOString(),
       startedAt: imp.startedAt.toISOString(),
       completedAt: imp.completedAt?.toISOString() || null,
@@ -124,9 +124,9 @@ router.post('/', async (req: Request, res: Response) => {
       successCount: z.number().optional().default(0),
       errorCount: z.number().optional().default(0),
       progress: z.number().optional().default(0),
-      errors: z.any().optional(),
+      errors: z.unknown().optional(),
       currentOperation: z.string().optional(),
-      metadata: z.any().optional(),
+      metadata: z.unknown().optional(),
     });
 
     const data = createSchema.parse(req.body);
@@ -206,8 +206,8 @@ router.get('/:id', async (req: Request, res: Response) => {
       errorCount: record.errorCount || 0,
       errors: record.errors ? (Array.isArray(record.errors) ? record.errors : []) : [],
       progress: record.progress || 0,
-      currentOperation: (record.metadata as Record<string, any>)?.currentOperation || null,
-      uploadedBy: (record.metadata as Record<string, any>)?.uploadedBy || 'admin',
+      currentOperation: (record.metadata as Record<string, unknown>)?.currentOperation || null,
+      uploadedBy: (record.metadata as Record<string, unknown>)?.uploadedBy || 'admin',
       uploadedAt: record.startedAt.toISOString(),
       startedAt: record.startedAt.toISOString(),
       completedAt: record.completedAt?.toISOString() || null,
@@ -237,8 +237,8 @@ router.put('/:id', async (req: Request, res: Response) => {
     }
 
     // Prepare update data, merging with existing metadata
-    const currentMeta = (currentRecord.metadata as Record<string, any>) || {};
-    const newMeta = (updateData.metadata as Record<string, any>) || {};
+    const currentMeta = (currentRecord.metadata as Record<string, unknown>) || {};
+    const newMeta = (updateData.metadata as Record<string, unknown>) || {};
     const updatedMetadata = {
       ...currentMeta,
       ...newMeta,
@@ -252,10 +252,10 @@ router.put('/:id', async (req: Request, res: Response) => {
       processedRecords?: number;
       successCount?: number;
       errorCount?: number;
-      errors?: any;
+      errors?: unknown;
       completedAt?: Date;
       startedAt?: Date;
-      metadata?: Record<string, any>;
+      metadata?: Record<string, unknown>;
       updatedAt?: Date;
     } = {};
 
@@ -317,12 +317,30 @@ router.delete('/:id', async (req: Request, res: Response) => {
   }
 });
 
+// Type definitions
+interface ImportHistoryRecord {
+  id: string;
+  fileName: string;
+  fileSize: number;
+  fileType: string;
+  status: string;
+  totalRecords?: number;
+  processedRecords?: number;
+  successCount?: number;
+  errorCount?: number;
+  errors?: unknown;
+  progress?: number;
+  startedAt: Date;
+  completedAt?: Date;
+  metadata?: Record<string, unknown>;
+}
+
 // Server-side import processing function
-async function processImportJob(jobId: string, job: Record<string, any>) {
-  const updateJob = async (data: Record<string, any>) => {
+async function processImportJob(jobId: string, job: Record<string, unknown>) {
+  const updateJob = async (data: Record<string, unknown>) => {
     try {
       const { currentOperation, ...otherData } = data;
-      const updateData: any = {
+      const updateData: Record<string, unknown> = {
         ...otherData,
         updatedAt: new Date()
       };
@@ -334,7 +352,7 @@ async function processImportJob(jobId: string, job: Record<string, any>) {
           select: { metadata: true }
         });
 
-        const currentMetadata = (currentJob?.metadata as Record<string, any>) || {};
+        const currentMetadata = (currentJob?.metadata as Record<string, unknown>) || {};
         updateData.metadata = {
           ...currentMetadata,
           currentOperation
@@ -353,7 +371,7 @@ async function processImportJob(jobId: string, job: Record<string, any>) {
   try {
     console.log(`🚀 Processing import job ${jobId}: ${job.fileName}`);
 
-    const metadata = (job.metadata as Record<string, any>) || {};
+    const metadata = (job.metadata as Record<string, unknown>) || {};
 
     // Update status to processing
     await updateJob({
@@ -398,7 +416,7 @@ async function processImportJob(jobId: string, job: Record<string, any>) {
 
 // Define interface for update job callback
 interface UpdateJobCallback {
-  (data: Record<string, any>): Promise<void>;
+  (data: Record<string, unknown>): Promise<void>;
 }
 
 async function processJobTitlesImportServerSide(csvData: string, jobId: string, updateJob: UpdateJobCallback) {
@@ -410,7 +428,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
     const job = await prisma.importHistory.findUnique({
       where: { id: jobId }
     });
-    const metadata = job?.metadata;
+    const metadata = job?.metadata as Record<string, unknown> | null;
     if (metadata && typeof metadata === 'object' && 'deleteMissingTitles' in metadata) {
       deleteMissingTitles = Boolean(metadata.deleteMissingTitles);
     }
@@ -636,7 +654,7 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
     const job = await prisma.importHistory.findUnique({
       where: { id: jobId }
     });
-    const metadata = job?.metadata;
+    const metadata = job?.metadata as Record<string, unknown> | null;
     if (metadata && typeof metadata === 'object' && 'deleteMissingTitles' in metadata) {
       deleteMissingTitles = Boolean(metadata.deleteMissingTitles);
     }
@@ -885,7 +903,7 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
     const job = await prisma.importHistory.findUnique({
       where: { id: jobId }
     });
-    const metadata = job?.metadata;
+    const metadata = job?.metadata as Record<string, unknown> | null;
     if (metadata && typeof metadata === 'object' && 'deleteMissingTitles' in metadata) {
       deleteMissingTitles = Boolean(metadata.deleteMissingTitles);
     }
@@ -907,7 +925,7 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
 
   const rows = lines.slice(1).map((line: string, index: number) => {
     const values = line.split(',').map((v: string) => v.trim().replace(/"/g, ''));
-    const row: any = {};
+    const row: Record<string, string> = {};
     headers.forEach((header: string, headerIndex: number) => {
       row[header] = values[headerIndex] || '';
     });
@@ -917,7 +935,7 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
   console.log(`Parsed ${rows.length} data rows`);
 
   // Group data by professional summary job title
-  const groupedData = new Map<string, { title: string; category: string; summaries: any[] }>();
+  const groupedData = new Map<string, { title: string; category: string; summaries: Array<{ content: string; isRecommended: boolean }> }>();
 
   rows.forEach((row: Record<string, string>, index: number) => {
     if (!row.title) {

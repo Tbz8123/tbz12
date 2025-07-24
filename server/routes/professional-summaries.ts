@@ -18,6 +18,10 @@ if (global.prisma) {
 
 const professionalSummariesRouter = Router();
 
+// Type definitions for missing Prisma types
+type ProfessionalSummaryJobTitleWhereInput = Prisma.ProfessionalSummaryJobTitleWhereInput;
+type ProfessionalSummaryWhereInput = Prisma.ProfessionalSummaryWhereInput;
+
 // Validation schemas
 const professionalSummaryJobTitleSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -43,7 +47,7 @@ professionalSummariesRouter.get("/jobtitles", async (req: Request, res: Response
     console.log(`Fetching professional summary job titles (page: ${page}, limit: ${limit}, category: ${category || 'all'}, search: ${searchQuery || 'none'})`);
 
     // Build where clause
-    const where: any = {};
+    const where: ProfessionalSummaryJobTitleWhereInput = {};
     if (category) {
       where.category = category;
     }
@@ -102,7 +106,7 @@ professionalSummariesRouter.get("/jobtitles/:id/summaries", async (req: Request,
     const searchTerm = req.query.search as string || null;
 
     // Build where clause
-    const where: any = { professionalSummaryJobTitleId: id };
+    const where: ProfessionalSummaryWhereInput = { professionalSummaryJobTitleId: id };
     if (searchTerm) {
       where.content = {
         contains: searchTerm,
@@ -143,7 +147,7 @@ professionalSummariesRouter.get("/summaries", async (req: Request, res: Response
     const searchTerm = req.query.search as string || null;
 
     // Build where clause
-    const where: any = {};
+    const where: ProfessionalSummaryWhereInput = {};
     if (professionalSummaryJobTitleId) {
       where.professionalSummaryJobTitleId = professionalSummaryJobTitleId;
     }
@@ -421,7 +425,7 @@ professionalSummariesRouter.get("/export", async (req: Request, res: Response) =
     console.log('Found', professionalSummaries.length, 'professional summaries');
 
     // Transform data for export - simplified format for import compatibility
-    const exportData = professionalSummaries.map((summary: any) => ({
+    const exportData = professionalSummaries.map((summary: Prisma.ProfessionalSummaryGetPayload<{ include: { professionalSummaryJobTitle: true } }>) => ({
       title: summary.professionalSummaryJobTitle.title,
       category: summary.professionalSummaryJobTitle.category,
       content: summary.content,
@@ -435,14 +439,14 @@ professionalSummariesRouter.get("/export", async (req: Request, res: Response) =
     } else if (format === 'excel') {
       // For now, return CSV with .xlsx extension until Excel library is added
       const csvHeaders = ['title', 'category', 'content', 'isRecommended'];
-      const csvRows = exportData.map((row: any) => [
+      const csvRows = exportData.map((row: { title: string; category: string; content: string; isRecommended: boolean }) => [
         `"${row.title.replace(/"/g, '""')}"`,
         `"${row.category.replace(/"/g, '""')}"`,
         `"${row.content.replace(/"/g, '""')}"`,
         row.isRecommended
       ]);
 
-      const csvContent = [csvHeaders.join(','), ...csvRows.map((row: any) => row.join(','))].join('\n');
+      const csvContent = [csvHeaders.join(','), ...csvRows.map((row: string[]) => row.join(','))].join('\n');
 
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', 'attachment; filename="professional-summaries.xlsx"');
@@ -450,14 +454,14 @@ professionalSummariesRouter.get("/export", async (req: Request, res: Response) =
     } else {
       // CSV format (default)
       const csvHeaders = ['title', 'category', 'content', 'isRecommended'];
-      const csvRows = exportData.map((row: any) => [
+      const csvRows = exportData.map((row: { title: string; category: string; content: string; isRecommended: boolean }) => [
         `"${row.title.replace(/"/g, '""')}"`,
         `"${row.category.replace(/"/g, '""')}"`,
         `"${row.content.replace(/"/g, '""')}"`,
         row.isRecommended
       ]);
 
-      const csvContent = [csvHeaders.join(','), ...csvRows.map((row: any) => row.join(','))].join('\n');
+      const csvContent = [csvHeaders.join(','), ...csvRows.map((row: string[]) => row.join(','))].join('\n');
 
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader('Content-Disposition', 'attachment; filename="professional-summaries.csv"');
