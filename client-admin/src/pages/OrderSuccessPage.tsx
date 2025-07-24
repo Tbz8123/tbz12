@@ -124,7 +124,7 @@ export default function OrderSuccessPage() {
               <Logo size="medium" />
             </Link>
             <div className="flex items-center gap-4">
-              <Link href="/admin/pro">
+              <Link href="/dashboard">
                 <button className="text-gray-300 hover:text-white transition-colors">
                   Go to Dashboard
                 </button>
@@ -350,4 +350,4 @@ export default function OrderSuccessPage() {
       </div>
     </div>
   );
-}
+} 

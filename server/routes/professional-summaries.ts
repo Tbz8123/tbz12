@@ -438,7 +438,7 @@ professionalSummariesRouter.get("/export", async (req: Request, res: Response) =
     console.log('Found', professionalSummaries.length, 'professional summaries');
 
     // Transform data for export - simplified format for import compatibility
-    const exportData = professionalSummaries.map((summary: { id: number; content: string; isRecommended: boolean; professionalSummaryJobTitle: { title: string; category: string } }) => ({
+    const exportData = professionalSummaries.map((summary: Prisma.ProfessionalSummaryGetPayload<{ include: { professionalSummaryJobTitle: true } }>) => ({
       title: summary.professionalSummaryJobTitle.title,
       category: summary.professionalSummaryJobTitle.category,
       content: summary.content,

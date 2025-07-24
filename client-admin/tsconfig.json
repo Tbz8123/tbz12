@@ -19,7 +19,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "downlevelIteration": true,
 
     /* Path mapping */
     "baseUrl": ".",

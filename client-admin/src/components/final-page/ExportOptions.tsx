@@ -50,6 +50,7 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ onOpenModal }) => {
 
   const clearAllData = () => {
     updateResumeData({
+      id: '',
       personalInfo: {
         firstName: '',
         lastName: '',
@@ -66,6 +67,9 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ onOpenModal }) => {
       certifications: [],
       languages: [],
       customSections: [],
+      templateId: '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     });
   };
 

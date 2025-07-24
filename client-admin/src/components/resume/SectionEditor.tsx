@@ -483,7 +483,7 @@ export default function SectionEditor({ resumeData, onChange, editorMode, active
   };
 
   const addCertification = () => {
-    const newCertification: any = { id: crypto.randomUUID(), name: '', issuingOrganization: '', date: '', credentialId: '' };
+    const newCertification: any = { name: '', issuingOrganization: '', date: '', credentialId: '' };
     onChange({ certifications: [...(resumeData.certifications as any[] || []), newCertification] });
   };
 
@@ -528,7 +528,7 @@ export default function SectionEditor({ resumeData, onChange, editorMode, active
   };
 
   const addCustomSection = () => {
-    onChange({ customSections: [...(resumeData.customSections || []), { title: 'New Section', content: '' }] });
+    onChange({ customSections: [...(resumeData.customSections || []), { title: 'New Section', content: '', placement: 'sidebar' }] });
   };
 
   const updateCustomSection = (index: number, field: string, value: string) => {

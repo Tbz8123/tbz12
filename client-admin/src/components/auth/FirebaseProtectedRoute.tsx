@@ -18,6 +18,7 @@ const FirebaseProtectedRoute: React.FC<FirebaseProtectedRouteProps> = ({
   const [_, setLocation] = useLocation();
 
   useEffect(() => {
+    localStorage.removeItem('mockUser');
     if (!loading) {
       // Check for mock user in localStorage first
       const mockUserData = localStorage.getItem('mockUser');

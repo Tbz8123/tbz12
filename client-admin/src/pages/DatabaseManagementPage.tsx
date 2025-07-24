@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { AlertTriangle, Database, Eye, EyeOff } from 'lucide-react';
+import { ExternalLink, AlertTriangle, Database, Eye, EyeOff } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
 const DatabaseManagementPage = () => {

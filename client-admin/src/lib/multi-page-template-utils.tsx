@@ -142,14 +142,14 @@ export const getContentUnits = (userData: any) => {
   return { mainUnits: units, sidebarUnits };
 };
 
-export const distributeContentToPages = (userData: any): Page[] => {
+export const distributeContentToPages = (userData: any) => {
   const { mainUnits, sidebarUnits } = getContentUnits(userData);
 
   const CONTENT_HEIGHT = 950;
   const SIDEBAR_HEIGHT = 1050;
 
-  const pages: Page[] = [];
-  let currentPage: Page = { mainUnits: [], sidebarUnits: [] };
+  const pages = [];
+  let currentPage = { mainUnits: [], sidebarUnits: [] };
   let currentMainHeight = 0;
   let currentSidebarHeight = 0;
 

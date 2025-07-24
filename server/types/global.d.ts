@@ -24,9 +24,6 @@ declare namespace Express {
       id: string;
     };
     visitorSession?: VisitorSessionData;
-    sessionId?: string;
-    visitorId?: string;
-    userId?: string;
   }
 }
 

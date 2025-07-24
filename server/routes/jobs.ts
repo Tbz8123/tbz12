@@ -186,7 +186,7 @@ jobsRouter.post("/titles", async (req: Request, res: Response) => {
     });
 
     return res.status(201).json(newJobTitle);
-  } catch (error: unknown) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ errors: error.errors });
     }
@@ -228,7 +228,7 @@ jobsRouter.put("/titles/:id", async (req: Request, res: Response) => {
     });
 
     return res.json(updatedJobTitle);
-  } catch (error: unknown) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ errors: error.errors });
     }
@@ -264,7 +264,7 @@ jobsRouter.delete("/titles/:id", async (req: Request, res: Response) => {
     });
 
     return res.json({ message: "Job title deleted successfully" });
-  } catch (error: unknown) {
+  } catch (error: any) {
     if (error instanceof Error && 'code' in error && error.code === 'P2025') {
       return res.status(404).json({ error: "Job title not found" });
     }

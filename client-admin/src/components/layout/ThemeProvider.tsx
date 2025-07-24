@@ -1,5 +1,5 @@
 import React, { createContext, useContext, ReactNode } from 'react';
-import { useTheme } from '@/hooks/use-theme';
+import { useTheme } from '@/hooks/use-theme.tsx';
 
 interface ThemeContextType {
   theme: 'light' | 'dark';

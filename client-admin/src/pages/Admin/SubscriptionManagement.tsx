@@ -15,7 +15,10 @@ import {
   Trash2, 
   Package, 
   Percent, 
+  DollarSign,
   Users,
+  Calendar,
+  Settings,
   Tag,
   TrendingUp
 } from 'lucide-react';

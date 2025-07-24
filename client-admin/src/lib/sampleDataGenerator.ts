@@ -163,15 +163,18 @@ const sampleLanguages = [
 const sampleCustomSections = [
   {
     title: "Projects",
-    content: "• E-commerce Platform: Built a full-stack e-commerce solution with React and Node.js\n• Task Management App: Developed a collaborative task management application\n• Data Visualization Tool: Created interactive dashboards using D3.js and Python"
+    content: "• E-commerce Platform: Built a full-stack e-commerce solution with React and Node.js\n• Task Management App: Developed a collaborative task management application\n• Data Visualization Tool: Created interactive dashboards using D3.js and Python",
+    placement: "main"
   },
   {
     title: "Achievements",
-    content: "• Employee of the Month (3 times)\n• Led team that won company hackathon\n• Published technical article with 10k+ views\n• Speaker at 2 tech conferences"
+    content: "• Employee of the Month (3 times)\n• Led team that won company hackathon\n• Published technical article with 10k+ views\n• Speaker at 2 tech conferences",
+    placement: "main"
   },
   {
     title: "Interests",
-    content: "Technology, Open Source, Machine Learning, Photography, Hiking, Chess"
+    content: "Technology, Open Source, Machine Learning, Photography, Hiking, Chess",
+    placement: "sidebar"
   }
 ];
 

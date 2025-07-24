@@ -276,7 +276,7 @@ const TemplatesPage = () => {
             ))
           ) : filteredTemplates && filteredTemplates.length > 0 ? (
             // Display templates
-            filteredTemplates.map((template: ResumeTemplate, index: number) => (
+            filteredTemplates.map((template: ResumeTemplate, index) => (
               <motion.div 
                 key={template.id} 
                 className="relative group flex items-center justify-center"

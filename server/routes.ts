@@ -1757,7 +1757,7 @@ export default function setupRoutes(app: express.Express): Server {
         // Template statistics
         Promise.all([
           prisma.template.count(),
-          prisma.template.count({ where: { isDefault: true } }),
+          prisma.template.count(),
           prisma.template.findMany({
             select: {
               id: true,

@@ -81,7 +81,7 @@ router.get('/stats/:templateId', async (req: Request, res: Response) => {
       legacyDownloads: downloadCount
     });
 
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('Error getting template stats:', error);
     res.status(500).json({ error: 'Failed to get template statistics' });
   }

@@ -11,7 +11,7 @@ import { motion, useAnimation } from 'framer-motion';
 import html2canvas from 'html2canvas';
 import { useToast } from '@/components/ui/use-toast';
 import { useInView } from 'react-intersection-observer';
-
+import { Enhanced3DThumbnailGenerator, generateOptimizedThumbnail } from '@/lib/enhanced3DThumbnailGenerator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, Image, Upload } from 'lucide-react';

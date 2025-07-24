@@ -88,27 +88,17 @@ function Router() {
 
 function App() {
   // Initialize Google Analytics 4
-  useEffect(() => {
-    initGA();
-    enableEnhancedMeasurement();
+  // useEffect(() => {
+  //   initGA();
+  //   enableEnhancedMeasurement();
 
-    // Enable debug mode in development
-    if (import.meta.env.DEV) {
-      enableDebugMode();
-    }
-  }, []);
+  //   // Enable debug mode in development
+  //   if (import.meta.env.DEV) {
+  //     enableDebugMode();
+  //   }
+  // }, []);
 
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <TooltipProvider>
-        <AuthProvider>
-          <Header />
-          <Router />
-          <Toaster />
-        </AuthProvider>
-      </TooltipProvider>
-    </Suspense>
-  );
+  return <h1>Hello World</h1>;
 }
 
 export default App;

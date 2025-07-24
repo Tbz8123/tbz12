@@ -228,7 +228,7 @@ export const distributeContentToPages = (userData: UserData): Page[] => {
   const SIDEBAR_HEIGHT = 1050;
 
   const pages: Page[] = [];
-  let currentPage: Page = { mainUnits: [], sidebarUnits: [] };
+  let currentPage = { mainUnits: [], sidebarUnits: [] };
   let currentMainHeight = 0;
   let currentSidebarHeight = 0;
 

@@ -28,7 +28,7 @@ router.get('/activities', async (req, res) => {
     }
 
     res.json(activities);
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('Error fetching recent activities:', error);
     res.status(500).json({ error: 'Failed to fetch recent activities' });
   }
@@ -39,7 +39,7 @@ router.get('/templates', async (req, res) => {
   try {
     const templates = memoryAnalytics.getTemplateStats();
     res.json(templates);
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('Error fetching template statistics:', error);
     res.status(500).json({ error: 'Failed to fetch template statistics' });
   }
@@ -50,7 +50,7 @@ router.get('/countries', async (req, res) => {
   try {
     const countries = memoryAnalytics.getCountryStats();
     res.json(countries);
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('Error fetching country statistics:', error);
     res.status(500).json({ error: 'Failed to fetch country statistics' });
   }
@@ -67,7 +67,7 @@ router.get('/sessions/:sessionId', async (req, res) => {
     }
 
     res.json(session);
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('Error fetching session details:', error);
     res.status(500).json({ error: 'Failed to fetch session details' });
   }
@@ -81,7 +81,7 @@ router.get('/users/:userId/activities', async (req, res) => {
 
     const activities = memoryAnalytics.getActivitiesByUser(userId, parseInt(limit as string));
     res.json(activities);
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('Error fetching user activities:', error);
     res.status(500).json({ error: 'Failed to fetch user activities' });
   }
@@ -93,7 +93,7 @@ router.get('/sessions/:sessionId/activities', async (req, res) => {
     const { sessionId } = req.params;
     const activities = memoryAnalytics.getActivitiesBySession(sessionId);
     res.json(activities);
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('Error fetching session activities:', error);
     res.status(500).json({ error: 'Failed to fetch session activities' });
   }
@@ -104,7 +104,7 @@ router.get('/memory-usage', async (req, res) => {
   try {
     const usage = memoryAnalytics.getMemoryUsage();
     res.json(usage);
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('Error fetching memory usage:', error);
     res.status(500).json({ error: 'Failed to fetch memory usage' });
   }
@@ -116,7 +116,7 @@ router.get('/top-templates', async (req, res) => {
     const { limit = 10 } = req.query;
     const templates = memoryAnalytics.getTopTemplates(parseInt(limit as string));
     res.json(templates);
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('Error fetching top templates:', error);
     res.status(500).json({ error: 'Failed to fetch top templates' });
   }
@@ -128,7 +128,7 @@ router.get('/top-countries', async (req, res) => {
     const { limit = 10 } = req.query;
     const countries = memoryAnalytics.getTopCountries(parseInt(limit as string));
     res.json(countries);
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('Error fetching top countries:', error);
     res.status(500).json({ error: 'Failed to fetch top countries' });
   }
@@ -139,7 +139,7 @@ router.delete('/clear', async (req, res) => {
   try {
     memoryAnalytics.clear();
     res.json({ message: 'Memory analytics cleared successfully' });
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('Error clearing memory analytics:', error);
     res.status(500).json({ error: 'Failed to clear memory analytics' });
   }

@@ -682,7 +682,7 @@ export default function ImportHistoryPage() {
       const groupedDataArray = Array.from(groupedData.entries());
 
       for (let i = 0; i < groupedDataArray.length; i++) {
-        const [_titleKey, group] = groupedDataArray[i];
+        const [titleKey, group] = groupedDataArray[i];
         processedCount++;
 
         const row = group.titleInfo;
@@ -951,7 +951,7 @@ export default function ImportHistoryPage() {
     }
   };
 
-  const processProfessionalSummariesImport = async (csvData: string, _fileName: string, jobId: string) => {
+  const processProfessionalSummariesImport = async (csvData: string, fileName: string, jobId: string) => {
     // Similar logic to Professional Summary Management page
     const updateJob = async (data: any) => {
       try {
@@ -1739,4 +1739,4 @@ export default function ImportHistoryPage() {
       </div>
     </div>
   );
-}
+} 

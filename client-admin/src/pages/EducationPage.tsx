@@ -154,7 +154,7 @@ const EducationPage = () => {
   const [, setLocation] = useLocation();
   // Connect to ResumeStore with stable selectors and hydration check
   const resumeData = useResumeStore(state => state.resumeData);
-  const _actions = useResumeStore(state => state.actions);
+  const actions = useResumeStore(state => state.actions);
   const getProTemplateById = useResumeStore(state => state.getProTemplateById);
   const activeProTemplateId = useResumeStore(state => state.activeProTemplateId);
   

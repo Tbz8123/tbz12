@@ -153,14 +153,12 @@ export const useResumeStore = create<ResumeState>()(
     persist(
       (set, get) => ({
         resumeData: getDefaultResumeData(),
-        get resume() { return get().resumeData; }, // Alias for resumeData
         proTemplates: [],
         isLoadingProTemplates: true,
         activeProTemplateId: null,
         getProTemplateById: (id) => {
           return get().proTemplates.find((t) => t.id === id);
         },
-        updateResume: (data) => get().actions.updateResumeData(data), // Alias for updateResumeData
         actions: {
           updateResumeData: (data) =>
             set((state) => ({ resumeData: { ...state.resumeData, ...data, updatedAt: new Date().toISOString() } })),

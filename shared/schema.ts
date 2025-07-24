@@ -84,7 +84,6 @@ export interface Language {
 }
 
 export interface Certification {
-  id: string;
   name: string;
   issuer: string;
   date: string;
@@ -129,7 +128,6 @@ export interface ResumeTemplateRecord {
   thumbnailUrl?: string | null;
   enhanced3DThumbnailUrl?: string | null;
   uploadedImageUrl?: string | null;
-  previewImageUrl?: string | null;
   thumbnailType?: 'standard' | 'enhanced3d' | null;
   displayMode?: 'thumbnail' | 'uploaded_image' | null;
   enhanced3DMetadata?: any | null;

@@ -61,7 +61,7 @@ router.get("/", async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error("Error fetching skills:", error);
+    console.error("Error fetching skills:", error as any);
     res.status(500).json({ error: "Failed to fetch skills" });
   }
 });
@@ -84,7 +84,7 @@ router.get("/:id/categories", async (req: Request, res: Response) => {
 
     res.json(categories);
   } catch (error) {
-    console.error("Error fetching skill categories:", error);
+    console.error("Error fetching skill categories:", error as any);
     res.status(500).json({ error: "Failed to fetch skill categories" });
   }
 });

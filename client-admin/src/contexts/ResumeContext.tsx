@@ -4,10 +4,10 @@ import { ResumeData, ResumeTemplateRecord } from '@shared/schema';
 
 interface ResumeContextType {
   resumeData: ResumeData;
-  proTemplates: any[];
+  proTemplates: ResumeTemplateRecord[];
   isLoadingProTemplates: boolean;
-  activeProTemplateId: number | null;
-  getProTemplateById?: (id: number | null) => any | undefined;
+  activeProTemplateId: string | null;
+  getProTemplateById?: (id: string | null) => ResumeTemplateRecord | undefined;
   updateResumeData: (data: Partial<ResumeData>) => void;
   updateSkills: (skills: any[]) => void;
   updateLanguages: (languages: any[]) => void;
@@ -15,7 +15,7 @@ interface ResumeContextType {
   updateCustomSections: (sections: any[]) => void;
   updateEducation: (education: any[]) => void;
   updateWorkExperience: (experience: any[]) => void;
-  setActiveProTemplateId: (id: number | null) => void;
+  setActiveProTemplateId: (id: string | null) => void;
 }
 
 const ResumeContext = createContext<ResumeContextType | undefined>(undefined);

@@ -1,24 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import {
-  useSortable,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { X, GripVertical, Eye, EyeOff, ArrowUpDown } from 'lucide-react';
 import { useResumeStore } from '@/stores/resumeStore';
 
@@ -35,97 +17,11 @@ interface SectionItem {
   required?: boolean;
 }
 
-interface SortableItemProps {
-  section: SectionItem;
-  toggleSectionVisibility: (sectionId: string) => void;
-}
-
-const SortableItem: React.FC<SortableItemProps> = ({ section, toggleSectionVisibility }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: section.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`flex items-center gap-3 p-4 bg-gray-50 rounded-lg border-2 transition-all ${
-        isDragging
-          ? 'border-purple-300 shadow-lg bg-white z-10'
-          : 'border-transparent hover:border-gray-200'
-      } ${
-        !section.visible ? 'opacity-50' : ''
-      }`}
-    >
-      {/* Drag Handle */}
-      <div
-        {...attributes}
-        {...listeners}
-        className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
-      >
-        <GripVertical className="w-5 h-5" />
-      </div>
-
-      {/* Section Icon */}
-      <div className="flex-shrink-0">
-        {section.icon}
-      </div>
-
-      {/* Section Name */}
-      <div className="flex-1">
-        <span className="font-medium text-gray-900">
-          {section.name}
-        </span>
-        {section.required && (
-          <span className="ml-2 text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">
-            Required
-          </span>
-        )}
-      </div>
-
-      {/* Visibility Toggle */}
-      {!section.required && (
-        <button
-          onClick={() => toggleSectionVisibility(section.id)}
-          className={`p-2 rounded-full transition-colors ${
-            section.visible
-              ? 'text-green-600 hover:bg-green-50'
-              : 'text-gray-400 hover:bg-gray-100'
-          }`}
-        >
-          {section.visible ? (
-            <Eye className="w-4 h-4" />
-          ) : (
-            <EyeOff className="w-4 h-4" />
-          )}
-        </button>
-      )}
-    </div>
-  );
-};
-
 const SectionReorderModal: React.FC<SectionReorderModalProps> = ({ isOpen, onClose }) => {
   const resumeData = useResumeStore((state) => state.resume);
   const updateResume = useResumeStore((state) => state.updateResume);
 
   const [sections, setSections] = useState<SectionItem[]>([]);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
 
   // Define all available sections with their display names and icons
   const sectionDefinitions: Record<string, { name: string; icon: React.ReactNode; required?: boolean }> = {
@@ -177,17 +73,14 @@ const SectionReorderModal: React.FC<SectionReorderModalProps> = ({ isOpen, onClo
     }
   }, [isOpen, resumeData.sectionOrder]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
 
-    if (active.id !== over?.id) {
-      setSections((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over?.id);
+    const items = Array.from(sections);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
 
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
+    setSections(items);
   };
 
   const toggleSectionVisibility = (sectionId: string) => {
@@ -271,26 +164,85 @@ const SectionReorderModal: React.FC<SectionReorderModalProps> = ({ isOpen, onClo
 
             {/* Content */}
             <div className="p-6 flex-1 overflow-y-auto">
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={sections.map(section => section.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <div className="space-y-2 transition-colors rounded-lg p-2">
-                    {sections.map((section) => (
-                      <SortableItem
-                        key={section.id}
-                        section={section}
-                        toggleSectionVisibility={toggleSectionVisibility}
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
+              <DragDropContext onDragEnd={handleDragEnd}>
+                <Droppable droppableId="sections">
+                  {(provided, snapshot) => (
+                    <div
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                      className={`space-y-2 ${
+                        snapshot.isDraggingOver ? 'bg-blue-50' : ''
+                      } transition-colors rounded-lg p-2`}
+                    >
+                      {sections.map((section, index) => (
+                        <Draggable
+                          key={section.id}
+                          draggableId={section.id}
+                          index={index}
+                        >
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              className={`flex items-center gap-3 p-4 bg-gray-50 rounded-lg border-2 transition-all ${
+                                snapshot.isDragging
+                                  ? 'border-purple-300 shadow-lg bg-white'
+                                  : 'border-transparent hover:border-gray-200'
+                              } ${
+                                !section.visible ? 'opacity-50' : ''
+                              }`}
+                            >
+                              {/* Drag Handle */}
+                              <div
+                                {...provided.dragHandleProps}
+                                className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
+                              >
+                                <GripVertical className="w-5 h-5" />
+                              </div>
+
+                              {/* Section Icon */}
+                              <div className="flex-shrink-0">
+                                {section.icon}
+                              </div>
+
+                              {/* Section Name */}
+                              <div className="flex-1">
+                                <span className="font-medium text-gray-900">
+                                  {section.name}
+                                </span>
+                                {section.required && (
+                                  <span className="ml-2 text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">
+                                    Required
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Visibility Toggle */}
+                              {!section.required && (
+                                <button
+                                  onClick={() => toggleSectionVisibility(section.id)}
+                                  className={`p-2 rounded-full transition-colors ${
+                                    section.visible
+                                      ? 'text-green-600 hover:bg-green-50'
+                                      : 'text-gray-400 hover:bg-gray-100'
+                                  }`}
+                                >
+                                  {section.visible ? (
+                                    <Eye className="w-4 h-4" />
+                                  ) : (
+                                    <EyeOff className="w-4 h-4" />
+                                  )}
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
             </div>
 
             {/* Footer */}

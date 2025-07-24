@@ -134,7 +134,7 @@ export async function generateHighQualityThumbnail(
     }
 
     // Restore ALL original styles
-    Object.entries(originalStyles).forEach(([property, value]: [string, string]) => {
+    Object.entries(originalStyles).forEach(([property, value]) => {
       (element.style as any)[property] = value;
     });
     element.className = originalClassName;

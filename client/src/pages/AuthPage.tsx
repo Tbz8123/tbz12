@@ -176,9 +176,9 @@ const AuthPage = () => {
                         name="username"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-gray-700">Username</FormLabel>
+                            <FormLabel className="text-gray-700">Admin Username</FormLabel>
                             <FormControl>
-                              <Input className="border-gray-300 focus:border-primary focus:ring-primary" placeholder="Choose a username" {...field} />
+                              <Input className="border-gray-300 focus:border-primary focus:ring-primary" placeholder="Choose an admin username" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>

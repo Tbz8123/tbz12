@@ -81,7 +81,7 @@ router.get('/', async (req: Request, res: Response) => {
     });
 
     // Transform data to match frontend expectations
-    const transformedImports = imports.map((imp: ImportHistoryRecord) => ({
+    const transformedImports = imports.map((imp: any) => ({
       id: imp.id,
       fileName: imp.fileName,
       fileSize: imp.fileSize,
@@ -385,8 +385,8 @@ async function processImportJob(jobId: string, job: Record<string, unknown>) {
       startedAt: new Date(),
       currentOperation: 'Server-side processing started...'
     });
-    const csvData = metadata?.csvData as string;
-    const importType = (metadata?.importType as string) || 'job_titles';
+    const csvData = metadata?.csvData;
+    const importType = metadata?.importType || 'job_titles';
 
     console.log(`📋 Import type: ${importType}`);
     console.log(`📄 CSV data length: ${csvData?.length || 0} characters`);
@@ -510,7 +510,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
 
       // Build a Set of normalized titles that are present in the uploaded file
       const uploadedTitleSet = new Set(
-        Array.from(groupedData.values()).map((g: any) => g.titleInfo.title.toLowerCase().trim())
+        Array.from(groupedData.values()).map((g: { titleInfo: { title: string } }) => g.titleInfo.title.toLowerCase().trim())
       );
 
       // Identify titles that are NOT in the uploaded file

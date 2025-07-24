@@ -60,7 +60,7 @@ const sampleUserData = {
 };
 
 export default function ViewTemplate() {
-  const [_match, params] = useRoute('/admin/templates/:id');
+  const [match, params] = useRoute('/admin/templates/:id');
   const templateId = params?.id;
 
   const { data: template, isLoading, error } = useQuery<Template>({

@@ -895,7 +895,7 @@ export default function ResumeBuilder() {
 
   console.log('[ResumeBuilder] Active Template for Preview:', activeTemplate);
   console.log('[ResumeBuilder] Active Template ID:', activeTemplateId);
-  console.log('[ResumeBuilder] All available templates:', templates.map((t: PrismaResumeTemplate & { templateType: 'snap' | 'pro' }) => ({ id: t.id, name: t.name })));
+  console.log('[ResumeBuilder] All available templates:', templates.map(t => ({ id: t.id, name: t.name })));
   console.log('[ResumeBuilder] Templates loading state:', isLoadingTemplates);
   console.log('[ResumeBuilder] Skills data being passed to preview:', previewData.skills);
   console.log('[ResumeBuilder] Full merged preview data:', previewData);

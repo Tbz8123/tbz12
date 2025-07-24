@@ -28,12 +28,13 @@ export default defineConfig({
   },
   server: {
     port: 5174,
-    proxy: {
-      '/api': {
-        target: process.env.VITE_API_URL || 'http://localhost:3000',
-        changeOrigin: true,
-      },
-    },
+    // Temporarily disable proxy to test frontend rendering
+    // proxy: {
+    //   '/api': {
+    //     target: process.env.VITE_API_URL || 'http://localhost:3000',
+    //     changeOrigin: true,
+    //   },
+    // },
   },
   define: {
     'process.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || 'http://localhost:3000'),

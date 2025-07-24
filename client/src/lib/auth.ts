@@ -95,7 +95,7 @@ export function setJwtCookie(res: ApiResponse, token: string) {
   };
   // The `cookie` library can be used for more robust cookie setting if needed
   // For now, setting it directly:
-  res.setHeader('Set-Cookie', `token=${token}; ${Object.entries(cookieOptions).map(([key, value]: [string, any]) => `${key === 'maxAge' ? 'Max-Age' : key}=${value}`).join('; ')}`);
+  res.setHeader('Set-Cookie', `token=${token}; ${Object.entries(cookieOptions).map(([key, value]) => `${key === 'maxAge' ? 'Max-Age' : key}=${value}`).join('; ')}`);
 }
 
 export function clearJwtCookie(res: ApiResponse) {

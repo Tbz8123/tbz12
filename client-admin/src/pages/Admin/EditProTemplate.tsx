@@ -1,3 +1,4 @@
+import React from 'react';
 import { useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import ProTemplateEditor from './ProTemplateEditor';
@@ -62,4 +63,4 @@ export default function EditProTemplate() {
       isEditing
     />
   );
-}
+} 

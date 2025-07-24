@@ -28,7 +28,6 @@ interface ExtendedUser extends User {
   currentTier?: string;
   subscriptionStatus?: string;
   role?: string;
-  isAdmin?: boolean;
 
   // Profile data
   userProfile?: {
@@ -408,4 +407,4 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
+}; 

@@ -12,7 +12,7 @@ import {
   User, 
   Settings, 
   BarChart3, 
- 
+  Calendar, 
   Star,
   TrendingUp,
   Award,
