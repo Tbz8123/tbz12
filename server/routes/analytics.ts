@@ -137,15 +137,15 @@ router.get('/visitors', async (req: Request, res: Response) => {
     });
 
     // Separate registered and unregistered visitors
-    const registeredVisitors = visitors.filter(v => v.isRegistered && v.user);
-    const unregisteredVisitors = visitors.filter(v => !v.isRegistered || !v.user);
+    const registeredVisitors = visitors.filter((v: any) => v.isRegistered && v.user);
+    const unregisteredVisitors = visitors.filter((v: any) => !v.isRegistered || !v.user);
 
     // Count active users
-    const activeRegistered = activeVisitors.filter(v => v.isRegistered && v.user).length;
-    const activeUnregistered = activeVisitors.filter(v => !v.isRegistered || !v.user).length;
+    const activeRegistered = activeVisitors.filter((v: any) => v.isRegistered && v.user).length;
+    const activeUnregistered = activeVisitors.filter((v: any) => !v.isRegistered || !v.user).length;
 
     // Transform data for frontend
-    const registered = registeredVisitors.map(v => ({
+    const registered = registeredVisitors.map((v: any) => ({
       id: v.userId || v.id,
       name: v.user?.name || 'Unknown',
       email: v.user?.email || 'Unknown',
@@ -162,7 +162,7 @@ router.get('/visitors', async (req: Request, res: Response) => {
       recentDownloads: []
     }));
 
-    const unregistered = unregisteredVisitors.map(v => ({
+    const unregistered = unregisteredVisitors.map((v: any) => ({
       anonymousId: v.sessionId,
       userAgent: v.userAgent || 'Unknown',
       country: v.country || 'Unknown',
@@ -442,7 +442,7 @@ router.get('/funnel', async (req: Request, res: Response) => {
       avgTime: number;
     }
 
-    const funnelAnalysis = funnelData.reduce((acc: Record<string, FunnelAnalysisItem>, item) => {
+    const funnelAnalysis = funnelData.reduce((acc: Record<string, FunnelAnalysisItem>, item: any) => {
       const key = `${item.funnelType}-${item.step}`;
       if (!acc[key]) {
         acc[key] = {
@@ -462,7 +462,7 @@ router.get('/funnel', async (req: Request, res: Response) => {
     }, {} as Record<string, FunnelAnalysisItem>);
 
     // Calculate averages
-    Object.values(funnelAnalysis).forEach((item) => {
+    Object.values(funnelAnalysis).forEach((item: FunnelAnalysisItem) => {
       if (item.totalTime > 0) {
         item.avgTime = item.totalTime / item.count;
       }

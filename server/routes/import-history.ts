@@ -75,7 +75,7 @@ router.get('/', async (req: Request, res: Response) => {
     });
 
     // Transform data to match frontend expectations
-    const transformedImports = imports.map((imp) => ({
+    const transformedImports = imports.map((imp: any) => ({
       id: imp.id,
       fileName: imp.fileName,
       fileSize: imp.fileSize,
@@ -310,7 +310,7 @@ async function processImportJob(jobId: string, job: Record<string, any>) {
   const updateJob = async (data: Record<string, any>) => {
     try {
       const { currentOperation, ...otherData } = data;
-      const updateData: Prisma.ImportHistoryUpdateInput = {
+      const updateData: any = {
         ...otherData,
         updatedAt: new Date()
       };
@@ -478,11 +478,11 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
       );
 
       // Identify titles that are NOT in the uploaded file
-      const titlesToDelete = existingTitles.filter((t) => !uploadedTitleSet.has(t.title.toLowerCase().trim()));
+      const titlesToDelete = existingTitles.filter((t: any) => !uploadedTitleSet.has(t.title.toLowerCase().trim()));
 
       if (titlesToDelete.length > 0) {
         console.log(`🗑️ Deleting ${titlesToDelete.length} job titles not present in uploaded file:`);
-        titlesToDelete.forEach((t) => console.log(`  - "${t.title}" (ID: ${t.id})`));
+        titlesToDelete.forEach((t: any) => console.log(`  - "${t.title}" (ID: ${t.id})`));
 
         // Delete job descriptions first, then job titles
         for (const title of titlesToDelete) {
@@ -494,7 +494,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
 
         const deletedTitles = await prisma.jobTitle.deleteMany({
           where: {
-            id: { in: titlesToDelete.map(t => t.id) }
+            id: { in: titlesToDelete.map((t: any) => t.id) }
           }
         });
 
@@ -713,11 +713,11 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
       );
 
       // Identify titles that are NOT in the uploaded file
-      const titlesToDelete = existingTitles.filter((t) => !uploadedTitleSet.has(t.title.toLowerCase().trim()));
+      const titlesToDelete = existingTitles.filter((t: any) => !uploadedTitleSet.has(t.title.toLowerCase().trim()));
 
       if (titlesToDelete.length > 0) {
         console.log(`🗑️ Deleting ${titlesToDelete.length} skills job titles not present in uploaded file:`);
-        titlesToDelete.forEach((t) => console.log(`  - "${t.title}" (ID: ${t.id})`));
+        titlesToDelete.forEach((t: any) => console.log(`  - "${t.title}" (ID: ${t.id})`));
 
         // Delete skill categories first, then job titles
         for (const title of titlesToDelete) {

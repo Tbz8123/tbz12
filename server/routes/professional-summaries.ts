@@ -43,7 +43,7 @@ professionalSummariesRouter.get("/jobtitles", async (req: Request, res: Response
     console.log(`Fetching professional summary job titles (page: ${page}, limit: ${limit}, category: ${category || 'all'}, search: ${searchQuery || 'none'})`);
 
     // Build where clause
-    const where: Prisma.ProfessionalSummaryJobTitleWhereInput = {};
+    const where: any = {};
     if (category) {
       where.category = category;
     }
@@ -102,7 +102,7 @@ professionalSummariesRouter.get("/jobtitles/:id/summaries", async (req: Request,
     const searchTerm = req.query.search as string || null;
 
     // Build where clause
-    const where: Prisma.ProfessionalSummaryWhereInput = { professionalSummaryJobTitleId: id };
+    const where: any = { professionalSummaryJobTitleId: id };
     if (searchTerm) {
       where.content = {
         contains: searchTerm,
@@ -143,7 +143,7 @@ professionalSummariesRouter.get("/summaries", async (req: Request, res: Response
     const searchTerm = req.query.search as string || null;
 
     // Build where clause
-    const where: Prisma.ProfessionalSummaryWhereInput = {};
+    const where: any = {};
     if (professionalSummaryJobTitleId) {
       where.professionalSummaryJobTitleId = professionalSummaryJobTitleId;
     }
@@ -213,7 +213,7 @@ professionalSummariesRouter.post("/jobtitles", async (req: Request, res: Respons
 
     // Handle raw query constraint error
     if (error && typeof error === 'object' && 'code' in error && error.code === 'P2010') {
-      const meta = error as { code?: string };
+      const meta = error as { code?: string; meta?: { code?: string } };
       if (meta.meta?.code === '23505') {
         return res.status(409).json({ 
           error: "Duplicate professional summary job title", 
@@ -399,7 +399,7 @@ professionalSummariesRouter.get("/export", async (req: Request, res: Response) =
     const validJobTitles = await prisma.professionalSummaryJobTitle.findMany({
       select: { id: true }
     });
-    const validJobTitleIds = validJobTitles.map(jt => jt.id);
+    const validJobTitleIds = validJobTitles.map((jt: any) => jt.id);
 
     const professionalSummaries = await prisma.professionalSummary.findMany({
       where: {
@@ -421,7 +421,7 @@ professionalSummariesRouter.get("/export", async (req: Request, res: Response) =
     console.log('Found', professionalSummaries.length, 'professional summaries');
 
     // Transform data for export - simplified format for import compatibility
-    const exportData = professionalSummaries.map(summary => ({
+    const exportData = professionalSummaries.map((summary: any) => ({
       title: summary.professionalSummaryJobTitle.title,
       category: summary.professionalSummaryJobTitle.category,
       content: summary.content,
@@ -435,14 +435,14 @@ professionalSummariesRouter.get("/export", async (req: Request, res: Response) =
     } else if (format === 'excel') {
       // For now, return CSV with .xlsx extension until Excel library is added
       const csvHeaders = ['title', 'category', 'content', 'isRecommended'];
-      const csvRows = exportData.map(row => [
+      const csvRows = exportData.map((row: any) => [
         `"${row.title.replace(/"/g, '""')}"`,
         `"${row.category.replace(/"/g, '""')}"`,
         `"${row.content.replace(/"/g, '""')}"`,
         row.isRecommended
       ]);
 
-      const csvContent = [csvHeaders.join(','), ...csvRows.map(row => row.join(','))].join('\n');
+      const csvContent = [csvHeaders.join(','), ...csvRows.map((row: any) => row.join(','))].join('\n');
 
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', 'attachment; filename="professional-summaries.xlsx"');
@@ -450,14 +450,14 @@ professionalSummariesRouter.get("/export", async (req: Request, res: Response) =
     } else {
       // CSV format (default)
       const csvHeaders = ['title', 'category', 'content', 'isRecommended'];
-      const csvRows = exportData.map(row => [
+      const csvRows = exportData.map((row: any) => [
         `"${row.title.replace(/"/g, '""')}"`,
         `"${row.category.replace(/"/g, '""')}"`,
         `"${row.content.replace(/"/g, '""')}"`,
         row.isRecommended
       ]);
 
-      const csvContent = [csvHeaders.join(','), ...csvRows.map(row => row.join(','))].join('\n');
+      const csvContent = [csvHeaders.join(','), ...csvRows.map((row: any) => row.join(','))].join('\n');
 
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader('Content-Disposition', 'attachment; filename="professional-summaries.csv"');

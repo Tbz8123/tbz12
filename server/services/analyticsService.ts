@@ -169,7 +169,7 @@ export class AnalyticsService {
   }
 
   // Track a new visitor or update existing visitor
-  async trackVisitor(data: TrackVisitorData): Promise<Prisma.VisitorAnalyticsGetPayload<{}>> {
+  async trackVisitor(data: TrackVisitorData): Promise<any> {
     try {
       const { sessionId, userId, ipAddress, userAgent, referrer, landingPage } = data;
 
@@ -224,7 +224,7 @@ export class AnalyticsService {
   }
 
   // Track a session
-  async trackSession(data: TrackSessionData): Promise<Prisma.SessionAnalyticsGetPayload<{}>> {
+  async trackSession(data: TrackSessionData): Promise<any> {
     try {
       const { sessionId, visitorId, userId, startTime } = data;
 
