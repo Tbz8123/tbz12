@@ -545,7 +545,7 @@ router.get('/funnel', async (req: Request, res: Response) => {
     }, {} as Record<string, FunnelAnalysisItem>);
 
     // Calculate averages
-    Object.values(funnelAnalysis).forEach((item: FunnelAnalysisItem) => {
+    (Object.values(funnelAnalysis) as FunnelAnalysisItem[]).forEach((item: FunnelAnalysisItem) => {
       if (item.totalTime > 0) {
         item.avgTime = item.totalTime / item.count;
       }
