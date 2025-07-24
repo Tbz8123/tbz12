@@ -174,13 +174,13 @@ export class AnalyticsService {
       const { sessionId, userId, ipAddress, userAgent, referrer, landingPage } = data;
 
       // Check if visitor already exists
-      const existingVisitor = await prisma.visitorAnalytics.findUnique({
+      const existingVisitor = await this.prisma.visitorAnalytics.findUnique({
         where: { sessionId }
       });
 
       if (existingVisitor) {
         // Update existing visitor
-        return await prisma.visitorAnalytics.update({
+        return await this.prisma.visitorAnalytics.update({
           where: { sessionId },
           data: {
             lastSeen: new Date(),
@@ -197,7 +197,7 @@ export class AnalyticsService {
       const userAgentData: UserAgentData = userAgent ? parseUserAgent(userAgent) : { deviceType: 'unknown', browserName: 'unknown', browserVersion: '', osName: 'unknown', osVersion: '' };
 
       // Create new visitor
-      const visitor = await prisma.visitorAnalytics.create({
+      const visitor = await this.prisma.visitorAnalytics.create({
         data: {
           sessionId,
           userId,
@@ -228,7 +228,7 @@ export class AnalyticsService {
     try {
       const { sessionId, visitorId, userId, startTime } = data;
 
-      return await prisma.sessionAnalytics.create({
+      return await this.prisma.sessionAnalytics.create({
         data: {
           sessionId,
           visitorId,
@@ -245,7 +245,7 @@ export class AnalyticsService {
   // End a session
   async endSession(sessionId: string): Promise<void> {
     try {
-      const session = await prisma.sessionAnalytics.findFirst({
+      const session = await this.prisma.sessionAnalytics.findFirst({
         where: { sessionId }
       });
 
@@ -253,7 +253,7 @@ export class AnalyticsService {
         const endTime = new Date();
         const duration = Math.floor((endTime.getTime() - session.startTime.getTime()) / 1000);
 
-        await prisma.sessionAnalytics.update({
+        await this.prisma.sessionAnalytics.update({
           where: { id: session.id },
           data: {
             endTime,
@@ -451,7 +451,7 @@ export class AnalyticsService {
   // Get session context for enhanced tracking
   private async getSessionContext(sessionId: string): Promise<SessionContext | null> {
     try {
-      const visitor = await prisma.visitorAnalytics.findUnique({
+      const visitor = await this.prisma.visitorAnalytics.findUnique({
         where: { sessionId },
         include: {
           user: {
@@ -502,7 +502,7 @@ export class AnalyticsService {
       }
 
       // Update geographic analytics
-      const visitor = await prisma.visitorAnalytics.findUnique({
+      const visitor = await this.prisma.visitorAnalytics.findUnique({
         where: { sessionId: data.sessionId }
       });
 
@@ -531,7 +531,7 @@ export class AnalyticsService {
       });
 
       // Update visitor to mark as registered
-      await prisma.visitorAnalytics.update({
+      await this.prisma.visitorAnalytics.update({
         where: { sessionId: data.sessionId },
         data: {
           isRegistered: true,
@@ -540,7 +540,7 @@ export class AnalyticsService {
       });
 
       // Update geographic analytics
-      const visitor = await prisma.visitorAnalytics.findUnique({
+      const visitor = await this.prisma.visitorAnalytics.findUnique({
         where: { sessionId: data.sessionId }
       });
 
@@ -570,7 +570,7 @@ export class AnalyticsService {
       });
 
       // Update geographic analytics
-      const visitor = await prisma.visitorAnalytics.findUnique({
+      const visitor = await this.prisma.visitorAnalytics.findUnique({
         where: { sessionId: data.sessionId }
       });
 
@@ -588,7 +588,7 @@ export class AnalyticsService {
   // Update session page views
   private async updateSessionPageViews(sessionId: string, pageUrl?: string) {
     try {
-      const session = await prisma.sessionAnalytics.findFirst({
+      const session = await this.prisma.sessionAnalytics.findFirst({
         where: { sessionId }
       });
 
@@ -598,7 +598,7 @@ export class AnalyticsService {
           pagesVisited.push(pageUrl);
         }
 
-        await prisma.sessionAnalytics.update({
+        await this.prisma.sessionAnalytics.update({
           where: { id: session.id },
           data: {
             pageViews: { increment: 1 },
@@ -614,7 +614,7 @@ export class AnalyticsService {
   // Update template analytics
   private async updateTemplateAnalytics(templateId: string, templateType: string, templateName?: string, activityType?: string) {
     try {
-      const existing = await prisma.templateAnalytics.findUnique({
+      const existing = await this.prisma.templateAnalytics.findUnique({
         where: { templateId_templateType: { templateId, templateType } }
       });
 
@@ -628,12 +628,12 @@ export class AnalyticsService {
           updateData.totalDownloads = { increment: 1 };
         }
 
-        await prisma.templateAnalytics.update({
+        await this.prisma.templateAnalytics.update({
           where: { templateId_templateType: { templateId, templateType } },
           data: updateData
         });
       } else {
-        await prisma.templateAnalytics.create({
+        await this.prisma.templateAnalytics.create({
           data: {
             templateId,
             templateName: templateName || `Template ${templateId}`,
@@ -652,7 +652,7 @@ export class AnalyticsService {
   // Update user usage stats
   private async updateUserUsageStats(userId: string, templateType: 'snap' | 'pro') {
     try {
-      const existing = await prisma.usageStats.findUnique({
+      const existing = await this.prisma.usageStats.findUnique({
         where: { userId }
       });
 
@@ -667,12 +667,12 @@ export class AnalyticsService {
           updateData.monthlyProDownloads = { increment: 1 };
         }
 
-        await prisma.usageStats.update({
+        await this.prisma.usageStats.update({
           where: { userId },
           data: updateData
         });
       } else {
-        await prisma.usageStats.create({
+        await this.prisma.usageStats.create({
           data: {
             userId,
             resumesDownloaded: 1,
@@ -691,7 +691,7 @@ export class AnalyticsService {
   // Update geographic analytics
   private async updateGeographicAnalytics(country: string, countryCode: any, isRegistered: boolean) {
     try {
-      const existing = await prisma.geographicAnalytics.findUnique({
+      const existing = await this.prisma.geographicAnalytics.findUnique({
         where: { country }
       });
 
@@ -707,12 +707,12 @@ export class AnalyticsService {
           updateData.unregisteredUsers = { increment: 1 };
         }
 
-        await prisma.geographicAnalytics.update({
+        await this.prisma.geographicAnalytics.update({
           where: { country },
           data: updateData
         });
       } else {
-        await prisma.geographicAnalytics.create({
+        await this.prisma.geographicAnalytics.create({
           data: {
             country,
             countryCode,
@@ -730,7 +730,7 @@ export class AnalyticsService {
   // Update geographic downloads
   private async updateGeographicDownloads(country: string, countryCode: any, templateType: 'snap' | 'pro') {
     try {
-      const existing = await prisma.geographicAnalytics.findUnique({
+      const existing = await this.prisma.geographicAnalytics.findUnique({
         where: { country }
       });
 
@@ -746,7 +746,7 @@ export class AnalyticsService {
           updateData.proDownloads = { increment: 1 };
         }
 
-        await prisma.geographicAnalytics.update({
+        await this.prisma.geographicAnalytics.update({
           where: { country },
           data: updateData
         });
@@ -759,7 +759,7 @@ export class AnalyticsService {
   // Update geographic registrations
   private async updateGeographicRegistrations(country: string, countryCode: any) {
     try {
-      const existing = await prisma.geographicAnalytics.findUnique({
+      const existing = await this.prisma.geographicAnalytics.findUnique({
         where: { country }
       });
 
@@ -770,7 +770,7 @@ export class AnalyticsService {
           lastUpdated: new Date()
         };
 
-        await prisma.geographicAnalytics.update({
+        await this.prisma.geographicAnalytics.update({
           where: { country },
           data: updateData
         });
@@ -783,7 +783,7 @@ export class AnalyticsService {
   // Update geographic subscriptions
   private async updateGeographicSubscriptions(country: string, countryCode: any) {
     try {
-      const existing = await prisma.geographicAnalytics.findUnique({
+      const existing = await this.prisma.geographicAnalytics.findUnique({
         where: { country }
       });
 
@@ -793,7 +793,7 @@ export class AnalyticsService {
           lastUpdated: new Date()
         };
 
-        await prisma.geographicAnalytics.update({
+        await this.prisma.geographicAnalytics.update({
           where: { country },
           data: updateData
         });
@@ -819,10 +819,10 @@ export class AnalyticsService {
       let registeredUsers = 0;
       
       try {
-        totalVisitors = await prisma.visitorAnalytics.count({ 
+        totalVisitors = await this.prisma.visitorAnalytics.count({ 
           where: { firstVisit: { gte: last24Hours } } 
         });
-        registeredUsers = await prisma.visitorAnalytics.count({ 
+        registeredUsers = await this.prisma.visitorAnalytics.count({ 
           where: { 
             firstVisit: { gte: last24Hours },
             isRegistered: true 
@@ -853,7 +853,7 @@ export class AnalyticsService {
         console.log(`📅 Using date range: ${startDate.toISOString()} to ${endDate.toISOString()}`);
 
         // Get new registrations for the date range
-        filteredNewRegistrations = await prisma.user.count({
+        filteredNewRegistrations = await this.prisma.user.count({
           where: {
             createdAt: {
               gte: startDate,
@@ -864,7 +864,7 @@ export class AnalyticsService {
         console.log(`📊 New registrations found: ${filteredNewRegistrations}`);
 
         // Get downloads for the date range
-        filteredSnapDownloads = await prisma.download.count({
+        filteredSnapDownloads = await this.prisma.download.count({
           where: { 
             templateType: 'snap',
             downloadedAt: {
@@ -875,7 +875,7 @@ export class AnalyticsService {
         });
         console.log(`📊 Snap downloads found: ${filteredSnapDownloads}`);
 
-        filteredProDownloads = await prisma.download.count({
+        filteredProDownloads = await this.prisma.download.count({
           where: { 
             templateType: 'pro',
             downloadedAt: {
@@ -887,7 +887,7 @@ export class AnalyticsService {
         console.log(`📊 Pro downloads found: ${filteredProDownloads}`);
 
         // Get registered users for the date range (for total count)
-        filteredRegisteredUsers = await prisma.user.count({
+        filteredRegisteredUsers = await this.prisma.user.count({
           where: {
             createdAt: {
               gte: startDate,
@@ -899,10 +899,10 @@ export class AnalyticsService {
 
       } else {
         // No date filter - get all-time totals
-        filteredRegisteredUsers = await prisma.user.count();
-        filteredSnapDownloads = await prisma.download.count({ where: { templateType: 'snap' } });
-        filteredProDownloads = await prisma.download.count({ where: { templateType: 'pro' } });
-        filteredNewRegistrations = await prisma.user.count({ where: { createdAt: { gte: todayStart } } });
+        filteredRegisteredUsers = await this.prisma.user.count();
+        filteredSnapDownloads = await this.prisma.download.count({ where: { templateType: 'snap' } });
+        filteredProDownloads = await this.prisma.download.count({ where: { templateType: 'pro' } });
+        filteredNewRegistrations = await this.prisma.user.count({ where: { createdAt: { gte: todayStart } } });
 
         console.log(`📊 All-time totals - Users: ${filteredRegisteredUsers}, Snap: ${filteredSnapDownloads}, Pro: ${filteredProDownloads}, New: ${filteredNewRegistrations}`);
       }
@@ -915,7 +915,7 @@ export class AnalyticsService {
         if (startDate.toDateString() === endDate.toDateString()) {
           endDate.setHours(23, 59, 59, 999);
         }
-        totalSubscribers = await prisma.user.count({
+        totalSubscribers = await this.prisma.user.count({
           where: {
             subscriptionStatus: 'ACTIVE',
             createdAt: {
@@ -925,7 +925,7 @@ export class AnalyticsService {
           }
         });
       } else {
-        totalSubscribers = await prisma.user.count({
+        totalSubscribers = await this.prisma.user.count({
           where: { subscriptionStatus: 'ACTIVE' }
         });
       }
@@ -933,7 +933,7 @@ export class AnalyticsService {
       console.log(`📊 Total subscribers: ${totalSubscribers}`);
 
       // Get geographic data
-      const geographicData = await prisma.geographicAnalytics.findMany({
+      const geographicData = await this.prisma.geographicAnalytics.findMany({
         where: { totalVisitors: { gt: 0 } },
         orderBy: { totalVisitors: 'desc' },
         take: 10
@@ -947,7 +947,7 @@ export class AnalyticsService {
         if (startDate.toDateString() === endDate.toDateString()) {
           endDate.setHours(23, 59, 59, 999);
         }
-        templateDownloads = await prisma.download.groupBy({
+        templateDownloads = await this.prisma.download.groupBy({
           by: ['templateId', 'templateType', 'templateName'],
           where: {
             downloadedAt: {
@@ -960,7 +960,7 @@ export class AnalyticsService {
           take: 10
         });
       } else {
-        templateDownloads = await prisma.download.groupBy({
+        templateDownloads = await this.prisma.download.groupBy({
           by: ['templateId', 'templateType', 'templateName'],
           _count: { templateId: true },
           orderBy: { _count: { templateId: 'desc' } },
@@ -968,7 +968,7 @@ export class AnalyticsService {
         });
       }
 
-      const topTemplates = templateDownloads.map((template: any) => ({
+      const topTemplates = templateDownloads.map(template => ({
          templateId: template.templateId,
          templateName: template.templateName || `Template ${template.templateId}`,
         templateType: template.templateType,
@@ -1018,7 +1018,7 @@ export class AnalyticsService {
   // Get country analytics
   async getCountryAnalytics() {
     try {
-      return await prisma.geographicAnalytics.findMany({
+      return await this.prisma.geographicAnalytics.findMany({
         where: { totalVisitors: { gt: 0 } },
         orderBy: { totalVisitors: 'desc' }
       });
@@ -1034,7 +1034,7 @@ export class AnalyticsService {
       const whereClause = templateType ? { templateType } : {};
 
       // Get template analytics from actual download data
-      const templateDownloads = await prisma.download.groupBy({
+      const templateDownloads = await this.prisma.download.groupBy({
         by: ['templateId', 'templateType', 'templateName'],
         where: whereClause,
         _count: {
@@ -1048,7 +1048,7 @@ export class AnalyticsService {
       });
 
       // Transform to match expected format
-      return templateDownloads.map((template: any) => ({
+      return templateDownloads.map(template => ({
         templateId: template.templateId,
         templateName: template.templateName || `Template ${template.templateId}`,
         templateType: template.templateType,
@@ -1081,29 +1081,29 @@ export class AnalyticsService {
       };
 
       // Get daily statistics
-      const totalVisitors = await prisma.visitorAnalytics.count({ where: whereClause });
-      const newVisitors = await prisma.visitorAnalytics.count({ 
+      const totalVisitors = await this.prisma.visitorAnalytics.count({ where: whereClause });
+      const newVisitors = await this.prisma.visitorAnalytics.count({ 
         where: { ...whereClause, firstVisit: { gte: startOfDay, lte: endOfDay } } 
       });
-      const registeredUsers = await prisma.visitorAnalytics.count({ 
+      const registeredUsers = await this.prisma.visitorAnalytics.count({ 
         where: { ...whereClause, isRegistered: true } 
       });
 
-      const snapDownloads = await prisma.download.count({
+      const snapDownloads = await this.prisma.download.count({
         where: { 
           templateType: 'snap',
           downloadedAt: { gte: startOfDay, lte: endOfDay }
         }
       });
 
-      const proDownloads = await prisma.download.count({
+      const proDownloads = await this.prisma.download.count({
         where: { 
           templateType: 'pro',
           downloadedAt: { gte: startOfDay, lte: endOfDay }
         }
       });
 
-      const newRegistrations = await prisma.user.count({
+      const newRegistrations = await this.prisma.user.count({
         where: { 
           createdAt: { gte: startOfDay, lte: endOfDay }
         }
@@ -1114,7 +1114,7 @@ export class AnalyticsService {
       const newSubscriptions = 0;
 
       // Create or update summary
-      const summary = await prisma.analyticsSummary.upsert({
+      const summary = await this.prisma.analyticsSummary.upsert({
         where: { date: startOfDay },
         update: {
           totalVisitors,

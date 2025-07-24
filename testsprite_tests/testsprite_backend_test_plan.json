@@ -1,52 +1,52 @@
 [
   {
     "id": "TC001",
-    "title": "create_new_order_api",
-    "description": "Test the /api/orders POST endpoint to verify that a new order can be created successfully with valid items and total amount, and that the server handles errors properly."
+    "title": "create_new_order",
+    "description": "Verify that a new order can be created successfully with valid items and total amount, and the API returns a 201 status code."
   },
   {
     "id": "TC002",
-    "title": "get_order_by_id_api",
-    "description": "Test the /api/orders/{id} GET endpoint to ensure it retrieves the correct order by ID, returns 404 for non-existent orders, and handles server errors."
+    "title": "get_order_by_id",
+    "description": "Verify that an order can be retrieved by its ID successfully, returning the correct order details with a 200 status code."
   },
   {
     "id": "TC003",
-    "title": "get_user_orders_api",
-    "description": "Test the /api/user/orders GET endpoint to verify that it returns the list of orders for the authenticated user and handles server errors."
+    "title": "get_users_orders",
+    "description": "Verify that the API returns the list of orders for the authenticated user with a 200 status code."
   },
   {
     "id": "TC004",
-    "title": "get_all_users_admin_api",
-    "description": "Test the /api/admin/users GET endpoint to confirm that only admin users can retrieve the list of all users, with proper handling of unauthorized access and server errors."
+    "title": "get_all_users_admin_only",
+    "description": "Verify that only admin users can retrieve the list of all users, and non-admin users receive a 403 status code."
   },
   {
     "id": "TC005",
-    "title": "get_user_permissions_api",
-    "description": "Test the /api/user/permissions GET endpoint to verify that it returns the permissions of the authenticated user and handles server errors."
+    "title": "get_user_permissions",
+    "description": "Verify that the API returns the permissions of the authenticated user with a 200 status code."
   },
   {
     "id": "TC006",
-    "title": "check_specific_permission_api",
-    "description": "Test the /api/user/permissions/{permission} GET endpoint to check if a specific permission is correctly identified for the user and that server errors are handled."
+    "title": "check_specific_permission",
+    "description": "Verify that the API correctly checks and returns the status of a specific permission for the authenticated user."
   },
   {
     "id": "TC007",
-    "title": "get_job_listings_api",
-    "description": "Test the /api/jobs GET endpoint to ensure it returns the list of job listings successfully and handles server errors."
+    "title": "get_job_listings",
+    "description": "Verify that the API returns the list of job listings successfully with a 200 status code."
   },
   {
     "id": "TC008",
-    "title": "create_new_job_api",
-    "description": "Test the /api/jobs POST endpoint to verify that a new job can be created with valid title, company, and description, and that server errors are handled."
+    "title": "create_new_job",
+    "description": "Verify that a new job can be created successfully with valid title, company, and description, returning a 201 status code."
   },
   {
     "id": "TC009",
-    "title": "get_skills_list_api",
-    "description": "Test the /api/skills GET endpoint to confirm it returns the list of skills successfully and handles server errors."
+    "title": "get_skills_list",
+    "description": "Verify that the API returns the list of skills successfully with a 200 status code."
   },
   {
     "id": "TC010",
-    "title": "add_new_skill_api",
-    "description": "Test the /api/skills POST endpoint to verify that a new skill can be added with valid name and category, and that server errors are handled."
+    "title": "add_new_skill",
+    "description": "Verify that a new skill can be added successfully with valid name and category, returning a 201 status code."
   }
 ]

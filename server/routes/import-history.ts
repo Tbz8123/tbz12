@@ -75,22 +75,7 @@ router.get('/', async (req: Request, res: Response) => {
     });
 
     // Transform data to match frontend expectations
-    const transformedImports = imports.map((imp: {
-      id: string;
-      fileName: string;
-      fileSize: number;
-      fileType: string;
-      status: string;
-      totalRecords: number | null;
-      processedRecords: number | null;
-      successCount: number | null;
-      errorCount: number | null;
-      errors: any;
-      progress: number | null;
-      metadata: any;
-      startedAt: Date;
-      completedAt: Date | null;
-    }) => ({
+    const transformedImports = imports.map((imp: any) => ({
       id: imp.id,
       fileName: imp.fileName,
       fileSize: imp.fileSize,
@@ -509,7 +494,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
 
       if (titlesToDelete.length > 0) {
         console.log(`🗑️ Deleting ${titlesToDelete.length} job titles not present in uploaded file:`);
-        titlesToDelete.forEach((t: { id: number; title: string }) => console.log(`  - "${t.title}" (ID: ${t.id})`));
+        titlesToDelete.forEach((t) => console.log(`  - "${t.title}" (ID: ${t.id})`));
 
         // Delete job descriptions first, then job titles
         for (const title of titlesToDelete) {
@@ -521,7 +506,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
 
         const deletedTitles = await prisma.jobTitle.deleteMany({
           where: {
-            id: { in: titlesToDelete.map((t: { id: number }) => t.id) }
+            id: { in: titlesToDelete.map((t) => t.id) }
           }
         });
 
@@ -934,7 +919,7 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
   // Group data by professional summary job title
   const groupedData = new Map<string, { title: string; category: string; summaries: any[] }>();
 
-  rows.forEach((row: any, index: number) => {
+  rows.forEach((row: Record<string, string>, index: number) => {
     if (!row.title) {
       console.warn(`Row ${index + 2}: Missing title, skipping`);
       return;

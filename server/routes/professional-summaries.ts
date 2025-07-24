@@ -213,7 +213,7 @@ professionalSummariesRouter.post("/jobtitles", async (req: Request, res: Respons
 
     // Handle raw query constraint error
     if (error && typeof error === 'object' && 'code' in error && (error as any).code === 'P2010') {
-      const errorWithMeta = error as any;
+      const errorWithMeta = error as { meta?: { code?: string } };
       if (errorWithMeta.meta?.code === '23505') {
         return res.status(409).json({ 
           error: "Duplicate professional summary job title", 
@@ -399,7 +399,7 @@ professionalSummariesRouter.get("/export", async (req: Request, res: Response) =
     const validJobTitles = await prisma.professionalSummaryJobTitle.findMany({
       select: { id: true }
     });
-    const validJobTitleIds = validJobTitles.map((jt: { id: number }) => jt.id);
+    const validJobTitleIds = validJobTitles.map(jt => jt.id);
 
     const professionalSummaries = await prisma.professionalSummary.findMany({
       where: {
@@ -421,7 +421,7 @@ professionalSummariesRouter.get("/export", async (req: Request, res: Response) =
     console.log('Found', professionalSummaries.length, 'professional summaries');
 
     // Transform data for export - simplified format for import compatibility
-    const exportData = professionalSummaries.map((summary: { professionalSummaryJobTitle: { title: string; category: string }; content: string; isRecommended: boolean }) => ({
+    const exportData = professionalSummaries.map((summary: any) => ({
       title: summary.professionalSummaryJobTitle.title,
       category: summary.professionalSummaryJobTitle.category,
       content: summary.content,
@@ -435,14 +435,14 @@ professionalSummariesRouter.get("/export", async (req: Request, res: Response) =
     } else if (format === 'excel') {
       // For now, return CSV with .xlsx extension until Excel library is added
       const csvHeaders = ['title', 'category', 'content', 'isRecommended'];
-      const csvRows = exportData.map((row: { title: string; category: string; content: string; isRecommended: boolean }) => [
+      const csvRows = exportData.map((row: any) => [
         `"${row.title.replace(/"/g, '""')}"`,
         `"${row.category.replace(/"/g, '""')}"`,
         `"${row.content.replace(/"/g, '""')}"`,
         row.isRecommended
       ]);
 
-      const csvContent = [csvHeaders.join(','), ...csvRows.map((row: string[]) => row.join(','))].join('\n');
+      const csvContent = [csvHeaders.join(','), ...csvRows.map((row: any) => row.join(','))].join('\n');
 
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', 'attachment; filename="professional-summaries.xlsx"');
@@ -450,14 +450,14 @@ professionalSummariesRouter.get("/export", async (req: Request, res: Response) =
     } else {
       // CSV format (default)
       const csvHeaders = ['title', 'category', 'content', 'isRecommended'];
-      const csvRows = exportData.map((row: { title: string; category: string; content: string; isRecommended: boolean }) => [
+      const csvRows = exportData.map((row: any) => [
         `"${row.title.replace(/"/g, '""')}"`,
         `"${row.category.replace(/"/g, '""')}"`,
         `"${row.content.replace(/"/g, '""')}"`,
         row.isRecommended
       ]);
 
-      const csvContent = [csvHeaders.join(','), ...csvRows.map((row: string[]) => row.join(','))].join('\n');
+      const csvContent = [csvHeaders.join(','), ...csvRows.map((row: any) => row.join(','))].join('\n');
 
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader('Content-Disposition', 'attachment; filename="professional-summaries.csv"');

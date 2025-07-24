@@ -1,9 +1,9 @@
 import { Router, Request, Response } from 'express';
-import { PrismaClient, Prisma } from '@prisma/client';
 import { z } from 'zod';
-import { AnalyticsService } from '../services/analyticsService.js';
+import { PrismaClient } from '@prisma/client';
+import { AnalyticsService } from '../services/analyticsService';
 
-// Extend Request interface to include custom properties
+// Extended Request interface for analytics tracking
 interface ExtendedRequest extends Request {
   sessionId?: string;
   visitorId?: string;
@@ -14,11 +14,11 @@ const router = Router();
 
 // Initialize Prisma with error handling
 let prisma: PrismaClient;
-let analyticsService: AnalyticsService;
+let analyticsServiceInstance: AnalyticsService;
 
 try {
   prisma = new PrismaClient();
-  analyticsService = new AnalyticsService();
+  analyticsServiceInstance = new AnalyticsService();
   console.log('✅ Analytics service initialized successfully');
 } catch (error: unknown) {
   console.error('❌ Failed to initialize analytics service:', error);
@@ -33,7 +33,7 @@ router.get('/dashboard', async (req: Request, res: Response) => {
     console.log('  Query params:', req.query);
 
     // Check if analytics service is initialized
-    if (!analyticsService || !prisma) {
+    if (!analyticsServiceInstance || !prisma) {
       console.error('❌ Analytics service not properly initialized');
       return res.status(500).json({ 
         error: 'Analytics service not available',
@@ -44,7 +44,7 @@ router.get('/dashboard', async (req: Request, res: Response) => {
     const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
     const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
 
-    const data = await analyticsService.getDashboardData(startDate && endDate ? { start: startDate, end: endDate } : undefined);
+    const data = await analyticsServiceInstance.getDashboardData(startDate && endDate ? { start: startDate, end: endDate } : undefined);
     res.json(data);
   } catch (error: unknown) {
     console.error('Error fetching dashboard data:', error);
@@ -55,7 +55,7 @@ router.get('/dashboard', async (req: Request, res: Response) => {
 // Get country analytics
 router.get('/countries', async (req: Request, res: Response) => {
   try {
-    const data = await analyticsService.getCountryAnalytics();
+    const data = await analyticsServiceInstance.getCountryAnalytics();
     res.json(data);
   } catch (error: unknown) {
     console.error('Error fetching country analytics:', error);
@@ -69,7 +69,7 @@ router.get('/templates', async (req: Request, res: Response) => {
     const { type } = req.query;
     const templateType = type as 'snap' | 'pro' | undefined;
 
-    const data = await analyticsService.getTemplateAnalytics(templateType);
+    const data = await analyticsServiceInstance.getTemplateAnalytics(templateType);
     res.json(data);
   } catch (error: unknown) {
     console.error('Error fetching template analytics:', error);
@@ -137,15 +137,15 @@ router.get('/visitors', async (req: Request, res: Response) => {
     });
 
     // Separate registered and unregistered visitors
-    const registeredVisitors = visitors.filter((v: { isRegistered: boolean; user: any }) => v.isRegistered && v.user);
-    const unregisteredVisitors = visitors.filter((v: { isRegistered: boolean; user: any }) => !v.isRegistered || !v.user);
+    const registeredVisitors = visitors.filter((v: any) => v.isRegistered && v.user);
+    const unregisteredVisitors = visitors.filter((v: any) => !v.isRegistered || !v.user);
 
     // Count active users
-    const activeRegistered = activeVisitors.filter((v: { isRegistered: boolean; user: any }) => v.isRegistered && v.user).length;
-    const activeUnregistered = activeVisitors.filter((v: { isRegistered: boolean; user: any }) => !v.isRegistered || !v.user).length;
+    const activeRegistered = activeVisitors.filter((v: any) => v.isRegistered && v.user).length;
+    const activeUnregistered = activeVisitors.filter((v: any) => !v.isRegistered || !v.user).length;
 
     // Transform data for frontend
-    const registered = registeredVisitors.map((v: { userId?: number; id: number; user?: { name?: string; email?: string; currentTier?: string }; country?: string; createdAt: Date; lastSeen: Date; totalSessions: number }) => ({
+    const registered = registeredVisitors.map((v: any) => ({
       id: v.userId || v.id,
       name: v.user?.name || 'Unknown',
       email: v.user?.email || 'Unknown',
@@ -162,7 +162,7 @@ router.get('/visitors', async (req: Request, res: Response) => {
       recentDownloads: []
     }));
 
-    const unregistered = unregisteredVisitors.map((v: { sessionId: string; userAgent?: string; country?: string; lastSeen: Date }) => ({
+    const unregistered = unregisteredVisitors.map((v: any) => ({
       anonymousId: v.sessionId,
       userAgent: v.userAgent || 'Unknown',
       country: v.country || 'Unknown',
@@ -206,14 +206,14 @@ router.get('/activities', async (req: Request, res: Response) => {
 
     // Filter by date range if provided
     if (startTimestamp && endTimestamp) {
-      activities = activities.filter((activity: { timestamp: number }) => 
+      activities = activities.filter(activity => 
         activity.timestamp >= startTimestamp && activity.timestamp <= endTimestamp
       );
     }
 
     // Filter by activity type if provided
     if (activityType) {
-      activities = activities.filter((activity: { activityType: string }) => activity.activityType === activityType);
+      activities = activities.filter(activity => activity.activityType === activityType);
     }
 
     res.json(activities);
@@ -403,7 +403,7 @@ router.post('/generate-summary', async (req: Request, res: Response) => {
     const { date } = req.body;
     const targetDate = date ? new Date(date) : new Date();
 
-    const summary = await analyticsService.generateDailySummary(targetDate);
+    const summary = await analyticsServiceInstance.generateDailySummary(targetDate);
     res.json(summary);
   } catch (error: unknown) {
     console.error('Error generating daily summary:', error);
@@ -442,7 +442,7 @@ router.get('/funnel', async (req: Request, res: Response) => {
       avgTime: number;
     }
 
-    const funnelAnalysis = funnelData.reduce((acc: Record<string, FunnelAnalysisItem>, item: any) => {
+    const funnelAnalysis = funnelData.reduce((acc: Record<string, FunnelAnalysisItem>, item: { funnelType: string; step: string; stepOrder: number; timeToComplete?: number }) => {
       const key = `${item.funnelType}-${item.step}`;
       if (!acc[key]) {
         acc[key] = {
@@ -462,7 +462,7 @@ router.get('/funnel', async (req: Request, res: Response) => {
     }, {} as Record<string, FunnelAnalysisItem>);
 
     // Calculate averages
-    Object.values(funnelAnalysis).forEach((item: any) => {
+    Object.values(funnelAnalysis).forEach((item: FunnelAnalysisItem) => {
       if (item.totalTime > 0) {
         item.avgTime = item.totalTime / item.count;
       }
@@ -495,15 +495,16 @@ router.post('/track', async (req: Request, res: Response) => {
       errorMessage
     } = req.body;
 
-    const sessionId = (req as ExtendedRequest).sessionId;
-    const visitorId = (req as ExtendedRequest).visitorId;
-    const userId = (req as ExtendedRequest).userId;
+    const extendedReq = req as ExtendedRequest;
+    const sessionId = extendedReq.sessionId;
+    const visitorId = extendedReq.visitorId;
+    const userId = extendedReq.userId;
 
     if (!sessionId || !visitorId) {
       return res.status(400).json({ error: 'Session not found' });
     }
 
-    await analyticsService.trackActivity({
+    await analyticsServiceInstance.trackActivity({
       sessionId,
       visitorId,
       userId,

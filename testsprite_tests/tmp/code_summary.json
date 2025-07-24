@@ -1,274 +1,207 @@
 {
-  "tech_stack": [
-    "TypeScript",
-    "Node.js",
-    "Express.js",
-    "React",
-    "Vite",
-    "PostgreSQL",
-    "Prisma ORM",
-    "Firebase Auth",
-    "Tailwind CSS",
-    "Radix UI",
-    "Wouter (Router)",
-    "Zustand (State Management)",
-    "React Query",
-    "Framer Motion",
-    "Drizzle ORM"
-  ],
-  "features": [
-    {
-      "name": "Order Management API",
-      "description": "Create, retrieve, and manage user orders with payment processing",
-      "files": ["server/routes.ts"],
-      "api_doc": {
-        "openapi": "3.0.0",
-        "paths": {
-          "/api/orders": {
-            "post": {
-              "summary": "Create new order",
-              "requestBody": {
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "items": {"type": "array"},
-                        "total": {"type": "number"}
-                      }
-                    }
-                  }
-                }
-              },
-              "responses": {
-                "201": {"description": "Order created successfully"},
-                "500": {"description": "Server error"}
-              }
-            }
-          },
-          "/api/orders/{id}": {
-            "get": {
-              "summary": "Get order by ID",
-              "parameters": [
-                {
-                  "name": "id",
-                  "in": "path",
-                  "required": true,
-                  "schema": {"type": "string"}
-                }
-              ],
-              "responses": {
-                "200": {"description": "Order retrieved successfully"},
-                "404": {"description": "Order not found"},
-                "500": {"description": "Server error"}
-              }
-            }
-          },
-          "/api/user/orders": {
-            "get": {
-              "summary": "Get user's orders",
-              "responses": {
-                "200": {"description": "User orders retrieved successfully"},
-                "500": {"description": "Server error"}
-              }
-            }
-          }
-        }
-      }
+  "project_name": "TbzResumeBuilderV4",
+  "project_type": "Full-Stack Web Application",
+  "description": "A comprehensive web-based resume building platform that enables users to create, customize, and manage professional resumes with multiple templates, admin panel, and analytics.",
+  "tech_stack": {
+    "frontend": {
+      "framework": "React 18+",
+      "language": "TypeScript",
+      "build_tool": "Vite",
+      "styling": "Tailwind CSS",
+      "routing": "React Router DOM",
+      "state_management": "Zustand",
+      "ui_components": "Radix UI",
+      "animations": "Framer Motion",
+      "forms": "React Hook Form",
+      "data_fetching": "TanStack React Query"
     },
-    {
-      "name": "User Management API",
-      "description": "Admin-only user management and permissions",
-      "files": ["server/routes.ts"],
-      "api_doc": {
-        "openapi": "3.0.0",
-        "paths": {
-          "/api/admin/users": {
-            "get": {
-              "summary": "Get all users (admin only)",
-              "security": [{"adminAuth": []}],
-              "responses": {
-                "200": {"description": "Users retrieved successfully"},
-                "403": {"description": "Admin access required"},
-                "500": {"description": "Server error"}
-              }
-            }
-          },
-          "/api/user/permissions": {
-            "get": {
-              "summary": "Get user permissions",
-              "responses": {
-                "200": {"description": "Permissions retrieved successfully"},
-                "500": {"description": "Server error"}
-              }
-            }
-          },
-          "/api/user/permissions/{permission}": {
-            "get": {
-              "summary": "Check specific permission",
-              "parameters": [
-                {
-                  "name": "permission",
-                  "in": "path",
-                  "required": true,
-                  "schema": {"type": "string"}
-                }
-              ],
-              "responses": {
-                "200": {"description": "Permission check completed"},
-                "500": {"description": "Server error"}
-              }
-            }
-          }
-        }
-      }
+    "backend": {
+      "runtime": "Node.js",
+      "framework": "Express.js",
+      "language": "TypeScript",
+      "database": "PostgreSQL",
+      "orm": "Prisma",
+      "authentication": "JWT + Firebase Auth",
+      "session_management": "Express Session",
+      "validation": "Zod"
     },
-    {
-      "name": "Job Management API",
-      "description": "Job listings and creation functionality",
-      "files": ["server/routes/jobs.ts"],
-      "api_doc": {
-        "openapi": "3.0.0",
-        "paths": {
-          "/api/jobs": {
-            "get": {
-              "summary": "Get job listings",
-              "responses": {
-                "200": {"description": "Job listings retrieved successfully"},
-                "500": {"description": "Server error"}
-              }
-            },
-            "post": {
-              "summary": "Create new job",
-              "requestBody": {
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "title": {"type": "string"},
-                        "company": {"type": "string"},
-                        "description": {"type": "string"}
-                      }
-                    }
-                  }
-                }
-              },
-              "responses": {
-                "201": {"description": "Job created successfully"},
-                "500": {"description": "Server error"}
-              }
-            }
-          }
-        }
-      }
+    "database": {
+      "primary": "PostgreSQL",
+      "orm": "Prisma",
+      "migrations": "Prisma Migrate"
     },
-    {
-      "name": "Skills Management API",
-      "description": "Skills data retrieval and management",
-      "files": ["server/routes/skills.ts"],
-      "api_doc": {
-        "openapi": "3.0.0",
-        "paths": {
-          "/api/skills": {
-            "get": {
-              "summary": "Get skills list",
-              "responses": {
-                "200": {"description": "Skills retrieved successfully"},
-                "500": {"description": "Server error"}
-              }
-            },
-            "post": {
-              "summary": "Add new skill",
-              "requestBody": {
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "name": {"type": "string"},
-                        "category": {"type": "string"}
-                      }
-                    }
-                  }
-                }
-              },
-              "responses": {
-                "201": {"description": "Skill added successfully"},
-                "500": {"description": "Server error"}
-              }
-            }
-          }
-        }
-      }
-    },
-    {
-      "name": "Resume Management",
-      "description": "Resume creation, editing, and template management",
-      "files": [
-        "client/src/pages/FinalPage.tsx",
-        "client-admin/src/components/resume/ResumePreview.tsx",
-        "shared/schema.ts"
-      ],
-      "api_doc": {
-        "openapi": "3.0.0",
-        "paths": {
-          "/api/resumes": {
-            "post": {
-              "summary": "Create resume",
-              "responses": {
-                "201": {"description": "Resume created successfully"},
-                "500": {"description": "Server error"}
-              }
-            }
-          }
-        }
-      }
-    },
-    {
-      "name": "Authentication System",
-      "description": "Firebase authentication with admin role management",
-      "files": [
-        "server/middleware/userAuth.ts",
-        "server/middleware/adminAuth.ts",
-        "client-admin/src/contexts/AuthContext.tsx"
-      ],
-      "api_doc": {
-        "openapi": "3.0.0",
-        "paths": {
-          "/api/auth/login": {
-            "post": {
-              "summary": "User login",
-              "responses": {
-                "200": {"description": "Login successful"},
-                "401": {"description": "Invalid credentials"}
-              }
-            }
-          }
-        }
-      }
-    },
-    {
-      "name": "Analytics Service",
-      "description": "User analytics and tracking functionality",
-      "files": [
-        "server/services/analyticsService.ts",
-        "server/routes/analytics.ts"
-      ],
-      "api_doc": {
-        "openapi": "3.0.0",
-        "paths": {
-          "/api/analytics": {
-            "get": {
-              "summary": "Get analytics data",
-              "responses": {
-                "200": {"description": "Analytics data retrieved"},
-                "500": {"description": "Server error"}
-              }
-            }
-          }
-        }
-      }
+    "deployment": {
+      "build_tool": "ESBuild",
+      "package_manager": "npm",
+      "environment": "Cross-platform (Windows/Linux/Mac)"
     }
-  ]
+  },
+  "architecture": {
+    "type": "Monorepo with Multiple Applications",
+    "applications": [
+      {
+        "name": "Main Client",
+        "path": "./client",
+        "port": 5000,
+        "description": "User-facing resume builder application"
+      },
+      {
+        "name": "Admin Client",
+        "path": "./client-admin",
+        "description": "Administrative dashboard for platform management"
+      },
+      {
+        "name": "Backend Server",
+        "path": "./server",
+        "port": 5174,
+        "description": "RESTful API server with database integration"
+      }
+    ],
+    "database_models": [
+      "User", "UserProfile", "Subscription", "UsageStats", "UserPermission",
+      "UserTemplate", "Notification", "SupportTicket", "Resume", "Download",
+      "ResumeTemplate", "ProTemplate", "Template", "JobTitle", "JobDescription",
+      "SkillsJobTitle", "SkillCategory", "ProfessionalSummaryJobTitle",
+      "ProfessionalSummary", "ImportHistory", "VisitorAnalytics", "SessionAnalytics",
+      "GeographicAnalytics", "TemplateAnalytics", "AnalyticsSummary"
+    ]
+  },
+  "key_features": [
+    {
+      "category": "User Management",
+      "features": [
+        "User registration and authentication",
+        "Firebase OAuth integration",
+        "User profiles and preferences",
+        "Subscription management (FREE/PRO tiers)",
+        "Usage tracking and limits"
+      ]
+    },
+    {
+      "category": "Resume Builder",
+      "features": [
+        "Step-by-step resume creation wizard",
+        "Real-time preview with live updates",
+        "Drag-and-drop section reordering",
+        "Auto-save functionality",
+        "Multiple export formats (PDF, DOCX)"
+      ]
+    },
+    {
+      "category": "Template System",
+      "features": [
+        "Multiple professionally designed templates",
+        "Template categorization (Snap/Pro)",
+        "Template customization and theming",
+        "3D enhanced thumbnails",
+        "Template analytics and usage tracking"
+      ]
+    },
+    {
+      "category": "Content Management",
+      "features": [
+        "Job titles and descriptions database",
+        "Skills categorization system",
+        "Professional summary templates",
+        "Import/export functionality",
+        "Bulk data management"
+      ]
+    },
+    {
+      "category": "Analytics & Monitoring",
+      "features": [
+        "Visitor tracking and analytics",
+        "Session monitoring",
+        "Geographic analytics",
+        "Template usage statistics",
+        "Real-time dashboard metrics"
+      ]
+    },
+    {
+      "category": "Administrative",
+      "features": [
+        "Admin dashboard with comprehensive metrics",
+        "User management and oversight",
+        "Template management system",
+        "Support ticket system",
+        "System health monitoring"
+      ]
+    }
+  ],
+  "api_structure": {
+    "base_url": "/api",
+    "endpoints": [
+      "/auth/*", "/users/*", "/resumes/*", "/templates/*",
+      "/analytics/*", "/admin/*", "/job-titles/*", "/skills/*",
+      "/professional-summaries/*", "/import-history/*", "/downloads/*"
+    ]
+  },
+  "security_features": [
+    "JWT token-based authentication",
+    "Firebase authentication integration",
+    "Role-based access control (USER/ADMIN)",
+    "Input validation with Zod schemas",
+    "CORS protection",
+    "Session management with secure cookies",
+    "Password hashing and encryption"
+  ],
+  "performance_optimizations": [
+    "Vite for fast development builds",
+    "Code splitting and lazy loading",
+    "Database indexing on key fields",
+    "Caching strategies for templates",
+    "Optimized image handling for thumbnails",
+    "Memory-based analytics for real-time data"
+  ],
+  "development_workflow": {
+    "scripts": {
+      "dev": "Development server for backend",
+      "dev:client": "Development server for main client",
+      "dev:admin": "Development server for admin client",
+      "build": "Production build for all applications",
+      "prisma:generate": "Generate Prisma client",
+      "prisma:migrate:dev": "Run database migrations"
+    },
+    "environment_variables": [
+      "DATABASE_URL", "JWT_SECRET", "FIREBASE_CONFIG",
+      "NODE_ENV", "PORT", "SESSION_SECRET"
+    ]
+  },
+  "testing_considerations": {
+    "frontend_testing": [
+      "Component rendering and interactions",
+      "Form validation and submission",
+      "Navigation and routing",
+      "Template selection and customization",
+      "Real-time preview functionality",
+      "Export and download features"
+    ],
+    "backend_testing": [
+      "API endpoint functionality",
+      "Authentication and authorization",
+      "Database operations (CRUD)",
+      "File upload and processing",
+      "Analytics data collection",
+      "Error handling and validation"
+    ],
+    "integration_testing": [
+      "End-to-end resume creation workflow",
+      "User registration and login flow",
+      "Template application and export",
+      "Admin dashboard functionality",
+      "Analytics tracking accuracy"
+    ]
+  },
+  "deployment_info": {
+    "ports": {
+      "backend": 5174,
+      "client": 5000,
+      "admin": "Dynamic (Vite dev server)"
+    },
+    "build_outputs": {
+      "backend": "./dist",
+      "client": "./client/dist",
+      "admin": "./client-admin/dist"
+    }
+  }
 }

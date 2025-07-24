@@ -1,59 +1,44 @@
 # TypeScript Fixes To-Do List
 
-## Overview
-This document outlines all the TypeScript type safety issues that need to be fixed across the codebase.
+## Critical Priority (Blocking Vercel Deployment)
 
-## High Priority Fixes
+### 1. Analytics Route Fixes
+- [ ] Fix missing Prisma types: `VisitorAnalyticsWhereInput`, `ActivityLogWhereInput`, `SessionAnalyticsWhereInput`
+- [ ] Fix implicit 'any' parameters in visitor filtering callbacks (lines 144, 161)
+- [ ] Fix Request object property access issues (`sessionId`, `visitorId`, `userId`)
 
-### 1. Analytics Service (`server/services/analyticsService.ts`)
-- [ ] Fix `Promise<any>` return type in `trackVisitor` method (line 172)
-- [ ] Fix `Promise<any>` return type in `trackSession` method
-- [ ] Replace `as any` casts in Prisma operations
-- [ ] Add proper return types for all analytics methods
-- [ ] Define proper interfaces for visitor tracking data
+### 2. Professional Summaries Route Fixes
+- [ ] Fix missing Prisma types: `ProfessionalSummaryWhereInput` (lines 146)
+- [ ] Fix implicit 'any' parameters in export callbacks (lines 453, 460)
+- [ ] Fix error meta property access (line 217)
 
-### 2. Import History Route (`server/routes/import-history.ts`)
-- [ ] Fix `updatePayload: any` type (line 310)
-- [ ] Fix `updateData: any` type (line 313)
-- [ ] Fix `metadata as Record<string, any>` casts (multiple locations)
-- [ ] Fix `(error as any)?.code` type assertion (line 570)
-- [ ] Add proper interfaces for import job data
-- [ ] Replace `Function` type with proper callback interface
+### 3. Import History Route Fixes
+- [ ] Fix missing Prisma types: `ImportHistoryWhereInput`
+- [ ] Fix implicit 'any' parameters in job title operations (lines 476, 480, 492, 710)
 
-### 3. Analytics Routes (`server/routes/analytics.ts`)
-- [x] Remove explicit `any` types from visitor filtering (COMPLETED)
-- [x] Fix funnel analysis type safety (COMPLETED)
-- [ ] Add proper interfaces for analytics data structures
-- [ ] Fix remaining `Record<string, any>` usages
+### 4. Analytics Service Fixes
+- [ ] Fix missing Prisma types: `VisitorAnalytics`, `SessionAnalytics`, `TemplateAnalyticsUpdateInput`, `UsageStatsUpdateInput`, `GeographicAnalyticsUpdateInput`
+- [ ] Fix property access issues (`prisma` property, `timestamp` property)
+- [ ] Fix implicit 'any' parameters in template operations (lines 949, 1029)
+- [ ] Fix type compatibility issues with `templateType` and `ActivityEvent`
 
-### 4. Visitor Tracking Middleware (`server/middleware/visitorTracking.ts`)
-- [ ] Review and fix any remaining type safety issues
-- [ ] Ensure proper return types for all tracking methods
+### 5. Memory Analytics Service Fixes
+- [ ] Fix type incompatibility in `TemplateStats` (line 342)
+- [ ] Fix `uniqueVisitors` type mismatch (number vs Set<string>)
 
-## Medium Priority Fixes
-
-### 5. Missing Prisma Types
-- [ ] Investigate missing `VisitorAnalyticsCreateInput` type
-- [ ] Investigate missing `VisitorAnalyticsUpdateInput` type
-- [ ] Investigate missing `ImportHistoryUpdateInput` type
-- [ ] Ensure all Prisma generated types are properly imported
-
-### 6. General Type Safety
-- [ ] Review all `as any` casts across the codebase
-- [ ] Add proper error type handling
-- [ ] Define interfaces for all data structures
-- [ ] Add proper return types for all functions
+### 6. Routes.ts Fixes
+- [ ] Fix unknown property `isActive` in `TemplateWhereInput` (line 1760)
 
 ## Implementation Strategy
+1. Start with Prisma type issues by using generic types or `any` where needed
+2. Fix implicit 'any' parameters with explicit type annotations
+3. Address property access issues on Request objects
+4. Fix type compatibility issues
+5. Test compilation locally before deployment
 
-1. **Start with Analytics Service**: Fix the core `Promise<any>` issues
-2. **Fix Import History**: Address the most critical type safety issues
-3. **Review Prisma Types**: Ensure all generated types are available
-4. **Systematic Review**: Go through each file and fix remaining issues
-5. **Testing**: Ensure all fixes don't break functionality
-
-## Notes
-- All fixes should maintain existing functionality
-- Prefer proper typing over `any` casts
-- Add interfaces for complex data structures
-- Ensure backward compatibility
+## Status
+- [ ] Phase 1: Critical Prisma type fixes
+- [ ] Phase 2: Implicit 'any' parameter fixes
+- [ ] Phase 3: Property access and compatibility fixes
+- [ ] Phase 4: Local TypeScript compilation test
+- [ ] Phase 5: Vercel deployment test
