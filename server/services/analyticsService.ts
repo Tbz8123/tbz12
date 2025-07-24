@@ -666,7 +666,7 @@ export class AnalyticsService {
       });
 
       if (existing) {
-        const updateData: Prisma.GeographicAnalyticsUpdateInput = { lastViewedAt: new Date() };
+        const updateData: Prisma.TemplateAnalyticsUpdateInput = { lastViewedAt: new Date() };
 
         if (activityType === 'TEMPLATE_VIEW') {
           updateData.totalViews = { increment: 1 };
@@ -704,7 +704,7 @@ export class AnalyticsService {
       });
 
       if (existing) {
-        const updateData: Prisma.GeographicAnalyticsUpdateInput = { resumesDownloaded: { increment: 1 } };
+        const updateData: Prisma.UsageStatsUpdateInput = { resumesDownloaded: { increment: 1 } };
 
         if (templateType === 'snap') {
           updateData.snapTemplateDownloads = { increment: 1 };

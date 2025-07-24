@@ -37,7 +37,13 @@ router.get('/', async (req: Request, res: Response) => {
     const importType = req.query.importType as string || null;
 
     // Build where clause
-    const where: Record<string, unknown> = {};
+    const where: {
+      status?: string;
+      uploadedBy?: string;
+      fileName?: { contains: string; mode: 'insensitive' };
+      startedAt?: { gte?: Date; lte?: Date };
+      importType?: string;
+    } = {};
     if (status && status !== 'all') {
       where.status = status;
     }
@@ -53,10 +59,10 @@ router.get('/', async (req: Request, res: Response) => {
     if (startDate || endDate) {
       where.startedAt = {};
       if (startDate) {
-        where.startedAt.gte = new Date(startDate);
+        where.startedAt.gte = new Date(startDate as string);
       }
       if (endDate) {
-        where.startedAt.lte = new Date(endDate);
+        where.startedAt.lte = new Date(endDate as string);
       }
     }
     if (importType && importType !== 'all') {
@@ -132,7 +138,7 @@ router.post('/', async (req: Request, res: Response) => {
     const data = createSchema.parse(req.body);
 
     // Set importType based on metadata if available
-    const importType = data.metadata?.importType || 'job_titles';
+    const importType = (data.metadata as Record<string, unknown>)?.importType as string || 'job_titles';
 
     const importRecord = await prisma.importHistory.create({
       data: {
@@ -148,7 +154,7 @@ router.post('/', async (req: Request, res: Response) => {
         errorCount: data.errorCount || 0,
         errors: data.errors || null,
         metadata: {
-          ...data.metadata,
+          ...(data.metadata as Record<string, unknown> || {}),
           uploadedBy: data.uploadedBy || 'admin',
           currentOperation: data.currentOperation || 'File uploaded, queued for processing...'
         }
@@ -379,8 +385,8 @@ async function processImportJob(jobId: string, job: Record<string, unknown>) {
       startedAt: new Date(),
       currentOperation: 'Server-side processing started...'
     });
-    const csvData = metadata?.csvData;
-    const importType = metadata?.importType || 'job_titles';
+    const csvData = metadata?.csvData as string;
+    const importType = (metadata?.importType as string) || 'job_titles';
 
     console.log(`📋 Import type: ${importType}`);
     console.log(`📄 CSV data length: ${csvData?.length || 0} characters`);
@@ -504,7 +510,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
 
       // Build a Set of normalized titles that are present in the uploaded file
       const uploadedTitleSet = new Set(
-        Array.from(groupedData.values()).map((g: { titleInfo: { title: string } }) => g.titleInfo.title.toLowerCase().trim())
+        Array.from(groupedData.values()).map((g: any) => g.titleInfo.title.toLowerCase().trim())
       );
 
       // Identify titles that are NOT in the uploaded file

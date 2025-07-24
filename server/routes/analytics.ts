@@ -494,7 +494,7 @@ router.get('/funnel', async (req: Request, res: Response) => {
       };
     } = {};
     if (funnelType) {
-      whereClause.funnelType = funnelType;
+      whereClause.funnelType = funnelType as string;
     }
     if (startDate && endDate) {
       whereClause.completedAt = {
