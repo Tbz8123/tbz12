@@ -294,9 +294,9 @@ router.get('/visitors', async (req, res) => {
         totalSessions: session.totalSessions,
         totalPageViews: session.totalPageViews,
         totalDownloads: session.activities.length,
-        snapDownloads: session.activities.filter(a => a.templateType === 'snap').length,
-        proDownloads: session.activities.filter(a => a.templateType === 'pro').length,
-        recentDownloads: session.activities.map(a => a.templateName).slice(0, 3)
+        snapDownloads: session.activities.filter(activity => activity.templateType === 'snap').length,
+        proDownloads: session.activities.filter(activity => activity.templateType === 'pro').length,
+        recentDownloads: session.activities.map(activity => activity.templateName).slice(0, 3)
       };
     });
 
@@ -314,8 +314,8 @@ router.get('/visitors', async (req, res) => {
       currentTier: user.currentTier,
       isActive: user.isActive,
       totalDownloads: user.downloads.length,
-      snapDownloads: user.downloads.filter(d => d.templateType === 'snap').length,
-      proDownloads: user.downloads.filter(d => d.templateType === 'pro').length,
+      snapDownloads: user.downloads.filter(download => download.templateType === 'snap').length,
+      proDownloads: user.downloads.filter(download => download.templateType === 'pro').length,
       totalSessions: user.usageStats?.totalLoginDays || 0,
       lastActiveAt: user.usageStats?.lastActiveDate || user.lastLoginAt,
       recentDownloads: user.downloads.slice(0, 5) // Last 5 downloads

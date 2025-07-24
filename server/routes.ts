@@ -115,7 +115,7 @@ export default function setupRoutes(app: express.Express): Server {
               invoiceNumber,
               customerEmail: billingInfo.email,
               customerName: `${billingInfo.firstName} ${billingInfo.lastName}`,
-              billingAddress: order.billingAddress as any,
+              billingAddress: order.billingAddress as { company?: string; address: string; city: string; state: string; zipCode: string; country: string; phone?: string },
               items: cart.map((item: any) => ({
                 name: item.packageName,
                 tier: item.tier,
@@ -261,12 +261,12 @@ export default function setupRoutes(app: express.Express): Server {
           <div class="billing-info">
             <h3>Billing Information</h3>
             <p>${order.customerName}</p>
-            ${order.billingAddress && (order.billingAddress as any).company ? `<p>${(order.billingAddress as any).company}</p>` : ''}
-            <p>${order.billingAddress ? (order.billingAddress as any).address : 'N/A'}</p>
-            <p>${order.billingAddress ? `${(order.billingAddress as any).city}, ${(order.billingAddress as any).state} ${(order.billingAddress as any).zipCode}` : 'N/A'}</p>
-            <p>${order.billingAddress ? (order.billingAddress as any).country : 'N/A'}</p>
+            ${order.billingAddress && (order.billingAddress as { company?: string; address: string; city: string; state: string; zipCode: string; country: string; phone?: string }).company ? `<p>${(order.billingAddress as { company?: string; address: string; city: string; state: string; zipCode: string; country: string; phone?: string }).company}</p>` : ''}
+            <p>${order.billingAddress ? (order.billingAddress as { company?: string; address: string; city: string; state: string; zipCode: string; country: string; phone?: string }).address : 'N/A'}</p>
+            <p>${order.billingAddress ? `${(order.billingAddress as { company?: string; address: string; city: string; state: string; zipCode: string; country: string; phone?: string }).city}, ${(order.billingAddress as { company?: string; address: string; city: string; state: string; zipCode: string; country: string; phone?: string }).state} ${(order.billingAddress as { company?: string; address: string; city: string; state: string; zipCode: string; country: string; phone?: string }).zipCode}` : 'N/A'}</p>
+            <p>${order.billingAddress ? (order.billingAddress as { company?: string; address: string; city: string; state: string; zipCode: string; country: string; phone?: string }).country : 'N/A'}</p>
             <p>Email: ${order.customerEmail}</p>
-            <p>Phone: ${order.billingAddress ? (order.billingAddress as any).phone : 'N/A'}</p>
+            <p>Phone: ${order.billingAddress ? (order.billingAddress as { company?: string; address: string; city: string; state: string; zipCode: string; country: string; phone?: string }).phone : 'N/A'}</p>
           </div>
 
           <table class="items-table">
@@ -348,7 +348,7 @@ export default function setupRoutes(app: express.Express): Server {
       res.status(201).json(userResponse);
     } catch (error: unknown) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: fromZodError(error as any).message });
+        return res.status(400).json({ error: fromZodError(error).message });
       }
       console.error("Error creating user:", error);
       res.status(500).json({ error: (error as Error).message });
@@ -435,7 +435,7 @@ export default function setupRoutes(app: express.Express): Server {
       res.json(updatedUser);
     } catch (error: unknown) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: fromZodError(error as any).message });
+        return res.status(400).json({ error: fromZodError(error).message });
       }
       console.error("Error updating user:", error);
       res.status(500).json({ error: (error as Error).message });
@@ -556,7 +556,7 @@ export default function setupRoutes(app: express.Express): Server {
       res.json(updatedUser);
     } catch (error: unknown) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: fromZodError(error as any).message });
+        return res.status(400).json({ error: fromZodError(error).message });
       }
       console.error("Error updating user profile:", error);
       res.status(500).json({ error: "Failed to update user profile" });
@@ -646,7 +646,7 @@ export default function setupRoutes(app: express.Express): Server {
       res.status(201).json(resume);
     } catch (error: unknown) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: fromZodError(error as any).message });
+        return res.status(400).json({ error: fromZodError(error).message });
       }
       console.error("Error creating resume:", error);
       res.status(500).json({ error: (error as Error).message });
@@ -2894,7 +2894,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
     } catch (error: unknown) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: fromZodError(error as any).message });
+        return res.status(400).json({ error: fromZodError(error).message });
       }
       console.error("Error creating user:", error);
       res.status(500).json({ error: (error as Error).message });

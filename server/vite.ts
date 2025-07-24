@@ -24,7 +24,7 @@ export async function setupVite(app: Express, server: Server) {
     middlewareMode: true,
     hmr: { server },
     host: "0.0.0.0",
-    allowedHosts: ['.localhost'] as any,
+    allowedHosts: ['.localhost'],
     origin: "http://localhost:3000"
   };
 

@@ -3,14 +3,5 @@
   "type": "backend",
   "scope": "codebase",
   "localEndpoint": "http://localhost:5174",
-  "backendAuthType": "public",
-  "executionArgs": {
-    "projectName": "TbzResumeBuilderV4",
-    "projectPath": "C:\\Users\\mhdtb\\OneDrive\\Desktop\\trae+replitV1\\TbzResumeBuilderV4",
-    "testIds": [],
-    "additionalInstruction": "Focus on identifying TypeScript compilation errors and API endpoint issues causing 500 errors. Analyze the backend routes, middleware, and database connections.",
-    "envs": {
-      "API_KEY": "sk-user-FLbtYnieD6ueNhtzH3laNdG-ytR0Q7ySh4_h0ShPIFa88xqj7OaOH9jgHp7COAO3B2JNfLudyqhpcPvweGCPRdVd2FgxDp6OOaLsdmJ6HRAcTg8RLviKe8cCjeCsR_D9UOs"
-    }
-  }
+  "backendAuthType": "public"
 }

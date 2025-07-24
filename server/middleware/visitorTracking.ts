@@ -141,7 +141,7 @@ export function trackVisitor(req: Request, res: Response, next: NextFunction) {
 async function handleVisitorSession(sessionId: string, ipAddress: string, userAgent: string, currentPath: string) {
   try {
     // Skip database operations if prisma is not available
-    const globalPrisma = (global as any).prisma;
+    const globalPrisma = (global as { prisma?: any }).prisma;
     if (!globalPrisma) {
       console.warn('⚠️ Database not available, skipping visitor tracking');
       return { sessionId, isNewSession: false, ipAddress, userAgent };

@@ -27,12 +27,12 @@ prisma.$connect()
   .then(() => {
     console.log('✅ Database connected successfully');
     // Make prisma available globally for middleware
-    (global as any).prisma = prisma;
+    (global as { prisma?: any }).prisma = prisma;
   })
   .catch((error: unknown) => {
     console.error('❌ Database connection failed:', error);
     // Set a flag to skip database operations if connection fails
-    (global as any).prisma = null;
+    (global as { prisma?: any }).prisma = null;
   });
 
 const PORT = parseInt(process.env.PORT || process.env.API_PORT || '5174', 10); // AWS compatible port configuration

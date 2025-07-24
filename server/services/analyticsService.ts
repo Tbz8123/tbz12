@@ -169,7 +169,7 @@ export class AnalyticsService {
   }
 
   // Track a new visitor or update existing visitor
-  async trackVisitor(data: TrackVisitorData): Promise<Prisma.VisitorAnalyticsCreateInput | Prisma.VisitorAnalyticsUpdateInput> {
+  async trackVisitor(data: TrackVisitorData): Promise<Prisma.VisitorAnalyticsGetPayload<{}>> {
     try {
       const { sessionId, userId, ipAddress, userAgent, referrer, landingPage } = data;
 
@@ -214,7 +214,7 @@ export class AnalyticsService {
       });
 
       // Update geographic analytics
-      await this.updateGeographicAnalytics(geoData.country, geoData.countryCode as any, !!userId);
+      await this.updateGeographicAnalytics(geoData.country, geoData.countryCode, !!userId);
 
       return visitor;
     } catch (error) {
@@ -224,7 +224,7 @@ export class AnalyticsService {
   }
 
   // Track a session
-  async trackSession(data: TrackSessionData): Promise<any> {
+  async trackSession(data: TrackSessionData): Promise<Prisma.SessionAnalyticsGetPayload<{}>> {
     try {
       const { sessionId, visitorId, userId, startTime } = data;
 
@@ -258,7 +258,7 @@ export class AnalyticsService {
           data: {
             endTime,
             duration,
-            bounceRate: (session as any).pageViews <= 1
+            bounceRate: session.pageViews <= 1
           }
         });
       }
@@ -630,7 +630,7 @@ export class AnalyticsService {
 
         await prisma.templateAnalytics.update({
           where: { templateId_templateType: { templateId, templateType } },
-          data: updateData as any
+          data: updateData
         });
       } else {
         await prisma.templateAnalytics.create({
@@ -669,7 +669,7 @@ export class AnalyticsService {
 
         await prisma.usageStats.update({
           where: { userId },
-          data: updateData as any
+          data: updateData
         });
       } else {
         await prisma.usageStats.create({
@@ -709,7 +709,7 @@ export class AnalyticsService {
 
         await prisma.geographicAnalytics.update({
           where: { country },
-          data: updateData as any
+          data: updateData
         });
       } else {
         await prisma.geographicAnalytics.create({
@@ -748,7 +748,7 @@ export class AnalyticsService {
 
         await prisma.geographicAnalytics.update({
           where: { country },
-          data: updateData as any
+          data: updateData
         });
       }
     } catch (error) {
@@ -772,7 +772,7 @@ export class AnalyticsService {
 
         await prisma.geographicAnalytics.update({
           where: { country },
-          data: updateData as any
+          data: updateData
         });
       }
     } catch (error) {
@@ -795,7 +795,7 @@ export class AnalyticsService {
 
         await prisma.geographicAnalytics.update({
           where: { country },
-          data: updateData as any
+          data: updateData
         });
       }
     } catch (error) {
@@ -819,10 +819,10 @@ export class AnalyticsService {
       let registeredUsers = 0;
       
       try {
-        totalVisitors = await (prisma.visitorAnalytics as any).count({ 
+        totalVisitors = await prisma.visitorAnalytics.count({ 
           where: { firstVisit: { gte: last24Hours } } 
         });
-        registeredUsers = await (prisma.visitorAnalytics as any).count({ 
+        registeredUsers = await prisma.visitorAnalytics.count({ 
           where: { 
             firstVisit: { gte: last24Hours },
             isRegistered: true 
@@ -853,7 +853,7 @@ export class AnalyticsService {
         console.log(`📅 Using date range: ${startDate.toISOString()} to ${endDate.toISOString()}`);
 
         // Get new registrations for the date range
-        filteredNewRegistrations = await (prisma.user as any).count({
+        filteredNewRegistrations = await prisma.user.count({
           where: {
             createdAt: {
               gte: startDate,
@@ -864,7 +864,7 @@ export class AnalyticsService {
         console.log(`📊 New registrations found: ${filteredNewRegistrations}`);
 
         // Get downloads for the date range
-        filteredSnapDownloads = await (prisma.download as any).count({
+        filteredSnapDownloads = await prisma.download.count({
           where: { 
             templateType: 'snap',
             downloadedAt: {
@@ -875,7 +875,7 @@ export class AnalyticsService {
         });
         console.log(`📊 Snap downloads found: ${filteredSnapDownloads}`);
 
-        filteredProDownloads = await (prisma.download as any).count({
+        filteredProDownloads = await prisma.download.count({
           where: { 
             templateType: 'pro',
             downloadedAt: {
@@ -887,7 +887,7 @@ export class AnalyticsService {
         console.log(`📊 Pro downloads found: ${filteredProDownloads}`);
 
         // Get registered users for the date range (for total count)
-        filteredRegisteredUsers = await (prisma.user as any).count({
+        filteredRegisteredUsers = await prisma.user.count({
           where: {
             createdAt: {
               gte: startDate,
@@ -915,7 +915,7 @@ export class AnalyticsService {
         if (startDate.toDateString() === endDate.toDateString()) {
           endDate.setHours(23, 59, 59, 999);
         }
-        totalSubscribers = await (prisma.user as any).count({
+        totalSubscribers = await prisma.user.count({
           where: {
             subscriptionStatus: 'ACTIVE',
             createdAt: {
@@ -933,7 +933,7 @@ export class AnalyticsService {
       console.log(`📊 Total subscribers: ${totalSubscribers}`);
 
       // Get geographic data
-      const geographicData = await (prisma.geographicAnalytics as any).findMany({
+      const geographicData = await prisma.geographicAnalytics.findMany({
         where: { totalVisitors: { gt: 0 } },
         orderBy: { totalVisitors: 'desc' },
         take: 10
@@ -947,7 +947,7 @@ export class AnalyticsService {
         if (startDate.toDateString() === endDate.toDateString()) {
           endDate.setHours(23, 59, 59, 999);
         }
-        templateDownloads = await (prisma.download as any).groupBy({
+        templateDownloads = await prisma.download.groupBy({
           by: ['templateId', 'templateType', 'templateName'],
           where: {
             downloadedAt: {

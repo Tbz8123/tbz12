@@ -37,7 +37,7 @@ router.get('/', async (req: Request, res: Response) => {
     const importType = req.query.importType as string || null;
 
     // Build where clause
-    const where: Prisma.ImportHistoryWhereInput = {};
+    const where: any = {};
     if (status && status !== 'all') {
       where.status = status;
     }
@@ -245,7 +245,7 @@ router.put('/:id', async (req: Request, res: Response) => {
       currentOperation: updateData.currentOperation || currentMeta.currentOperation
     };
 
-    const updatePayload: Prisma.ImportHistoryUpdateInput = {};
+    const updatePayload: any = {};
 
     if (updateData.status !== undefined) updatePayload.status = updateData.status;
     if (updateData.progress !== undefined) {
@@ -341,7 +341,7 @@ async function processImportJob(jobId: string, job: Record<string, any>) {
   try {
     console.log(`🚀 Processing import job ${jobId}: ${job.fileName}`);
 
-    const metadata = job.metadata as Record<string, any>;
+    const metadata = (job.metadata as Record<string, any>) || {};
 
     // Update status to processing
     await updateJob({
@@ -384,7 +384,12 @@ async function processImportJob(jobId: string, job: Record<string, any>) {
   }
 }
 
-async function processJobTitlesImportServerSide(csvData: string, jobId: string, updateJob: Function) {
+// Define interface for update job callback
+interface UpdateJobCallback {
+  (data: Record<string, any>): Promise<void>;
+}
+
+async function processJobTitlesImportServerSide(csvData: string, jobId: string, updateJob: UpdateJobCallback) {
   console.log('🚀 Starting job titles import processing...');
 
   // Get deleteMissingTitles setting from job metadata
@@ -489,7 +494,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
 
         const deletedTitles = await prisma.jobTitle.deleteMany({
           where: {
-            id: { in: titlesToDelete.map((t) => t.id) }
+            id: { in: titlesToDelete.map(t => t.id) }
           }
         });
 
@@ -572,7 +577,8 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
           console.log(`✅ Created job description with ID: ${newDescription.id}`);
         } catch (error: unknown) {
           // Ignore duplicate descriptions
-          if ((error as any)?.code !== 'P2002') {
+          const prismaError = error as { code?: string };
+          if (prismaError?.code !== 'P2002') {
             console.error(`❌ Failed to create description for ${titleInfo.title}:`, error);
           } else {
             console.log(`⚠️ Duplicate description skipped for ${titleInfo.title}`);
@@ -600,7 +606,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
   });
 }
 
-async function processSkillsImportServerSide(csvData: string, jobId: string, updateJob: Function) {
+async function processSkillsImportServerSide(csvData: string, jobId: string, updateJob: UpdateJobCallback) {
   console.log('🚀 Starting skills import processing...');
 
   // Test database connection first
@@ -723,7 +729,7 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
 
         const deletedTitles = await prisma.skillsJobTitle.deleteMany({
           where: {
-            id: { in: titlesToDelete.map((t) => t.id) }
+            id: { in: titlesToDelete.map((t: any) => t.id) }
           }
         });
 
@@ -849,7 +855,7 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
   console.log(`Skills import completed successfully. Processed ${processedCount} skills job titles.`);
 }
 
-async function processProfessionalSummariesImportServerSide(csvData: string, jobId: string, updateJob: Function) {
+async function processProfessionalSummariesImportServerSide(csvData: string, jobId: string, updateJob: UpdateJobCallback) {
   console.log('🚀 Starting professional summaries import processing...');
 
   // Test database connection first

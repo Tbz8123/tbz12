@@ -153,7 +153,7 @@ class MemoryAnalyticsService extends EventEmitter {
     const activity: ActivityEvent = {
       id: this.generateId(),
       timestamp: Date.now(),
-      ...(data as any)
+      ...data
     };
 
     // Store activity
