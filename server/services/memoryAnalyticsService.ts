@@ -122,7 +122,7 @@ class MemoryAnalyticsService extends EventEmitter {
         .slice(0, this.maxActivities);
 
       this.activities.clear();
-      sortedActivities.forEach(([id, activity]) => {
+      sortedActivities.forEach(([id, activity]: [string, ActivityEvent]) => {
         this.activities.set(id, activity);
       });
     }

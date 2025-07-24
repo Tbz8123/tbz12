@@ -546,7 +546,7 @@ export function getCurrentVisitorStats() {
     registeredActive,
     unregisteredActive: totalActive - registeredActive,
     recentVisitors: totalActive, // Same as total active for now
-    countries: Array.from(countries.entries()).map(([country, count]) => ({ country, count }))
+    countries: Array.from(countries.entries()).map(([country, count]: [string, number]) => ({ country, count }))
   };
 }
 
@@ -576,7 +576,7 @@ export async function getDatabaseVisitorStats() {
     const registeredActive = activeVisitors.filter(v => v.isRegistered).length;
     const countries = new Map<string, number>();
 
-    activeVisitors.forEach(visitor => {
+    activeVisitors.forEach((visitor: { country?: string | null }) => {
       if (visitor.country) {
         countries.set(visitor.country, (countries.get(visitor.country) || 0) + 1);
       }
@@ -587,7 +587,7 @@ export async function getDatabaseVisitorStats() {
       registeredActive,
       unregisteredActive: totalActive - registeredActive,
       recentVisitors: totalActive,
-      countries: Array.from(countries.entries()).map(([country, count]) => ({ country, count })),
+      countries: Array.from(countries.entries()).map(([country, count]: [string, number]) => ({ country, count })),
       activeVisitors
     };
   } catch (error) {
@@ -660,7 +660,7 @@ export async function deleteVisitorSessions(sessionIds: string[]) {
     });
 
     // Delete from memory
-    sessionIds.forEach(sessionId => {
+    sessionIds.forEach((sessionId: string) => {
       activeSessions.delete(sessionId);
     });
 

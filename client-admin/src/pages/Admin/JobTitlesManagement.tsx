@@ -604,7 +604,7 @@ export default function JobTitlesManagement() {
       const rows = lines.slice(1).map(line => {
         const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
         const row: any = {};
-        headers.forEach((header, index) => {
+        headers.forEach((header: string, index: number) => {
           row[header] = values[index] || '';
         });
         return row;
@@ -613,7 +613,7 @@ export default function JobTitlesManagement() {
       // Group data by job title
       const groupedData = new Map();
 
-      rows.forEach((row, index) => {
+      rows.forEach((row: any, index: number) => {
         if (!row.title) {
           console.warn(`Row ${index + 2}: Missing title, skipping`);
           return;

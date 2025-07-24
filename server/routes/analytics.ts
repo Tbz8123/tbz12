@@ -137,15 +137,15 @@ router.get('/visitors', async (req: Request, res: Response) => {
     });
 
     // Separate registered and unregistered visitors
-    const registeredVisitors = visitors.filter((v: any) => v.isRegistered && v.user);
-    const unregisteredVisitors = visitors.filter((v: any) => !v.isRegistered || !v.user);
+    const registeredVisitors = visitors.filter((v: { isRegistered: boolean; user: any }) => v.isRegistered && v.user);
+    const unregisteredVisitors = visitors.filter((v: { isRegistered: boolean; user: any }) => !v.isRegistered || !v.user);
 
     // Count active users
-    const activeRegistered = activeVisitors.filter((v: any) => v.isRegistered && v.user).length;
-    const activeUnregistered = activeVisitors.filter((v: any) => !v.isRegistered || !v.user).length;
+    const activeRegistered = activeVisitors.filter((v: { isRegistered: boolean; user: any }) => v.isRegistered && v.user).length;
+    const activeUnregistered = activeVisitors.filter((v: { isRegistered: boolean; user: any }) => !v.isRegistered || !v.user).length;
 
     // Transform data for frontend
-    const registered = registeredVisitors.map((v: any) => ({
+    const registered = registeredVisitors.map((v: { userId?: number; id: number; user?: { name?: string; email?: string; currentTier?: string }; country?: string; createdAt: Date; lastSeen: Date; totalSessions: number }) => ({
       id: v.userId || v.id,
       name: v.user?.name || 'Unknown',
       email: v.user?.email || 'Unknown',
@@ -162,7 +162,7 @@ router.get('/visitors', async (req: Request, res: Response) => {
       recentDownloads: []
     }));
 
-    const unregistered = unregisteredVisitors.map((v: any) => ({
+    const unregistered = unregisteredVisitors.map((v: { sessionId: string; userAgent?: string; country?: string; lastSeen: Date }) => ({
       anonymousId: v.sessionId,
       userAgent: v.userAgent || 'Unknown',
       country: v.country || 'Unknown',
@@ -206,14 +206,14 @@ router.get('/activities', async (req: Request, res: Response) => {
 
     // Filter by date range if provided
     if (startTimestamp && endTimestamp) {
-      activities = activities.filter(activity => 
+      activities = activities.filter((activity: { timestamp: number }) => 
         activity.timestamp >= startTimestamp && activity.timestamp <= endTimestamp
       );
     }
 
     // Filter by activity type if provided
     if (activityType) {
-      activities = activities.filter(activity => activity.activityType === activityType);
+      activities = activities.filter((activity: { activityType: string }) => activity.activityType === activityType);
     }
 
     res.json(activities);
@@ -462,7 +462,7 @@ router.get('/funnel', async (req: Request, res: Response) => {
     }, {} as Record<string, FunnelAnalysisItem>);
 
     // Calculate averages
-    Object.values(funnelAnalysis).forEach((item: FunnelAnalysisItem) => {
+    Object.values(funnelAnalysis).forEach((item: any) => {
       if (item.totalTime > 0) {
         item.avgTime = item.totalTime / item.count;
       }

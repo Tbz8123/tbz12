@@ -164,8 +164,8 @@ const parseUserAgent = (userAgent: string): UserAgentData => {
 export class AnalyticsService {
   private prisma: PrismaClient;
 
-  constructor(prismaClient?: PrismaClient) {
-    this.prisma = prismaClient || new PrismaClient();
+  constructor() {
+    this.prisma = new PrismaClient();
   }
 
   // Track a new visitor or update existing visitor

@@ -75,7 +75,22 @@ router.get('/', async (req: Request, res: Response) => {
     });
 
     // Transform data to match frontend expectations
-    const transformedImports = imports.map((imp: any) => ({
+    const transformedImports = imports.map((imp: {
+      id: string;
+      fileName: string;
+      fileSize: number;
+      fileType: string;
+      status: string;
+      totalRecords: number | null;
+      processedRecords: number | null;
+      successCount: number | null;
+      errorCount: number | null;
+      errors: any;
+      progress: number | null;
+      metadata: any;
+      startedAt: Date;
+      completedAt: Date | null;
+    }) => ({
       id: imp.id,
       fileName: imp.fileName,
       fileSize: imp.fileSize,
@@ -245,7 +260,19 @@ router.put('/:id', async (req: Request, res: Response) => {
       currentOperation: updateData.currentOperation || currentMeta.currentOperation
     };
 
-    const updatePayload: any = {};
+    const updatePayload: {
+      status?: string;
+      progress?: number;
+      totalRecords?: number;
+      processedRecords?: number;
+      successCount?: number;
+      errorCount?: number;
+      errors?: any;
+      completedAt?: Date;
+      startedAt?: Date;
+      metadata?: Record<string, any>;
+      updatedAt?: Date;
+    } = {};
 
     if (updateData.status !== undefined) updatePayload.status = updateData.status;
     if (updateData.progress !== undefined) {
@@ -415,10 +442,10 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
     throw new Error('File must contain at least one data row');
   }
 
-  const rows = lines.slice(1).map(line => {
-    const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+  const rows = lines.slice(1).map((line: string) => {
+    const values = line.split(',').map((v: string) => v.trim().replace(/"/g, ''));
     const row: Record<string, string> = {};
-    headers.forEach((header, index) => {
+    headers.forEach((header: string, index: number) => {
       row[header] = values[index] || '';
     });
     return row;
@@ -427,7 +454,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
   // Group data by job title
   const groupedData = new Map();
 
-  rows.forEach((row, index) => {
+  rows.forEach((row: Record<string, string>, index: number) => {
     if (!row.title) {
       console.warn(`Row ${index + 2}: Missing title, skipping`);
       return;
@@ -474,15 +501,15 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
 
       // Build a Set of normalized titles that are present in the uploaded file
       const uploadedTitleSet = new Set(
-        Array.from(groupedData.values()).map((g: Record<string, any>) => g.titleInfo.title.toLowerCase().trim())
+        Array.from(groupedData.values()).map((g: { titleInfo: { title: string } }) => g.titleInfo.title.toLowerCase().trim())
       );
 
       // Identify titles that are NOT in the uploaded file
-      const titlesToDelete = existingTitles.filter((t: any) => !uploadedTitleSet.has(t.title.toLowerCase().trim()));
+      const titlesToDelete = existingTitles.filter((t: { id: number; title: string }) => !uploadedTitleSet.has(t.title.toLowerCase().trim()));
 
       if (titlesToDelete.length > 0) {
         console.log(`🗑️ Deleting ${titlesToDelete.length} job titles not present in uploaded file:`);
-        titlesToDelete.forEach((t: any) => console.log(`  - "${t.title}" (ID: ${t.id})`));
+        titlesToDelete.forEach((t: { id: number; title: string }) => console.log(`  - "${t.title}" (ID: ${t.id})`));
 
         // Delete job descriptions first, then job titles
         for (const title of titlesToDelete) {
@@ -494,7 +521,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
 
         const deletedTitles = await prisma.jobTitle.deleteMany({
           where: {
-            id: { in: titlesToDelete.map((t: any) => t.id) }
+            id: { in: titlesToDelete.map((t: { id: number }) => t.id) }
           }
         });
 
@@ -644,10 +671,10 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
   const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, '').toLowerCase());
   console.log('CSV Headers found:', headers);
 
-  const rows = lines.slice(1).map((line, index) => {
-    const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+  const rows = lines.slice(1).map((line: string, index: number) => {
+    const values = line.split(',').map((v: string) => v.trim().replace(/"/g, ''));
     const row: Record<string, string> = {};
-    headers.forEach((header, headerIndex) => {
+    headers.forEach((header: string, headerIndex: number) => {
       row[header] = values[headerIndex] || '';
     });
     return row;
@@ -658,7 +685,7 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
   // Group data by skills job title
   const groupedData = new Map<string, { title: string; category: string; skills: Array<{ content: string; isRecommended: boolean }> }>();
 
-  rows.forEach((row, index) => {
+  rows.forEach((row: Record<string, string>, index: number) => {
     if (!row.title) {
       console.warn(`Row ${index + 2}: Missing title, skipping`);
       return;
@@ -709,15 +736,15 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
 
       // Build a Set of normalized titles that are present in the uploaded file
       const uploadedTitleSet = new Set(
-        Array.from(groupedData.values()).map((g) => g.title.toLowerCase().trim())
+        Array.from(groupedData.values()).map((g: { title: string }) => g.title.toLowerCase().trim())
       );
 
       // Identify titles that are NOT in the uploaded file
-      const titlesToDelete = existingTitles.filter((t: any) => !uploadedTitleSet.has(t.title.toLowerCase().trim()));
+      const titlesToDelete = existingTitles.filter((t: { id: number; title: string }) => !uploadedTitleSet.has(t.title.toLowerCase().trim()));
 
       if (titlesToDelete.length > 0) {
         console.log(`🗑️ Deleting ${titlesToDelete.length} skills job titles not present in uploaded file:`);
-        titlesToDelete.forEach((t: any) => console.log(`  - "${t.title}" (ID: ${t.id})`));
+        titlesToDelete.forEach((t: { id: number; title: string }) => console.log(`  - "${t.title}" (ID: ${t.id})`));
 
         // Delete skill categories first, then job titles
         for (const title of titlesToDelete) {
@@ -729,7 +756,7 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
 
         const deletedTitles = await prisma.skillsJobTitle.deleteMany({
           where: {
-            id: { in: titlesToDelete.map((t: any) => t.id) }
+            id: { in: titlesToDelete.map((t: { id: number }) => t.id) }
           }
         });
 
@@ -893,10 +920,10 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
   const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, '').toLowerCase());
   console.log('CSV Headers found:', headers);
 
-  const rows = lines.slice(1).map((line, index) => {
-    const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+  const rows = lines.slice(1).map((line: string, index: number) => {
+    const values = line.split(',').map((v: string) => v.trim().replace(/"/g, ''));
     const row: any = {};
-    headers.forEach((header, headerIndex) => {
+    headers.forEach((header: string, headerIndex: number) => {
       row[header] = values[headerIndex] || '';
     });
     return row;
@@ -907,7 +934,7 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
   // Group data by professional summary job title
   const groupedData = new Map<string, { title: string; category: string; summaries: any[] }>();
 
-  rows.forEach((row, index) => {
+  rows.forEach((row: any, index: number) => {
     if (!row.title) {
       console.warn(`Row ${index + 2}: Missing title, skipping`);
       return;
@@ -958,11 +985,11 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
 
       // Build a Set of normalized titles that are present in the uploaded file
       const uploadedTitleSet = new Set(
-        Array.from(groupedData.values()).map((g: any) => g.title.toLowerCase().trim())
+        Array.from(groupedData.values()).map((g: { title: string }) => g.title.toLowerCase().trim())
       );
 
       // Identify titles that are NOT in the uploaded file
-      const titlesToDelete = existingTitles.filter((t: any) => 
+      const titlesToDelete = existingTitles.filter((t: { id: number; title: string }) => 
         !uploadedTitleSet.has(t.title.toLowerCase().trim())
       );
 
