@@ -18,9 +18,22 @@ if (global.prisma) {
 
 const professionalSummariesRouter = Router();
 
-// Type definitions for missing Prisma types
-type ProfessionalSummaryJobTitleWhereInput = Prisma.ProfessionalSummaryJobTitleWhereInput;
-type ProfessionalSummaryWhereInput = Prisma.ProfessionalSummaryWhereInput;
+// Type definitions for where clauses
+type ProfessionalSummaryJobTitleWhereInput = {
+  category?: string;
+  title?: {
+    contains: string;
+    mode: 'insensitive';
+  };
+};
+
+type ProfessionalSummaryWhereInput = {
+  professionalSummaryJobTitleId?: number;
+  content?: {
+    contains: string;
+    mode: 'insensitive';
+  };
+};
 
 // Validation schemas
 const professionalSummaryJobTitleSchema = z.object({
@@ -403,7 +416,7 @@ professionalSummariesRouter.get("/export", async (req: Request, res: Response) =
     const validJobTitles = await prisma.professionalSummaryJobTitle.findMany({
       select: { id: true }
     });
-    const validJobTitleIds = validJobTitles.map(jt => jt.id);
+    const validJobTitleIds = validJobTitles.map((jt: { id: number }) => jt.id);
 
     const professionalSummaries = await prisma.professionalSummary.findMany({
       where: {
@@ -425,7 +438,7 @@ professionalSummariesRouter.get("/export", async (req: Request, res: Response) =
     console.log('Found', professionalSummaries.length, 'professional summaries');
 
     // Transform data for export - simplified format for import compatibility
-    const exportData = professionalSummaries.map((summary: Prisma.ProfessionalSummaryGetPayload<{ include: { professionalSummaryJobTitle: true } }>) => ({
+    const exportData = professionalSummaries.map((summary: { id: number; content: string; isRecommended: boolean; professionalSummaryJobTitle: { title: string; category: string } }) => ({
       title: summary.professionalSummaryJobTitle.title,
       category: summary.professionalSummaryJobTitle.category,
       content: summary.content,

@@ -4,30 +4,59 @@ import { PrismaClient, Prisma } from '@prisma/client';
 import { AnalyticsService } from '../services/analyticsService';
 
 // Type definitions for analytics
-type VisitorAnalyticsWithUser = Prisma.VisitorAnalyticsGetPayload<{
-  include: {
-    user: {
-      select: {
-        id: true;
-        name: true;
-        email: true;
-        currentTier: true;
-      }
-    }
-  }
-}>;
+type VisitorAnalyticsWithUser = {
+  id: string;
+  sessionId: string;
+  userId?: string | null;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  country?: string | null;
+  city?: string | null;
+  region?: string | null;
+  deviceType?: string | null;
+  browserName?: string | null;
+  browserVersion?: string | null;
+  osName?: string | null;
+  osVersion?: string | null;
+  referrer?: string | null;
+  landingPage?: string | null;
+  isRegistered: boolean;
+  firstVisit: Date;
+  lastSeen: Date;
+  totalSessions: number;
+  totalPageViews: number;
+  sessionDuration?: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+  user?: {
+    id: string;
+    name?: string | null;
+    email: string;
+    currentTier: string;
+  } | null;
+};
 
-type SessionAnalyticsWithUser = Prisma.SessionAnalyticsGetPayload<{
-  include: {
-    user: {
-      select: {
-        id: true;
-        name: true;
-        email: true;
-      }
-    }
-  }
-}>;
+type SessionAnalyticsWithUser = {
+  id: string;
+  sessionId: string;
+  visitorId: string;
+  userId?: string | null;
+  startTime: Date;
+  endTime?: Date | null;
+  duration?: number | null;
+  pageViews: number;
+  pagesVisited?: any;
+  bounceRate: boolean;
+  exitPage?: string | null;
+  conversionType?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  user?: {
+    id: string;
+    name?: string | null;
+    email: string;
+  } | null;
+};
 
 // Extended Request interface for analytics tracking
 interface ExtendedRequest extends Request {
@@ -119,7 +148,12 @@ router.get('/visitors', async (req: Request, res: Response) => {
 
     const { startDate, endDate, limit = 50 } = req.query;
 
-    const whereClause: Prisma.VisitorAnalyticsWhereInput = {};
+    const whereClause: {
+      createdAt?: {
+        gte: Date;
+        lte: Date;
+      };
+    } = {};
     if (startDate && endDate) {
       whereClause.createdAt = {
         gte: new Date(startDate as string),
@@ -254,7 +288,12 @@ router.get('/sessions', async (req: Request, res: Response) => {
   try {
     const { startDate, endDate, limit = '50' } = req.query;
 
-    const whereClause: Prisma.SessionAnalyticsWhereInput = {};
+    const whereClause: {
+      startTime?: {
+        gte: Date;
+        lte: Date;
+      };
+    } = {};
     if (startDate && endDate) {
       whereClause.startTime = {
         gte: new Date(startDate as string),
@@ -289,7 +328,12 @@ router.get('/summary', async (req: Request, res: Response) => {
   try {
     const { startDate, endDate } = req.query;
 
-    const whereClause: Prisma.AnalyticsSummaryWhereInput = {};
+    const whereClause: {
+      date?: {
+        gte: Date;
+        lte: Date;
+      };
+    } = {};
     if (startDate && endDate) {
       whereClause.date = {
         gte: new Date(startDate as string),
@@ -442,7 +486,13 @@ router.get('/funnel', async (req: Request, res: Response) => {
   try {
     const { funnelType, startDate, endDate } = req.query;
 
-    const whereClause: Prisma.ConversionFunnelWhereInput = {};
+    const whereClause: {
+      funnelType?: string;
+      completedAt?: {
+        gte: Date;
+        lte: Date;
+      };
+    } = {};
     if (funnelType) {
       whereClause.funnelType = funnelType;
     }
@@ -468,7 +518,14 @@ router.get('/funnel', async (req: Request, res: Response) => {
       avgTime: number;
     }
 
-    const funnelAnalysis = funnelData.reduce((acc: Record<string, FunnelAnalysisItem>, item: Prisma.ConversionFunnelGetPayload<{}>) => {
+    const funnelAnalysis = funnelData.reduce((acc: Record<string, FunnelAnalysisItem>, item: {
+      id: number;
+      funnelType: string;
+      step: string;
+      stepOrder: number;
+      timeToComplete?: number;
+      completedAt: Date;
+    }) => {
       const key = `${item.funnelType}-${item.step}`;
       if (!acc[key]) {
         acc[key] = {

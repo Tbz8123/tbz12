@@ -512,7 +512,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
 
       if (titlesToDelete.length > 0) {
         console.log(`🗑️ Deleting ${titlesToDelete.length} job titles not present in uploaded file:`);
-        titlesToDelete.forEach((t) => console.log(`  - "${t.title}" (ID: ${t.id})`));
+        titlesToDelete.forEach((t: { id: number; title: string }) => console.log(`  - "${t.title}" (ID: ${t.id})`));
 
         // Delete job descriptions first, then job titles
         for (const title of titlesToDelete) {
@@ -524,7 +524,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
 
         const deletedTitles = await prisma.jobTitle.deleteMany({
           where: {
-            id: { in: titlesToDelete.map((t) => t.id) }
+            id: { in: titlesToDelete.map((t: { id: number; title: string }) => t.id) }
           }
         });
 

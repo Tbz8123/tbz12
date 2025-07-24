@@ -3,8 +3,51 @@ import gaService from './googleAnalyticsService';
 import memoryAnalytics from './memoryAnalyticsService';
 
 // Type definitions for analytics payloads
-type VisitorAnalyticsGetPayload<T extends Prisma.VisitorAnalyticsDefaultArgs> = Prisma.VisitorAnalyticsGetPayload<T>;
-type SessionAnalyticsGetPayload<T extends Prisma.SessionAnalyticsDefaultArgs> = Prisma.SessionAnalyticsGetPayload<T>;
+type VisitorAnalyticsRecord = {
+  id: number;
+  sessionId: string;
+  userId?: string;
+  ipAddress?: string;
+  userAgent?: string;
+  referrer?: string;
+  landingPage?: string;
+  country?: string;
+  countryCode?: string;
+  city?: string;
+  region?: string;
+  deviceType?: string;
+  browserName?: string;
+  browserVersion?: string;
+  osName?: string;
+  osVersion?: string;
+  firstVisit: Date;
+  lastSeen: Date;
+  totalSessions: number;
+  totalPageViews: number;
+  totalTimeSpent: number;
+  bounceRate?: number;
+  conversionValue?: number;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+type SessionAnalyticsRecord = {
+  id: number;
+  sessionId: string;
+  visitorId: number;
+  userId?: string;
+  startTime: Date;
+  endTime?: Date;
+  duration?: number;
+  pageViews: number;
+  activityCount: number;
+  bounced: boolean;
+  converted: boolean;
+  conversionValue?: number;
+  exitPage?: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 // Type definitions
 interface TrackVisitorData {
@@ -173,7 +216,7 @@ export class AnalyticsService {
   }
 
   // Track a new visitor or update existing visitor
-  async trackVisitor(data: TrackVisitorData): Promise<Prisma.VisitorAnalyticsGetPayload<{}>> {
+  async trackVisitor(data: TrackVisitorData): Promise<VisitorAnalyticsRecord> {
     try {
       const { sessionId, userId, ipAddress, userAgent, referrer, landingPage } = data;
 
@@ -228,7 +271,7 @@ export class AnalyticsService {
   }
 
   // Track a session
-  async trackSession(data: TrackSessionData): Promise<Prisma.SessionAnalyticsGetPayload<{}>> {
+  async trackSession(data: TrackSessionData): Promise<SessionAnalyticsRecord> {
     try {
       const { sessionId, visitorId, userId, startTime } = data;
 
@@ -972,7 +1015,12 @@ export class AnalyticsService {
         });
       }
 
-      const topTemplates = templateDownloads.map(template => ({
+      const topTemplates = templateDownloads.map((template: {
+        templateId: string;
+        templateType: string;
+        templateName: string;
+        _count: { templateId: number };
+      }) => ({
          templateId: template.templateId,
          templateName: template.templateName || `Template ${template.templateId}`,
         templateType: template.templateType,
@@ -1052,7 +1100,12 @@ export class AnalyticsService {
       });
 
       // Transform to match expected format
-      return templateDownloads.map(template => ({
+      return templateDownloads.map((template: {
+        templateId: string;
+        templateType: string;
+        templateName: string;
+        _count: { templateId: number };
+      }) => ({
         templateId: template.templateId,
         templateName: template.templateName || `Template ${template.templateId}`,
         templateType: template.templateType,
