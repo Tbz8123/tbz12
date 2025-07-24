@@ -88,11 +88,11 @@ const LoginPage: React.FC = () => {
         description: "Welcome back to the admin panel!",
       });
       setLocation('/admin/pro');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error:', error);
       toast({
         title: "Login Failed",
-        description: error.message || "Invalid admin credentials. Use 'admin' / 'admin123'",
+        description: error instanceof Error ? error.message : "Invalid admin credentials. Use 'admin' / 'admin123'",
         variant: "destructive",
       });
     } finally {
@@ -110,11 +110,11 @@ const LoginPage: React.FC = () => {
         description: "Your admin account has been created successfully.",
       });
       setLocation('/admin/pro');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Signup error:', error);
       toast({
         title: "Registration Failed",
-        description: error.message || "Please try again.",
+        description: error instanceof Error ? error.message : "Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -131,18 +131,20 @@ const LoginPage: React.FC = () => {
         description: 'You have been logged in with Google.',
       });
       setLocation('/admin/pro');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Google login error:', error);
       
       let errorMessage = 'Please try again.';
-      if (error.message === 'Sign-in was cancelled') {
-        errorMessage = 'Sign-in was cancelled. Please try again.';
-      } else if (error.message.includes('popup')) {
-        errorMessage = 'Please allow popups and try again.';
-      } else if (error.message.includes('unauthorized-domain')) {
-        errorMessage = 'This domain is not configured for Google sign-in.';
-      } else if (error.message) {
-        errorMessage = error.message;
+      if (error instanceof Error) {
+        if (error.message === 'Sign-in was cancelled') {
+          errorMessage = 'Sign-in was cancelled. Please try again.';
+        } else if (error.message.includes('popup')) {
+          errorMessage = 'Please allow popups and try again.';
+        } else if (error.message.includes('unauthorized-domain')) {
+          errorMessage = 'This domain is not configured for Google sign-in.';
+        } else {
+          errorMessage = error.message;
+        }
       }
 
       toast({

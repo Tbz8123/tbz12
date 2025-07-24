@@ -70,18 +70,34 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(import.meta.dirname, "..", "dist", "public");
+  const clientDistPath = path.resolve(import.meta.dirname, "..", "dist", "client");
+  const adminDistPath = path.resolve(import.meta.dirname, "..", "dist", "admin");
 
-  if (!fs.existsSync(distPath)) {
+  if (!fs.existsSync(clientDistPath)) {
     throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`,
+      `Could not find the client build directory: ${clientDistPath}, make sure to build the client first`,
     );
   }
 
-  app.use(express.static(distPath));
+  if (!fs.existsSync(adminDistPath)) {
+    throw new Error(
+      `Could not find the admin build directory: ${adminDistPath}, make sure to build the admin first`,
+    );
+  }
 
-  // fall through to index.html if the file doesn't exist
+  // Serve admin static files
+  app.use("/admin", express.static(adminDistPath));
+  
+  // Serve client static files
+  app.use(express.static(clientDistPath));
+
+  // Admin routes - serve admin index.html for admin paths
+  app.use("/admin/*", (_req, res) => {
+    res.sendFile(path.resolve(adminDistPath, "index.html"));
+  });
+
+  // Client routes - fall through to client index.html if the file doesn't exist
   app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+    res.sendFile(path.resolve(clientDistPath, "index.html"));
   });
 }

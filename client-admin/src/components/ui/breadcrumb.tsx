@@ -49,7 +49,7 @@ const BreadcrumbLink = React.forwardRef<
 
   return (
     <Comp
-      ref={ref}
+      ref={ref as any}
       className={cn("transition-colors hover:text-foreground", className)}
       {...props}
     />
@@ -102,7 +102,7 @@ const BreadcrumbEllipsis = ({
     <span className="sr-only">More</span>
   </span>
 )
-BreadcrumbEllipsis.displayName = "BreadcrumbElipssis"
+BreadcrumbEllipsis.displayName = "BreadcrumbEllipsis"
 
 export {
   Breadcrumb,

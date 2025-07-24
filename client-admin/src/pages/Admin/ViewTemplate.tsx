@@ -7,6 +7,12 @@ import { motion, useAnimation, useInView } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
 
+interface Template {
+  id: string;
+  name: string;
+  code: string;
+}
+
 const sampleUserData = {
   personalInfo: {
     firstName: "John",
@@ -54,10 +60,10 @@ const sampleUserData = {
 };
 
 export default function ViewTemplate() {
-  const [match, params] = useRoute('/admin/templates/:id');
+  const [_match, params] = useRoute('/admin/templates/:id');
   const templateId = params?.id;
 
-  const { data: template, isLoading, error } = useQuery({
+  const { data: template, isLoading, error } = useQuery<Template>({
     queryKey: [`/api/templates/${templateId}`],
     enabled: !!templateId,
     retry: 2,

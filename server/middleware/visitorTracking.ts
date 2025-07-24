@@ -298,8 +298,8 @@ async function trackPageView(sessionId: string, visitorId: string, pageUrl: stri
       userTier: session?.user?.currentTier,
       country: session?.country,
       deviceType: session?.deviceType,
-      referrer: session?.referrer,
-      userAgent: session?.userAgent
+      referrer: session?.referrer || undefined,
+      userAgent: session?.userAgent || undefined
     });
   } catch (error) {
     console.error('Error tracking page view:', error);
@@ -617,16 +617,6 @@ export async function getAllVisitorSessions(limit: number = 100) {
             name: true,
             currentTier: true
           }
-        },
-        activities: {
-          select: {
-            activityType: true,
-            activityName: true,
-            pageUrl: true,
-            timestamp: true
-          },
-          orderBy: { timestamp: 'desc' },
-          take: 5
         }
       }
     });
@@ -737,7 +727,7 @@ async function trackDownloadEvent(sessionId: string, downloadData: any) {
   try {
     const session = await prisma.visitorAnalytics.findUnique({
       where: { sessionId },
-      select: { id: true, userId: true, country: true, countryCode: true }
+      select: { id: true, userId: true, country: true }
     });
 
     if (session) {
@@ -746,7 +736,7 @@ async function trackDownloadEvent(sessionId: string, downloadData: any) {
       await analyticsService.trackActivity({
         sessionId: sessionId,
         visitorId: session.id,
-        userId: session.userId,
+        userId: session.userId || undefined,
         activityType: 'TEMPLATE_DOWNLOAD',
         activityName: 'template_download',
         description: `Downloaded template: ${downloadData.templateName}`,
@@ -759,8 +749,13 @@ async function trackDownloadEvent(sessionId: string, downloadData: any) {
       });
 
       // Update geographic analytics for downloads
-      if (session.country && session.countryCode) {
-        await updateGeographicDownloads(session.country, session.countryCode, downloadData.templateType);
+      if (session.country) {
+        // Get country code from geographic analytics or use a default
+        const geoData = await prisma.geographicAnalytics.findUnique({
+          where: { country: session.country }
+        });
+        const countryCode = geoData?.countryCode || 'XX';
+        await updateGeographicDownloads(session.country, countryCode, downloadData.templateType);
       }
     }
   } catch (error) {
@@ -775,4 +770,4 @@ declare global {
       visitorSession?: any; // Changed to any as the type is no longer VisitorSession
     }
   }
-} 
+}

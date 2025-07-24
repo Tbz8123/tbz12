@@ -45,15 +45,11 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ onOpenModal }) => {
   // Sample Data Functions
   const loadSampleData = (config: SampleDataConfig) => {
     const sampleData = generateSampleData(config);
-    updateResumeData({
-      ...resumeData,
-      ...sampleData
-    });
+    updateResumeData(sampleData);
   };
 
   const clearAllData = () => {
     updateResumeData({
-      id: '',
       personalInfo: {
         firstName: '',
         lastName: '',
@@ -70,9 +66,6 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ onOpenModal }) => {
       certifications: [],
       languages: [],
       customSections: [],
-      templateId: '',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     });
   };
 

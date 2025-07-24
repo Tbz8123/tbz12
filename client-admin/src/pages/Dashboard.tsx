@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, Link } from 'wouter';
+import React, { useState } from 'react';
+import { useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
 import { 
   FileText, 
   Plus, 
@@ -13,14 +12,10 @@ import {
   User, 
   Settings, 
   BarChart3, 
-  Calendar, 
-  Clock,
-  Sparkles,
+ 
   Star,
   TrendingUp,
-  Users,
   Award,
-  ChevronRight,
   LogOut
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -283,21 +278,21 @@ const DashboardContent = () => {
     setLocation(`/preview/${id}`);
   };
 
-  const handleDownloadResume = (id: string) => {
+  const handleDownloadResume = (_id: string) => {
     toast({
       title: "Download Started",
       description: "Your resume is being downloaded...",
     });
   };
 
-  const handleDuplicateResume = (id: string) => {
+  const handleDuplicateResume = (_id: string) => {
     toast({
       title: "Resume Duplicated",
       description: "A copy of your resume has been created.",
     });
   };
 
-  const handleDeleteResume = (id: string) => {
+  const handleDeleteResume = (_id: string) => {
     toast({
       title: "Resume Deleted",
       description: "Your resume has been permanently deleted.",
@@ -636,4 +631,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard; 
+export default Dashboard;

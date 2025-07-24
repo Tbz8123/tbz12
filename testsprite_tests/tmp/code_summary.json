@@ -1,0 +1,274 @@
+{
+  "tech_stack": [
+    "TypeScript",
+    "Node.js",
+    "Express.js",
+    "React",
+    "Vite",
+    "PostgreSQL",
+    "Prisma ORM",
+    "Firebase Auth",
+    "Tailwind CSS",
+    "Radix UI",
+    "Wouter (Router)",
+    "Zustand (State Management)",
+    "React Query",
+    "Framer Motion",
+    "Drizzle ORM"
+  ],
+  "features": [
+    {
+      "name": "Order Management API",
+      "description": "Create, retrieve, and manage user orders with payment processing",
+      "files": ["server/routes.ts"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/api/orders": {
+            "post": {
+              "summary": "Create new order",
+              "requestBody": {
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "items": {"type": "array"},
+                        "total": {"type": "number"}
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "201": {"description": "Order created successfully"},
+                "500": {"description": "Server error"}
+              }
+            }
+          },
+          "/api/orders/{id}": {
+            "get": {
+              "summary": "Get order by ID",
+              "parameters": [
+                {
+                  "name": "id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {"type": "string"}
+                }
+              ],
+              "responses": {
+                "200": {"description": "Order retrieved successfully"},
+                "404": {"description": "Order not found"},
+                "500": {"description": "Server error"}
+              }
+            }
+          },
+          "/api/user/orders": {
+            "get": {
+              "summary": "Get user's orders",
+              "responses": {
+                "200": {"description": "User orders retrieved successfully"},
+                "500": {"description": "Server error"}
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "User Management API",
+      "description": "Admin-only user management and permissions",
+      "files": ["server/routes.ts"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/api/admin/users": {
+            "get": {
+              "summary": "Get all users (admin only)",
+              "security": [{"adminAuth": []}],
+              "responses": {
+                "200": {"description": "Users retrieved successfully"},
+                "403": {"description": "Admin access required"},
+                "500": {"description": "Server error"}
+              }
+            }
+          },
+          "/api/user/permissions": {
+            "get": {
+              "summary": "Get user permissions",
+              "responses": {
+                "200": {"description": "Permissions retrieved successfully"},
+                "500": {"description": "Server error"}
+              }
+            }
+          },
+          "/api/user/permissions/{permission}": {
+            "get": {
+              "summary": "Check specific permission",
+              "parameters": [
+                {
+                  "name": "permission",
+                  "in": "path",
+                  "required": true,
+                  "schema": {"type": "string"}
+                }
+              ],
+              "responses": {
+                "200": {"description": "Permission check completed"},
+                "500": {"description": "Server error"}
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Job Management API",
+      "description": "Job listings and creation functionality",
+      "files": ["server/routes/jobs.ts"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/api/jobs": {
+            "get": {
+              "summary": "Get job listings",
+              "responses": {
+                "200": {"description": "Job listings retrieved successfully"},
+                "500": {"description": "Server error"}
+              }
+            },
+            "post": {
+              "summary": "Create new job",
+              "requestBody": {
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "title": {"type": "string"},
+                        "company": {"type": "string"},
+                        "description": {"type": "string"}
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "201": {"description": "Job created successfully"},
+                "500": {"description": "Server error"}
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Skills Management API",
+      "description": "Skills data retrieval and management",
+      "files": ["server/routes/skills.ts"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/api/skills": {
+            "get": {
+              "summary": "Get skills list",
+              "responses": {
+                "200": {"description": "Skills retrieved successfully"},
+                "500": {"description": "Server error"}
+              }
+            },
+            "post": {
+              "summary": "Add new skill",
+              "requestBody": {
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "name": {"type": "string"},
+                        "category": {"type": "string"}
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "201": {"description": "Skill added successfully"},
+                "500": {"description": "Server error"}
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Resume Management",
+      "description": "Resume creation, editing, and template management",
+      "files": [
+        "client/src/pages/FinalPage.tsx",
+        "client-admin/src/components/resume/ResumePreview.tsx",
+        "shared/schema.ts"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/api/resumes": {
+            "post": {
+              "summary": "Create resume",
+              "responses": {
+                "201": {"description": "Resume created successfully"},
+                "500": {"description": "Server error"}
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Authentication System",
+      "description": "Firebase authentication with admin role management",
+      "files": [
+        "server/middleware/userAuth.ts",
+        "server/middleware/adminAuth.ts",
+        "client-admin/src/contexts/AuthContext.tsx"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/api/auth/login": {
+            "post": {
+              "summary": "User login",
+              "responses": {
+                "200": {"description": "Login successful"},
+                "401": {"description": "Invalid credentials"}
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Analytics Service",
+      "description": "User analytics and tracking functionality",
+      "files": [
+        "server/services/analyticsService.ts",
+        "server/routes/analytics.ts"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "paths": {
+          "/api/analytics": {
+            "get": {
+              "summary": "Get analytics data",
+              "responses": {
+                "200": {"description": "Analytics data retrieved"},
+                "500": {"description": "Server error"}
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

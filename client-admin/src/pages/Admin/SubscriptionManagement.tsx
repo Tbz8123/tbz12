@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,15 +15,9 @@ import {
   Trash2, 
   Package, 
   Percent, 
-  DollarSign,
   Users,
-  Calendar,
-  Settings,
-  History,
   Tag,
-  TrendingUp,
-  Eye,
-  EyeOff
+  TrendingUp
 } from 'lucide-react';
 import {
   Table,
@@ -313,7 +307,7 @@ const SubscriptionManagement: React.FC = () => {
       console.error('Error deleting package:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to delete package",
+        description: (error as Error).message || "Failed to delete package",
         variant: "destructive",
       });
     }
@@ -1283,4 +1277,4 @@ const SubscriptionManagement: React.FC = () => {
   );
 };
 
-export default SubscriptionManagement; 
+export default SubscriptionManagement;

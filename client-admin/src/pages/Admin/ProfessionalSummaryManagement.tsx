@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { 
@@ -18,7 +18,7 @@ import {
   Briefcase,
   FileText,
   Star,
-  StarOff,
+
   ChevronDown
 } from 'lucide-react';
 import {
@@ -27,7 +27,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -454,7 +454,7 @@ export default function ProfessionalSummaryManagement() {
     }
   };
 
-  const processImportInBackground = async (jobId: string, csvData: string, fileName: string) => {
+  const _processImportInBackground = async (jobId: string, csvData: string, fileName: string) => {
     try {
       console.log('=== BACKGROUND PROFESSIONAL SUMMARY IMPORT STARTING ===');
       console.log('Job ID received:', jobId);
@@ -506,7 +506,7 @@ export default function ProfessionalSummaryManagement() {
     }
   };
 
-  const processImportFromData = async (csvData: string, fileName: string, jobId?: string) => {
+  const processImportFromData = async (csvData: string, _fileName: string, jobId?: string) => {
     console.log('=== PROCESSING PROFESSIONAL SUMMARY IMPORT DATA ===');
     console.log('Job ID:', jobId);
 
@@ -1266,4 +1266,4 @@ export default function ProfessionalSummaryManagement() {
       </div>
     </div>
   );
-} 
+}

@@ -37,7 +37,7 @@ router.get('/', async (req: Request, res: Response) => {
     const importType = req.query.importType as string || null;
 
     // Build where clause
-    const where: any = {};
+    const where: Prisma.ImportHistoryWhereInput = {};
     if (status && status !== 'all') {
       where.status = status;
     }
@@ -75,7 +75,7 @@ router.get('/', async (req: Request, res: Response) => {
     });
 
     // Transform data to match frontend expectations
-    const transformedImports = imports.map((imp: any) => ({
+    const transformedImports = imports.map((imp) => ({
       id: imp.id,
       fileName: imp.fileName,
       fileSize: imp.fileSize,
@@ -87,8 +87,8 @@ router.get('/', async (req: Request, res: Response) => {
       errorCount: imp.errorCount || 0,
       errors: imp.errors ? (Array.isArray(imp.errors) ? imp.errors : []) : [],
       progress: imp.progress || 0,
-      currentOperation: (imp.metadata as any)?.currentOperation || null,
-      uploadedBy: (imp.metadata as any)?.uploadedBy || 'admin',
+      currentOperation: (imp.metadata as Record<string, any>)?.currentOperation || null,
+      uploadedBy: (imp.metadata as Record<string, any>)?.uploadedBy || 'admin',
       uploadedAt: imp.startedAt.toISOString(),
       startedAt: imp.startedAt.toISOString(),
       completedAt: imp.completedAt?.toISOString() || null,
@@ -104,7 +104,7 @@ router.get('/', async (req: Request, res: Response) => {
         totalPages: Math.ceil(totalCount / limit),
       }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching import history:', error);
     res.status(500).json({ error: 'Failed to fetch import history' });
   }
@@ -156,7 +156,7 @@ router.post('/', async (req: Request, res: Response) => {
     });
 
     res.status(201).json(importRecord);
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: 'Validation error', details: error.errors });
     }
@@ -177,7 +177,7 @@ router.post('/:id/process', async (req: Request, res: Response) => {
     // Start processing in background
     setImmediate(() => processImportJob(id, job));
     res.json({ message: 'Import processing started on server' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error starting import processing:', error);
     res.status(500).json({ error: 'Failed to start import processing' });
   }
@@ -206,8 +206,8 @@ router.get('/:id', async (req: Request, res: Response) => {
       errorCount: record.errorCount || 0,
       errors: record.errors ? (Array.isArray(record.errors) ? record.errors : []) : [],
       progress: record.progress || 0,
-      currentOperation: (record.metadata as any)?.currentOperation || null,
-      uploadedBy: (record.metadata as any)?.uploadedBy || 'admin',
+      currentOperation: (record.metadata as Record<string, any>)?.currentOperation || null,
+      uploadedBy: (record.metadata as Record<string, any>)?.uploadedBy || 'admin',
       uploadedAt: record.startedAt.toISOString(),
       startedAt: record.startedAt.toISOString(),
       completedAt: record.completedAt?.toISOString() || null,
@@ -215,7 +215,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     };
 
     res.json(transformedRecord);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching import record:', error);
     res.status(500).json({ error: 'Failed to fetch import record' });
   }
@@ -237,15 +237,15 @@ router.put('/:id', async (req: Request, res: Response) => {
     }
 
     // Prepare update data, merging with existing metadata
-    const currentMeta = (currentRecord.metadata as any) || {};
-    const newMeta = (updateData.metadata as any) || {};
+    const currentMeta = (currentRecord.metadata as Record<string, any>) || {};
+    const newMeta = (updateData.metadata as Record<string, any>) || {};
     const updatedMetadata = {
       ...currentMeta,
       ...newMeta,
       currentOperation: updateData.currentOperation || currentMeta.currentOperation
     };
 
-    const updatePayload: any = {};
+    const updatePayload: Prisma.ImportHistoryUpdateInput = {};
 
     if (updateData.status !== undefined) updatePayload.status = updateData.status;
     if (updateData.progress !== undefined) {
@@ -269,7 +269,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     });
 
     res.json(updatedRecord);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating import record:', error);
     res.status(500).json({ error: 'Failed to update import record' });
   }
@@ -299,18 +299,18 @@ router.delete('/:id', async (req: Request, res: Response) => {
 
     console.log(`Import record ${id} deleted successfully`);
     res.status(204).send();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting import record:', error);
     res.status(500).json({ error: 'Failed to delete import record' });
   }
 });
 
 // Server-side import processing function
-async function processImportJob(jobId: string, job: any) {
-  const updateJob = async (data: any) => {
+async function processImportJob(jobId: string, job: Record<string, any>) {
+  const updateJob = async (data: Record<string, any>) => {
     try {
       const { currentOperation, ...otherData } = data;
-      const updateData: any = {
+      const updateData: Prisma.ImportHistoryUpdateInput = {
         ...otherData,
         updatedAt: new Date()
       };
@@ -322,7 +322,7 @@ async function processImportJob(jobId: string, job: any) {
           select: { metadata: true }
         });
 
-        const currentMetadata = (currentJob?.metadata as any) || {};
+        const currentMetadata = (currentJob?.metadata as Record<string, any>) || {};
         updateData.metadata = {
           ...currentMetadata,
           currentOperation
@@ -333,7 +333,7 @@ async function processImportJob(jobId: string, job: any) {
         where: { id: jobId },
         data: updateData
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to update import job:', error);
     }
   };
@@ -341,7 +341,7 @@ async function processImportJob(jobId: string, job: any) {
   try {
     console.log(`🚀 Processing import job ${jobId}: ${job.fileName}`);
 
-    const metadata = job.metadata as any;
+    const metadata = job.metadata as Record<string, any>;
 
     // Update status to processing
     await updateJob({
@@ -374,7 +374,7 @@ async function processImportJob(jobId: string, job: any) {
 
     console.log(`✅ Import job ${jobId} completed successfully`);
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`❌ Import job ${jobId} failed:`, error);
     await updateJob({
       status: 'failed',
@@ -398,7 +398,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
       deleteMissingTitles = Boolean(metadata.deleteMissingTitles);
     }
     console.log('🗑️ Delete missing titles setting:', deleteMissingTitles);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Failed to get job metadata:', err);
   }
 
@@ -412,7 +412,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
 
   const rows = lines.slice(1).map(line => {
     const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
-    const row: any = {};
+    const row: Record<string, string> = {};
     headers.forEach((header, index) => {
       row[header] = values[index] || '';
     });
@@ -469,15 +469,15 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
 
       // Build a Set of normalized titles that are present in the uploaded file
       const uploadedTitleSet = new Set(
-        Array.from(groupedData.values()).map((g: any) => g.titleInfo.title.toLowerCase().trim())
+        Array.from(groupedData.values()).map((g: Record<string, any>) => g.titleInfo.title.toLowerCase().trim())
       );
 
       // Identify titles that are NOT in the uploaded file
-      const titlesToDelete = existingTitles.filter((t: any) => !uploadedTitleSet.has(t.title.toLowerCase().trim()));
+      const titlesToDelete = existingTitles.filter((t) => !uploadedTitleSet.has(t.title.toLowerCase().trim()));
 
       if (titlesToDelete.length > 0) {
         console.log(`🗑️ Deleting ${titlesToDelete.length} job titles not present in uploaded file:`);
-        titlesToDelete.forEach((t: any) => console.log(`  - "${t.title}" (ID: ${t.id})`));
+        titlesToDelete.forEach((t) => console.log(`  - "${t.title}" (ID: ${t.id})`));
 
         // Delete job descriptions first, then job titles
         for (const title of titlesToDelete) {
@@ -489,7 +489,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
 
         const deletedTitles = await prisma.jobTitle.deleteMany({
           where: {
-            id: { in: titlesToDelete.map((t: any) => t.id) }
+            id: { in: titlesToDelete.map((t) => t.id) }
           }
         });
 
@@ -497,7 +497,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
       } else {
         console.log('✅ No job titles to delete (all existing titles are present in uploaded file)');
       }
-    } catch (deleteError: any) {
+    } catch (deleteError: unknown) {
       console.error('❌ Error during deletion process:', deleteError);
       // Continue with import even if deletion fails
     }
@@ -570,7 +570,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
           });
 
           console.log(`✅ Created job description with ID: ${newDescription.id}`);
-        } catch (error: any) {
+        } catch (error: unknown) {
           // Ignore duplicate descriptions
           if ((error as any)?.code !== 'P2002') {
             console.error(`❌ Failed to create description for ${titleInfo.title}:`, error);
@@ -582,7 +582,7 @@ async function processJobTitlesImportServerSide(csvData: string, jobId: string, 
 
       console.log(`✅ Successfully processed ${descriptions.length} descriptions for ${titleInfo.title}`);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`Error processing ${titleInfo.title}:`, error);
     }
 
@@ -607,7 +607,7 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
   try {
     const testCount = await prisma.skillsJobTitle.count();
     console.log(`✅ Database connection test passed. Current SkillsJobTitle count: ${testCount}`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Database connection test failed:', error);
     throw new Error('Database connection failed');
   }
@@ -640,7 +640,7 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
 
   const rows = lines.slice(1).map((line, index) => {
     const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
-    const row: any = {};
+    const row: Record<string, string> = {};
     headers.forEach((header, headerIndex) => {
       row[header] = values[headerIndex] || '';
     });
@@ -650,7 +650,7 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
   console.log(`Parsed ${rows.length} data rows`);
 
   // Group data by skills job title
-  const groupedData = new Map<string, { title: string; category: string; skills: any[] }>();
+  const groupedData = new Map<string, { title: string; category: string; skills: Array<{ content: string; isRecommended: boolean }> }>();
 
   rows.forEach((row, index) => {
     if (!row.title) {
@@ -703,15 +703,15 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
 
       // Build a Set of normalized titles that are present in the uploaded file
       const uploadedTitleSet = new Set(
-        Array.from(groupedData.values()).map((g: any) => g.title.toLowerCase().trim())
+        Array.from(groupedData.values()).map((g) => g.title.toLowerCase().trim())
       );
 
       // Identify titles that are NOT in the uploaded file
-      const titlesToDelete = existingTitles.filter((t: any) => !uploadedTitleSet.has(t.title.toLowerCase().trim()));
+      const titlesToDelete = existingTitles.filter((t) => !uploadedTitleSet.has(t.title.toLowerCase().trim()));
 
       if (titlesToDelete.length > 0) {
         console.log(`🗑️ Deleting ${titlesToDelete.length} skills job titles not present in uploaded file:`);
-        titlesToDelete.forEach((t: any) => console.log(`  - "${t.title}" (ID: ${t.id})`));
+        titlesToDelete.forEach((t) => console.log(`  - "${t.title}" (ID: ${t.id})`));
 
         // Delete skill categories first, then job titles
         for (const title of titlesToDelete) {
@@ -723,7 +723,7 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
 
         const deletedTitles = await prisma.skillsJobTitle.deleteMany({
           where: {
-            id: { in: titlesToDelete.map((t: any) => t.id) }
+            id: { in: titlesToDelete.map((t) => t.id) }
           }
         });
 
@@ -810,7 +810,7 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
 
           console.log(`✅ Created skill category with ID: ${newSkillCategory.id}`);
 
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error(`❌ Failed to create skill category "${skill.content}" for ${group.title}:`, error);
 
           // Log more details about the error
@@ -823,7 +823,7 @@ async function processSkillsImportServerSide(csvData: string, jobId: string, upd
 
       console.log(`✅ Successfully processed ${group.skills.length} skills for ${group.title}`);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`❌ Error processing skills job title ${group.title}:`, error);
 
       // Log more details about the error
@@ -856,7 +856,7 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
   try {
     const testCount = await prisma.professionalSummaryJobTitle.count();
     console.log(`✅ Database connection test passed. Current ProfessionalSummaryJobTitle count: ${testCount}`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Database connection test failed:', error);
     throw new Error('Database connection failed');
   }
@@ -872,7 +872,7 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
       deleteMissingTitles = Boolean(metadata.deleteMissingTitles);
     }
     console.log('🗑️ Delete missing titles setting:', deleteMissingTitles);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to get job metadata:', error);
   }
 
@@ -973,7 +973,7 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
             await prisma.professionalSummaryJobTitle.delete({
               where: { id: title.id }
             });
-          } catch (delErr: any) {
+          } catch (delErr: unknown) {
             console.error(`❌ Failed to delete professional summary job title ${title.title}:`, delErr);
           }
         }
@@ -982,7 +982,7 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
       } else {
         console.log('✅ No professional summary job titles to delete');
       }
-    } catch (delError: any) {
+    } catch (delError: unknown) {
       console.error('❌ Error during deleteMissingTitles processing:', delError);
     }
   }
@@ -1060,7 +1060,7 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
 
           console.log(`✅ Created professional summary with ID: ${newProfessionalSummary.id}`);
 
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error(`❌ Failed to create professional summary "${summary.content.substring(0, 50)}..." for ${group.title}:`, error);
 
           // Log more details about the error
@@ -1073,7 +1073,7 @@ async function processProfessionalSummariesImportServerSide(csvData: string, job
 
       console.log(`✅ Successfully processed ${group.summaries.length} professional summaries for ${group.title}`);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`❌ Error processing professional summary job title ${group.title}:`, error);
 
       // Log more details about the error

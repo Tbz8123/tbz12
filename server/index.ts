@@ -29,13 +29,13 @@ prisma.$connect()
     // Make prisma available globally for middleware
     (global as any).prisma = prisma;
   })
-  .catch((error: any) => {
+  .catch((error: unknown) => {
     console.error('❌ Database connection failed:', error);
     // Set a flag to skip database operations if connection fails
     (global as any).prisma = null;
   });
 
-const PORT = parseInt(process.env.PORT || process.env.API_PORT || '5000', 10); // AWS compatible port configuration
+const PORT = parseInt(process.env.PORT || process.env.API_PORT || '5174', 10); // AWS compatible port configuration
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -43,7 +43,7 @@ async function startServer() {
   const app = express();
 
   // Add error handler middleware
-  app.use((err: any, req: any, res: any, next: any) => {
+  app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     console.error('Express error:', err);
     res.status(500).json({ error: 'Internal server error' });
   });
@@ -74,8 +74,7 @@ async function startServer() {
   console.log('🔍 Visitor tracking middleware initialized');
 
   // Register all API routes first - this returns an HTTP server
-  setupRoutes(app);
-  const httpServer = http.createServer(app);
+  const httpServer = setupRoutes(app);
 
   // Admin routes have been moved to separate admin server (server-admin/)
   // Admin panel is now accessible via separate subdomain/port for security
@@ -99,7 +98,7 @@ async function startServer() {
 }
 
 // Add global error handlers
-process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
+process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
   // Don't exit the process, just log the error
 });
@@ -133,7 +132,7 @@ async function initialize() {
     console.log('✅ Server initialization completed successfully');
 
     // Handle server errors
-    server.on('error', (error: any) => {
+    server.on('error', (error: Error & { code?: string }) => {
       console.error('❌ Server error occurred:', error);
       if (error.code === 'EADDRINUSE') {
         console.error(`🚫 Port ${PORT} is already in use. Please wait for it to be freed or use a different port.`);
@@ -143,9 +142,11 @@ async function initialize() {
       }
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('💀 Failed to start server:', error);
-    console.error('📋 Error details:', error.stack);
+    if (error instanceof Error) {
+      console.error('📋 Error details:', error.stack);
+    }
     process.exit(1);
   }
 }

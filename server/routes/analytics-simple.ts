@@ -30,7 +30,7 @@ router.get('/database-stats', async (req, res) => {
     console.log('📊 Database visitor stats endpoint called');
     const stats = await getDatabaseVisitorStats();
     res.json(stats);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Error fetching database visitor stats:', error);
     res.status(500).json({ 
       error: 'Failed to fetch database visitor stats',
@@ -52,7 +52,7 @@ router.get('/sessions', async (req, res) => {
       total: sessions.length,
       message: 'Visitor sessions retrieved successfully'
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Error fetching visitor sessions:', error);
     res.status(500).json({ 
       error: 'Failed to fetch visitor sessions',
@@ -80,7 +80,7 @@ router.delete('/session/:sessionId', async (req, res) => {
         sessionId 
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Error deleting visitor session:', error);
     res.status(500).json({ 
       error: 'Failed to delete visitor session',
@@ -109,7 +109,7 @@ router.delete('/sessions', async (req, res) => {
       deletedCount,
       requestedCount: sessionIds.length
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Error deleting visitor sessions:', error);
     res.status(500).json({ 
       error: 'Failed to delete visitor sessions',
@@ -129,7 +129,7 @@ router.delete('/sessions/all', async (req, res) => {
       message: `All visitor sessions cleared successfully`,
       deletedCount
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Error clearing all visitor sessions:', error);
     res.status(500).json({ 
       error: 'Failed to clear all visitor sessions',
@@ -187,7 +187,7 @@ router.get('/session/:sessionId', async (req, res) => {
       session,
       message: 'Visitor session details retrieved successfully'
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Error fetching visitor session details:', error);
     res.status(500).json({ 
       error: 'Failed to fetch visitor session details',
@@ -336,7 +336,7 @@ router.get('/visitors', async (req, res) => {
     console.log('✅ Detailed visitor data prepared successfully');
     res.json(data);
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Error fetching detailed visitor data:', error);
     res.status(500).json({ 
       error: 'Failed to fetch detailed visitor data',
@@ -459,7 +459,7 @@ router.get('/dashboard', async (req, res) => {
     console.log('✅ Analytics data prepared successfully');
     res.json(data);
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Error preparing analytics data:', error);
     res.status(500).json({ 
       error: 'Failed to prepare analytics data',

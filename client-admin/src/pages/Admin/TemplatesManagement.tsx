@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Link, useLocation } from 'wouter';
+import { useLocation } from 'wouter';
 
 import { useToast } from '@/components/ui/use-toast';
 
@@ -40,7 +40,7 @@ export default function TemplatesManagement() {
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const [search, setSearch] = useState('');
-  const { toast } = useToast();
+  const { toast: _toast } = useToast();
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => { // ID is number

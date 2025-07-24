@@ -12,6 +12,10 @@ import { professionalSummariesRouter } from './routes/professional-summaries.js'
 import { default as analyticsRouter } from './routes/analytics.js';
 import { importHistoryRouter } from './routes/import-history.js';
 
+// Import authentication middleware
+import { requireUserAuth, optionalUserAuth } from './middleware/userAuth.js';
+import { requireAdminAuth } from './middleware/adminAuth.js';
+
 const prisma = new PrismaClient();
 
 declare global {
@@ -111,7 +115,7 @@ export default function setupRoutes(app: express.Express): Server {
               invoiceNumber,
               customerEmail: billingInfo.email,
               customerName: `${billingInfo.firstName} ${billingInfo.lastName}`,
-              billingAddress: order.billingAddress,
+              billingAddress: order.billingAddress as any,
               items: cart.map((item: any) => ({
                 name: item.packageName,
                 tier: item.tier,
@@ -134,7 +138,7 @@ export default function setupRoutes(app: express.Express): Server {
           // TODO: Send confirmation email
           // TODO: Activate user subscription
 
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error('Error processing payment:', error);
         }
       }, 2000); // Simulate 2 second processing time
@@ -149,7 +153,7 @@ export default function setupRoutes(app: express.Express): Server {
         }
       });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error creating order:", error);
       res.status(500).json({ error: (error as Error).message });
     }
@@ -174,14 +178,14 @@ export default function setupRoutes(app: express.Express): Server {
       }
 
       res.json(order);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching order:", error);
       res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Get user's orders
-  app.get("/api/user/orders", async (req: express.Request, res: express.Response) => {
+  app.get("/api/user/orders", requireUserAuth, async (req: express.Request, res: express.Response) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -199,7 +203,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json(orders);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching user orders:", error);
       res.status(500).json({ error: (error as Error).message });
     }
@@ -257,12 +261,12 @@ export default function setupRoutes(app: express.Express): Server {
           <div class="billing-info">
             <h3>Billing Information</h3>
             <p>${order.customerName}</p>
-            ${order.billingAddress.company ? `<p>${order.billingAddress.company}</p>` : ''}
-            <p>${order.billingAddress.address}</p>
-            <p>${order.billingAddress.city}, ${order.billingAddress.state} ${order.billingAddress.zipCode}</p>
-            <p>${order.billingAddress.country}</p>
+            ${order.billingAddress && (order.billingAddress as any).company ? `<p>${(order.billingAddress as any).company}</p>` : ''}
+            <p>${order.billingAddress ? (order.billingAddress as any).address : 'N/A'}</p>
+            <p>${order.billingAddress ? `${(order.billingAddress as any).city}, ${(order.billingAddress as any).state} ${(order.billingAddress as any).zipCode}` : 'N/A'}</p>
+            <p>${order.billingAddress ? (order.billingAddress as any).country : 'N/A'}</p>
             <p>Email: ${order.customerEmail}</p>
-            <p>Phone: ${order.billingAddress.phone}</p>
+            <p>Phone: ${order.billingAddress ? (order.billingAddress as any).phone : 'N/A'}</p>
           </div>
 
           <table class="items-table">
@@ -300,7 +304,7 @@ export default function setupRoutes(app: express.Express): Server {
 
       res.setHeader('Content-Type', 'text/html');
       res.send(receiptHtml);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error generating receipt:", error);
       res.status(500).json({ error: (error as Error).message });
     }
@@ -312,11 +316,11 @@ export default function setupRoutes(app: express.Express): Server {
   app.post("/api/users", async (req: express.Request, res: express.Response) => {
     try {
       const userSchema = z.object({
-        email: z.string().email(),
-        name: z.string().min(1),
-        password: z.string().min(6),
-        tier: z.enum(['FREE', 'PREMIUM', 'ENTERPRISE']).optional().default('FREE')
-      });
+      email: z.string().email(),
+      name: z.string().min(1),
+      password: z.string().min(6),
+      currentTier: z.enum(['FREE', 'PREMIUM', 'ENTERPRISE']).optional().default('FREE')
+    });
 
       const validatedData = userSchema.parse(req.body);
 
@@ -333,16 +337,16 @@ export default function setupRoutes(app: express.Express): Server {
         data: {
           email: validatedData.email,
           name: validatedData.name,
-          passwordHash: validatedData.password, // In production, hash this password
-          tier: validatedData.tier,
+          password: validatedData.password, // In production, hash this password
+          currentTier: validatedData.currentTier,
           isActive: true
         }
       });
 
-      // Don't return password hash
-      const { passwordHash, ...userResponse } = user;
+      // Don't return password
+      const { password, ...userResponse } = user;
       res.status(201).json(userResponse);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error as any).message });
       }
@@ -362,7 +366,7 @@ export default function setupRoutes(app: express.Express): Server {
           id: true,
           email: true,
           name: true,
-          tier: true,
+          currentTier: true,
           isActive: true,
           createdAt: true,
           updatedAt: true,
@@ -375,7 +379,7 @@ export default function setupRoutes(app: express.Express): Server {
       }
 
       res.json(user);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching user:", error);
       res.status(500).json({ error: (error as Error).message });
     }
@@ -388,7 +392,7 @@ export default function setupRoutes(app: express.Express): Server {
       const updateSchema = z.object({
         name: z.string().min(1).optional(),
         email: z.string().email().optional(),
-        tier: z.enum(['FREE', 'PREMIUM', 'ENTERPRISE']).optional(),
+        currentTier: z.enum(['FREE', 'PREMIUM', 'ENTERPRISE']).optional(),
         isActive: z.boolean().optional()
       });
 
@@ -420,7 +424,7 @@ export default function setupRoutes(app: express.Express): Server {
           id: true,
           email: true,
           name: true,
-          tier: true,
+          currentTier: true,
           isActive: true,
           createdAt: true,
           updatedAt: true,
@@ -429,7 +433,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json(updatedUser);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error as any).message });
       }
@@ -456,7 +460,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json({ message: "User deleted successfully" });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting user:", error);
       res.status(500).json({ error: (error as Error).message });
     }
@@ -499,10 +503,10 @@ export default function setupRoutes(app: express.Express): Server {
         return res.status(404).json({ error: "User not found" });
       }
 
-      // Don't return password hash
-      const { passwordHash, ...userProfile } = user;
+      // Don't return password
+      const { password, ...userProfile } = user;
       res.json(userProfile);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching user profile:", error);
       res.status(500).json({ error: (error as Error).message });
     }
@@ -550,7 +554,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json(updatedUser);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error as any).message });
       }
@@ -589,7 +593,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json(resumes);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching resumes:", error);
       res.status(500).json({ error: (error as Error).message });
     }
@@ -640,7 +644,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.status(201).json(resume);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error as any).message });
       }
@@ -679,7 +683,7 @@ export default function setupRoutes(app: express.Express): Server {
       }
 
       res.json(resume);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching resume:", error);
       res.status(500).json({ error: (error as Error).message });
     }
@@ -730,7 +734,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json(updatedResume);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -766,7 +770,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json({ message: "Resume deleted successfully" });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting resume:", error);
       res.status(500).json({ error: (error as Error).message });
     }
@@ -814,7 +818,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.status(201).json(duplicatedResume);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error duplicating resume:", error);
       res.status(500).json({ error: (error as Error).message });
     }
@@ -849,7 +853,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json(templates);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching snap templates:", error);
       res.status(500).json({ error: "Failed to fetch snap templates" });
     }
@@ -874,7 +878,7 @@ export default function setupRoutes(app: express.Express): Server {
       }
 
       res.json(template);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching snap template:", error);
       res.status(500).json({ error: "Failed to fetch snap template" });
     }
@@ -905,7 +909,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json({ message: "Snap template deleted successfully" });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting snap template:", error);
       res.status(500).json({ error: "Failed to delete snap template" });
     }
@@ -916,7 +920,7 @@ export default function setupRoutes(app: express.Express): Server {
     try {
       const { isActive } = req.query;
       
-      const whereClause: any = {};
+      const whereClause: Record<string, any> = {};
       if (isActive !== undefined) whereClause.isActive = isActive === 'true';
 
       const templates = await prisma.template.findMany({
@@ -942,7 +946,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json(templates);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching templates:", error);
       res.status(500).json({ error: "Failed to fetch templates" });
     }
@@ -969,16 +973,15 @@ export default function setupRoutes(app: express.Express): Server {
       }
 
       res.json(template);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching template:", error);
       res.status(500).json({ error: "Failed to fetch template" });
     }
   });
 
   // Create template (admin only)
-  app.post("/api/templates", async (req: express.Request, res: express.Response) => {
+  app.post("/api/templates", requireAdminAuth, async (req: express.Request, res: express.Response) => {
     try {
-      // TODO: Add admin authentication middleware
       const templateSchema = z.object({
         name: z.string().min(1),
         description: z.string().optional(),
@@ -1001,7 +1004,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.status(201).json(template);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -1011,10 +1014,9 @@ export default function setupRoutes(app: express.Express): Server {
   });
 
   // Update template (admin only)
-  app.put("/api/templates/:id", async (req: express.Request, res: express.Response) => {
+  app.put("/api/templates/:id", requireAdminAuth, async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
-      // TODO: Add admin authentication middleware
       
       const updateSchema = z.object({
         name: z.string().min(1).optional(),
@@ -1047,7 +1049,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json(updatedTemplate);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -1057,10 +1059,9 @@ export default function setupRoutes(app: express.Express): Server {
   });
 
   // Delete template (admin only)
-  app.delete("/api/templates/:id", async (req: express.Request, res: express.Response) => {
+  app.delete("/api/templates/:id", requireAdminAuth, async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
-      // TODO: Add admin authentication middleware
 
       const template = await prisma.template.findUnique({
         where: { id }
@@ -1077,7 +1078,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json({ message: "Template deleted successfully" });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting template:", error);
       res.status(500).json({ error: "Failed to delete template" });
     }
@@ -1090,7 +1091,7 @@ export default function setupRoutes(app: express.Express): Server {
     try {
       const templates = await storage.getAllProTemplates();
       res.json(templates);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching pro templates:", error);
       res.status(500).json({ error: "Failed to fetch pro templates" });
     }
@@ -1107,21 +1108,19 @@ export default function setupRoutes(app: express.Express): Server {
       }
 
       res.json(template);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching pro template:", error);
       res.status(500).json({ error: "Failed to fetch pro template" });
     }
   });
 
   // Create pro template (admin only)
-  app.post("/api/pro-templates", async (req: express.Request, res: express.Response) => {
+  app.post("/api/pro-templates", requireAdminAuth, async (req: express.Request, res: express.Response) => {
     try {
       console.log('POST /api/pro-templates - Request received:', {
         body: req.body,
         headers: req.headers['content-type']
       });
-      
-      // TODO: Add admin authentication middleware
       const templateSchema = z.object({
         name: z.string().min(1),
         description: z.string().optional(),
@@ -1145,7 +1144,7 @@ export default function setupRoutes(app: express.Express): Server {
       console.log('POST /api/pro-templates - Template created successfully:', template);
 
       res.status(201).json(template);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('POST /api/pro-templates - Error occurred:', error);
       
       if (error instanceof z.ZodError) {
@@ -1206,17 +1205,16 @@ export default function setupRoutes(app: express.Express): Server {
       const updatedTemplate = await storage.updateProTemplate(id, dataForStorage);
 
       res.json(updatedTemplate);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating pro template:", error);
       res.status(500).json({ message: "Failed to update pro template" });
     }
   });
 
   // Delete pro template (admin only)
-  app.delete("/api/pro-templates/:id", async (req: express.Request, res: express.Response) => {
+  app.delete("/api/pro-templates/:id", requireAdminAuth, async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;
-      // TODO: Add admin authentication middleware
 
       const template = await storage.getProTemplateById(parseInt(id));
 
@@ -1227,7 +1225,7 @@ export default function setupRoutes(app: express.Express): Server {
       await storage.deleteProTemplate(parseInt(id));
 
       res.json({ message: "Pro template deleted successfully" });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting pro template:", error);
       res.status(500).json({ error: "Failed to delete pro template" });
     }
@@ -1249,7 +1247,7 @@ export default function setupRoutes(app: express.Express): Server {
 
       const validatedData = trackingSchema.parse(req.body);
 
-      const usageStatistic = await prisma.usageStats.create({
+      const usageStats = await prisma.usageStats.create({
         data: {
           userId: validatedData.userId,
           action: validatedData.action,
@@ -1259,8 +1257,8 @@ export default function setupRoutes(app: express.Express): Server {
         }
       });
 
-      res.status(201).json({ success: true, id: usageStatistic.id });
-    } catch (error: any) {
+      res.status(201).json({ success: true, id: usageStats.id });
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -1322,7 +1320,7 @@ export default function setupRoutes(app: express.Express): Server {
 
       // Get template usage counts manually
       const templateUsageCounts = await Promise.all(
-        templateUsage.map(async (template: any) => {
+        templateUsage.map(async (template: { id: string | number; [key: string]: any }) => {
           const count = await prisma.resume.count({
             where: {
               templateId: template.id.toString()
@@ -1369,7 +1367,7 @@ export default function setupRoutes(app: express.Express): Server {
       };
 
       res.json(statistics);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching dashboard statistics:", error);
       res.status(500).json({ error: "Failed to fetch dashboard statistics" });
     }
@@ -1431,7 +1429,7 @@ export default function setupRoutes(app: express.Express): Server {
       };
 
       res.json(statistics);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching user usage statistics:", error);
       res.status(500).json({ error: "Failed to fetch user usage statistics" });
     }
@@ -1455,7 +1453,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json({ success: true });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error tracking resume creation:", error);
       res.status(500).json({ error: "Failed to track resume creation" });
     }
@@ -1479,7 +1477,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json({ success: true });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error tracking resume download:", error);
       res.status(500).json({ error: "Failed to track resume download" });
     }
@@ -1503,7 +1501,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json({ success: true });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error tracking template usage:", error);
       res.status(500).json({ error: "Failed to track template usage" });
     }
@@ -1527,7 +1525,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json({ success: true });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error tracking AI suggestion:", error);
       res.status(500).json({ error: "Failed to track AI suggestion" });
     }
@@ -1536,13 +1534,12 @@ export default function setupRoutes(app: express.Express): Server {
   // Admin Management Routes
   
   // Get all users (admin only)
-  app.get("/api/admin/users", async (req: express.Request, res: express.Response) => {
+  app.get("/api/admin/users", requireAdminAuth, async (req: express.Request, res: express.Response) => {
     try {
-      // TODO: Add admin authentication middleware
       const { page = 1, limit = 20, search, tier, isActive } = req.query;
       
       const skip = (Number(page) - 1) * Number(limit);
-      const whereClause: any = {};
+      const whereClause: Record<string, any> = {};
       
       if (search) {
         whereClause.OR = [
@@ -1587,16 +1584,15 @@ export default function setupRoutes(app: express.Express): Server {
           pages: Math.ceil(totalCount / Number(limit))
         }
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching admin users:", error);
       res.status(500).json({ error: "Failed to fetch users" });
     }
   });
 
   // Get detailed user data (admin only)
-  app.get("/api/admin/users/:id", async (req: express.Request, res: express.Response) => {
+  app.get("/api/admin/users/:id", requireAdminAuth, async (req: express.Request, res: express.Response) => {
     try {
-      // TODO: Add admin authentication middleware
       const { id } = req.params;
 
       const user = await prisma.user.findUnique({
@@ -1670,16 +1666,15 @@ export default function setupRoutes(app: express.Express): Server {
       // Don't return password
       const { password, ...userDetails } = user;
       res.json(userDetails);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching admin user details:", error);
       res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Update user tier (admin only)
-  app.put("/api/admin/users/:id/tier", async (req: express.Request, res: express.Response) => {
+  app.put("/api/admin/users/:id/tier", requireAdminAuth, async (req: express.Request, res: express.Response) => {
     try {
-      // TODO: Add admin authentication middleware
       const { id } = req.params;
       const { tier } = req.body;
 
@@ -1709,7 +1704,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json(updatedUser);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -1719,9 +1714,8 @@ export default function setupRoutes(app: express.Express): Server {
   });
 
   // Get admin statistics
-  app.get("/api/admin/statistics", async (req: express.Request, res: express.Response) => {
+  app.get("/api/admin/statistics", requireAdminAuth, async (req: express.Request, res: express.Response) => {
     try {
-      // TODO: Add admin authentication middleware
       const { timeframe = '30d' } = req.query;
       
       let startDate: Date;
@@ -1763,7 +1757,7 @@ export default function setupRoutes(app: express.Express): Server {
         // Template statistics
         Promise.all([
           prisma.template.count(),
-          prisma.template.count({ where: { isActive: true } }),
+          prisma.template.count(),
           prisma.template.findMany({
             select: {
               id: true,
@@ -1845,16 +1839,15 @@ export default function setupRoutes(app: express.Express): Server {
       };
 
       res.json(statistics);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching admin statistics:", error);
       res.status(500).json({ error: "Failed to fetch admin statistics" });
     }
   });
 
   // Update database configuration (admin only)
-  app.put("/api/admin/database-config", async (req: express.Request, res: express.Response) => {
+  app.put("/api/admin/database-config", requireAdminAuth, async (req: express.Request, res: express.Response) => {
     try {
-      // TODO: Add admin authentication middleware
       // TODO: Add proper validation and security measures
       const { databaseUrl, maxConnections } = req.body;
 
@@ -1865,7 +1858,7 @@ export default function setupRoutes(app: express.Express): Server {
         message: "Database configuration update requested",
         note: "This feature requires additional implementation for security"
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating database config:", error);
       res.status(500).json({ error: "Failed to update database configuration" });
     }
@@ -1880,7 +1873,7 @@ export default function setupRoutes(app: express.Express): Server {
       const { page = 1, limit = 20, isRead } = req.query;
       
       const skip = (Number(page) - 1) * Number(limit);
-      const whereClause: any = { userId };
+      const whereClause: Record<string, any> = { userId };
       
       if (isRead !== undefined) {
         whereClause.isRead = isRead === 'true';
@@ -1905,7 +1898,7 @@ export default function setupRoutes(app: express.Express): Server {
           pages: Math.ceil(totalCount / Number(limit))
         }
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching notifications:", error);
       res.status(500).json({ error: "Failed to fetch notifications" });
     }
@@ -1938,7 +1931,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.status(201).json(notification);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -1969,7 +1962,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json(updatedNotification);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error marking notification as read:", error);
       res.status(500).json({ error: "Failed to mark notification as read" });
     }
@@ -1993,7 +1986,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json({ message: "Notification deleted successfully" });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting notification:", error);
       res.status(500).json({ error: "Failed to delete notification" });
     }
@@ -2007,7 +2000,7 @@ export default function setupRoutes(app: express.Express): Server {
       const { page = 1, limit = 20, status, priority, userId } = req.query;
       
       const skip = (Number(page) - 1) * Number(limit);
-      const whereClause: any = {};
+      const whereClause: Record<string, any> = {};
       
       if (status) whereClause.status = status;
       if (priority) whereClause.priority = priority;
@@ -2041,7 +2034,7 @@ export default function setupRoutes(app: express.Express): Server {
           pages: Math.ceil(totalCount / Number(limit))
         }
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching support tickets:", error);
       res.status(500).json({ error: "Failed to fetch support tickets" });
     }
@@ -2086,7 +2079,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.status(201).json(ticket);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -2118,7 +2111,7 @@ export default function setupRoutes(app: express.Express): Server {
       }
 
       res.json(ticket);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching support ticket:", error);
       res.status(500).json({ error: "Failed to fetch support ticket" });
     }
@@ -2163,7 +2156,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json(updatedTicket);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -2192,7 +2185,7 @@ export default function setupRoutes(app: express.Express): Server {
       }
 
       res.json(subscription);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching subscription:", error);
       res.status(500).json({ error: "Failed to fetch subscription" });
     }
@@ -2244,7 +2237,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.status(201).json(subscription);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -2289,7 +2282,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json(updatedSubscription);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -2321,7 +2314,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.json(cancelledSubscription);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error cancelling subscription:", error);
       res.status(500).json({ error: "Failed to cancel subscription" });
     }
@@ -2386,7 +2379,7 @@ export default function setupRoutes(app: express.Express): Server {
           description: discountCode.description
         }
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -2445,7 +2438,7 @@ export default function setupRoutes(app: express.Express): Server {
           discountValue: discountCode.discountValue
         }
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -2488,7 +2481,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.status(201).json(discountCode);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -2531,7 +2524,7 @@ export default function setupRoutes(app: express.Express): Server {
         return res.status(403).json({ error: "Access denied" });
       }
 
-      const download = await prisma.downloadTracking.create({
+      const download = await prisma.download.create({
         data: {
           ...validatedData,
           downloadedAt: new Date()
@@ -2549,7 +2542,7 @@ export default function setupRoutes(app: express.Express): Server {
       });
 
       res.status(201).json(download);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -2565,13 +2558,13 @@ export default function setupRoutes(app: express.Express): Server {
       const { page = 1, limit = 20, format, resumeId } = req.query;
       
       const skip = (Number(page) - 1) * Number(limit);
-      const whereClause: any = { userId };
+      const whereClause: Record<string, any> = { userId };
       
       if (format) whereClause.format = format;
       if (resumeId) whereClause.resumeId = resumeId;
 
       const [downloads, totalCount] = await Promise.all([
-        prisma.downloadTracking.findMany({
+        prisma.download.findMany({
           where: whereClause,
           include: {
             resume: {
@@ -2585,7 +2578,7 @@ export default function setupRoutes(app: express.Express): Server {
           take: Number(limit),
           orderBy: { downloadedAt: 'desc' }
         }),
-        prisma.downloadTracking.count({ where: whereClause })
+        prisma.download.count({ where: whereClause })
       ]);
 
       res.json({
@@ -2597,7 +2590,7 @@ export default function setupRoutes(app: express.Express): Server {
           pages: Math.ceil(totalCount / Number(limit))
         }
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching download history:", error);
       res.status(500).json({ error: "Failed to fetch download history" });
     }
@@ -2625,7 +2618,7 @@ export default function setupRoutes(app: express.Express): Server {
           startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       }
 
-      const whereClause: any = {
+      const whereClause: Record<string, any> = {
         downloadedAt: {
           gte: startDate,
           lte: endDate
@@ -2635,13 +2628,13 @@ export default function setupRoutes(app: express.Express): Server {
       if (userId) whereClause.userId = userId;
 
       const [totalDownloads, formatStats, dailyStats] = await Promise.all([
-        prisma.downloadTracking.count({ where: whereClause }),
-        prisma.downloadTracking.groupBy({
+        prisma.download.count({ where: whereClause }),
+    prisma.download.groupBy({
           by: ['format'],
           where: whereClause,
           _count: { format: true }
         }),
-        prisma.downloadTracking.groupBy({
+        prisma.download.groupBy({
           by: ['downloadedAt'],
           where: whereClause,
           _count: { downloadedAt: true }
@@ -2659,7 +2652,7 @@ export default function setupRoutes(app: express.Express): Server {
           count: stat._count.downloadedAt
         }))
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching download statistics:", error);
       res.status(500).json({ error: "Failed to fetch download statistics" });
     }
@@ -2711,7 +2704,7 @@ export default function setupRoutes(app: express.Express): Server {
         permissions,
         subscriptionStatus: activeSubscription?.status || 'NONE'
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching user permissions:", error);
       res.status(500).json({ error: (error as Error).message });
     }
@@ -2792,7 +2785,7 @@ export default function setupRoutes(app: express.Express): Server {
         planType,
         resourceId
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: fromZodError(error).message });
       }
@@ -2845,6 +2838,132 @@ export default function setupRoutes(app: express.Express): Server {
   function canAccessAnalytics(planType: string): boolean {
     return ['PREMIUM', 'ENTERPRISE'].includes(planType);
   }
+
+  // Authentication Routes
+  
+  // User registration
+  app.post("/api/auth/register", async (req: express.Request, res: express.Response) => {
+    try {
+      const userSchema = z.object({
+        email: z.string().email(),
+        password: z.string().min(6),
+        name: z.string().min(1).optional(),
+        username: z.string().min(1).optional()
+      });
+
+      const validatedData = userSchema.parse(req.body);
+
+      // Check if user already exists
+      const existingUser = await prisma.user.findUnique({
+        where: { email: validatedData.email }
+      });
+
+      if (existingUser) {
+        return res.status(400).json({ error: "User with this email already exists" });
+      }
+
+      // Create user (in production, hash the password)
+      const user = await prisma.user.create({
+        data: {
+          email: validatedData.email,
+          name: validatedData.name || validatedData.username || validatedData.email.split('@')[0],
+          password: validatedData.password, // TODO: Hash password in production
+          currentTier: 'FREE',
+          isActive: true
+        }
+      });
+
+      // Generate JWT token
+      const jwt = require('jsonwebtoken');
+      const token = jwt.sign(
+        { userId: user.id, email: user.email },
+        process.env.JWT_SECRET,
+        { expiresIn: '2h' }
+      );
+
+      // Don't return password
+      const { password, ...userResponse } = user;
+      
+      res.status(201).json({
+        success: true,
+        user: userResponse,
+        token,
+        id: user.id,
+        userId: user.id,
+        uid: user.id
+      });
+    } catch (error: unknown) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: fromZodError(error as any).message });
+      }
+      console.error("Error creating user:", error);
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  // User login
+  app.post("/api/auth/login", async (req: express.Request, res: express.Response) => {
+    try {
+      const loginSchema = z.object({
+        email: z.string().email(),
+        password: z.string().min(1)
+      });
+
+      const { email, password } = loginSchema.parse(req.body);
+
+      // Find user
+      const user = await prisma.user.findUnique({
+        where: { email }
+      });
+
+      if (!user || !user.isActive) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      // TODO: In production, compare hashed password
+      if (user.password !== password) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      // Update last login
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { lastLoginAt: new Date() }
+      });
+
+      // Generate JWT token
+      const jwt = require('jsonwebtoken');
+      const token = jwt.sign(
+        { userId: user.id, email: user.email },
+        process.env.JWT_SECRET,
+        { expiresIn: '2h' }
+      );
+
+      // Don't return password
+      const { password: _, ...userResponse } = user;
+      
+      res.json({
+        success: true,
+        user: userResponse,
+        token,
+        id: user.id,
+        userId: user.id
+      });
+    } catch (error: unknown) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: fromZodError(error as any).message });
+      }
+      console.error("Error during login:", error);
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  // User logout
+  app.post("/api/auth/logout", async (req: express.Request, res: express.Response) => {
+    // In a stateless JWT system, logout is handled client-side by removing the token
+    // For enhanced security, you could maintain a blacklist of tokens
+    res.json({ success: true, message: "Logged out successfully" });
+  });
 
   // Register API routers
   app.use('/api/jobs', jobsRouter);

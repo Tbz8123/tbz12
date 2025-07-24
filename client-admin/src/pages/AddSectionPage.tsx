@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import ProgressStepper from '@/components/ProgressStepper';
 import { useResumeStore } from '@/stores/resumeStore';
 import ResumePreviewModal from '@/components/modal/ResumePreviewModal';
@@ -43,7 +43,7 @@ const AddSectionPage = () => {
   const activeProTemplateId = useResumeStore((state) => state.activeProTemplateId);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
-  const [sections, setSections] = useState({
+  const [sections, _setSections] = useState({
     personalDetails: false,
     websites: false,
     certifications: false,

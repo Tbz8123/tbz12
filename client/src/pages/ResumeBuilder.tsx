@@ -607,8 +607,8 @@ export default function ResumeBuilder() {
 
   // Use appropriate templates based on type
   const templates = templateType === 'snap' 
-    ? snapTemplates.map(template => ({ ...template, templateType: 'snap' as const }))
-    : proTemplates.map(template => ({ ...template, templateType: 'pro' as const }));
+    ? snapTemplates.map((template: PrismaResumeTemplate) => ({ ...template, templateType: 'snap' as const }))
+    : proTemplates.map((template: PrismaResumeTemplate) => ({ ...template, templateType: 'pro' as const }));
 
   console.log('🔄 Template loading state:', {
     templateType,
@@ -620,7 +620,7 @@ export default function ResumeBuilder() {
   });
 
   console.log('📋 Templates loaded:', templates.length, 'templates');
-  console.log('📋 Template details:', templates.map(t => ({ id: t.id, name: t.name, type: t.templateType })));
+  console.log('📋 Template details:', templates.map((t: PrismaResumeTemplate & { templateType: 'snap' | 'pro' }) => ({ id: t.id, name: t.name, type: t.templateType })));
 
   const isLoadingTemplates = templateType === 'snap' ? isLoadingSnapTemplates : isLoadingProTemplates;
 
@@ -895,7 +895,7 @@ export default function ResumeBuilder() {
 
   console.log('[ResumeBuilder] Active Template for Preview:', activeTemplate);
   console.log('[ResumeBuilder] Active Template ID:', activeTemplateId);
-  console.log('[ResumeBuilder] All available templates:', templates.map(t => ({ id: t.id, name: t.name })));
+  console.log('[ResumeBuilder] All available templates:', templates.map((t: PrismaResumeTemplate & { templateType: 'snap' | 'pro' }) => ({ id: t.id, name: t.name })));
   console.log('[ResumeBuilder] Templates loading state:', isLoadingTemplates);
   console.log('[ResumeBuilder] Skills data being passed to preview:', previewData.skills);
   console.log('[ResumeBuilder] Full merged preview data:', previewData);

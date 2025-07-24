@@ -3,6 +3,13 @@ import { PrismaClient, Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { AnalyticsService } from '../services/analyticsService.js';
 
+// Extend Request interface to include custom properties
+interface ExtendedRequest extends Request {
+  sessionId?: string;
+  visitorId?: string;
+  userId?: string;
+}
+
 const router = Router();
 
 // Initialize Prisma with error handling
@@ -13,7 +20,7 @@ try {
   prisma = new PrismaClient();
   analyticsService = new AnalyticsService();
   console.log('✅ Analytics service initialized successfully');
-} catch (error: any) {
+} catch (error: unknown) {
   console.error('❌ Failed to initialize analytics service:', error);
 }
 
@@ -39,12 +46,9 @@ router.get('/dashboard', async (req: Request, res: Response) => {
 
     const data = await analyticsService.getDashboardData(startDate && endDate ? { start: startDate, end: endDate } : undefined);
     res.json(data);
-  } catch (error: any) {
-    console.error('Error getting dashboard data:', error);
-    res.status(500).json({ 
-      error: 'Failed to fetch dashboard data',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    });
+  } catch (error: unknown) {
+    console.error('Error fetching dashboard data:', error);
+    res.status(500).json({ error: 'Failed to fetch dashboard data' });
   }
 });
 
@@ -53,7 +57,7 @@ router.get('/countries', async (req: Request, res: Response) => {
   try {
     const data = await analyticsService.getCountryAnalytics();
     res.json(data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching country analytics:', error);
     res.status(500).json({ error: 'Failed to fetch country analytics' });
   }
@@ -67,7 +71,7 @@ router.get('/templates', async (req: Request, res: Response) => {
 
     const data = await analyticsService.getTemplateAnalytics(templateType);
     res.json(data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching template analytics:', error);
     res.status(500).json({ error: 'Failed to fetch template analytics' });
   }
@@ -89,7 +93,7 @@ router.get('/visitors', async (req: Request, res: Response) => {
 
     const { startDate, endDate, limit = 50 } = req.query;
 
-    const whereClause: any = {};
+    const whereClause: Record<string, any> = {};
     if (startDate && endDate) {
       whereClause.createdAt = {
         gte: new Date(startDate as string),
@@ -133,15 +137,15 @@ router.get('/visitors', async (req: Request, res: Response) => {
     });
 
     // Separate registered and unregistered visitors
-    const registeredVisitors = visitors.filter((v: any) => v.isRegistered && v.user);
-    const unregisteredVisitors = visitors.filter((v: any) => !v.isRegistered || !v.user);
+    const registeredVisitors = visitors.filter((v) => v.isRegistered && v.user);
+    const unregisteredVisitors = visitors.filter((v) => !v.isRegistered || !v.user);
 
     // Count active users
-    const activeRegistered = activeVisitors.filter((v: any) => v.isRegistered && v.user).length;
-    const activeUnregistered = activeVisitors.filter((v: any) => v.isRegistered && v.user).length;
+    const activeRegistered = activeVisitors.filter((v) => v.isRegistered && v.user).length;
+    const activeUnregistered = activeVisitors.filter((v) => !v.isRegistered || !v.user).length;
 
     // Transform data for frontend
-    const registered = registeredVisitors.map((v: any) => ({
+    const registered = registeredVisitors.map((v) => ({
       id: v.userId || v.id,
       name: v.user?.name || 'Unknown',
       email: v.user?.email || 'Unknown',
@@ -158,7 +162,7 @@ router.get('/visitors', async (req: Request, res: Response) => {
       recentDownloads: []
     }));
 
-    const unregistered = unregisteredVisitors.map((v: any) => ({
+    const unregistered = unregisteredVisitors.map((v) => ({
       anonymousId: v.sessionId,
       userAgent: v.userAgent || 'Unknown',
       country: v.country || 'Unknown',
@@ -182,7 +186,7 @@ router.get('/visitors', async (req: Request, res: Response) => {
       unregistered,
       summary
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching visitor analytics:', error);
     res.status(500).json({ error: 'Failed to fetch visitor analytics' });
   }
@@ -193,23 +197,27 @@ router.get('/activities', async (req: Request, res: Response) => {
   try {
     const { startDate, endDate, activityType, limit = 100 } = req.query;
 
-    const whereClause: any = {};
-    if (startDate && endDate) {
-      whereClause.timestamp = {
-        gte: new Date(startDate as string),
-        lte: new Date(endDate as string)
-      };
-    }
-    if (activityType) {
-      whereClause.activityType = activityType;
-    }
+    const startTimestamp = startDate ? new Date(startDate as string).getTime() : undefined;
+    const endTimestamp = endDate ? new Date(endDate as string).getTime() : undefined;
 
     // Activity logs now handled by memory analytics
     const memoryAnalytics = await import('../services/memoryAnalyticsService');
-    const activities = memoryAnalytics.default.getRecentActivities(parseInt(limit as string));
+    let activities = memoryAnalytics.default.getRecentActivities(parseInt(limit as string));
+
+    // Filter by date range if provided
+    if (startTimestamp && endTimestamp) {
+      activities = activities.filter(activity => 
+        activity.timestamp >= startTimestamp && activity.timestamp <= endTimestamp
+      );
+    }
+
+    // Filter by activity type if provided
+    if (activityType) {
+      activities = activities.filter(activity => activity.activityType === activityType);
+    }
 
     res.json(activities);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching activity logs:', error);
     res.status(500).json({ error: 'Failed to fetch activity logs' });
   }
@@ -220,7 +228,7 @@ router.get('/sessions', async (req: Request, res: Response) => {
   try {
     const { startDate, endDate, limit = '50' } = req.query;
 
-    const whereClause: any = {};
+    const whereClause: Record<string, any> = {};
     if (startDate && endDate) {
       whereClause.startTime = {
         gte: new Date(startDate as string),
@@ -244,18 +252,18 @@ router.get('/sessions', async (req: Request, res: Response) => {
     });
 
     res.json(sessions);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching session analytics:', error);
     res.status(500).json({ error: 'Failed to fetch session analytics' });
   }
 });
 
 // Get analytics summary by date range
-router.get('/summary', async (req, res) => {
+router.get('/summary', async (req: Request, res: Response) => {
   try {
     const { startDate, endDate } = req.query;
 
-    const whereClause: any = {};
+    const whereClause: Record<string, any> = {};
     if (startDate && endDate) {
       whereClause.date = {
         gte: new Date(startDate as string),
@@ -270,14 +278,14 @@ router.get('/summary', async (req, res) => {
     });
 
     res.json(summaries);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching analytics summary:', error);
     res.status(500).json({ error: 'Failed to fetch analytics summary' });
   }
 });
 
 // Get real-time statistics
-router.get('/realtime', async (req, res) => {
+router.get('/realtime', async (req: Request, res: Response) => {
   try {
     const now = new Date();
     const todayStart = new Date(now);
@@ -383,32 +391,32 @@ router.get('/realtime', async (req, res) => {
       topCountries,
       topTemplates
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching real-time statistics:', error);
     res.status(500).json({ error: 'Failed to fetch real-time statistics' });
   }
 });
 
 // Generate daily summary (admin endpoint)
-router.post('/generate-summary', async (req, res) => {
+router.post('/generate-summary', async (req: Request, res: Response) => {
   try {
     const { date } = req.body;
     const targetDate = date ? new Date(date) : new Date();
 
     const summary = await analyticsService.generateDailySummary(targetDate);
     res.json(summary);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error generating daily summary:', error);
     res.status(500).json({ error: 'Failed to generate daily summary' });
   }
 });
 
 // Get conversion funnel data
-router.get('/funnel', async (req, res) => {
+router.get('/funnel', async (req: Request, res: Response) => {
   try {
     const { funnelType, startDate, endDate } = req.query;
 
-    const whereClause: any = {};
+    const whereClause: Record<string, any> = {};
     if (funnelType) {
       whereClause.funnelType = funnelType;
     }
@@ -425,7 +433,7 @@ router.get('/funnel', async (req, res) => {
     });
 
     // Group by funnel type and step
-    const funnelAnalysis = funnelData.reduce((acc: any, item: any) => {
+    const funnelAnalysis = funnelData.reduce((acc: Record<string, any>, item: any) => {
       const key = `${item.funnelType}-${item.step}`;
       if (!acc[key]) {
         acc[key] = {
@@ -442,24 +450,24 @@ router.get('/funnel', async (req, res) => {
         acc[key].totalTime += item.timeToComplete;
       }
       return acc;
-    }, {} as any);
+    }, {} as Record<string, any>);
 
     // Calculate averages
-    Object.values(funnelAnalysis).forEach((item: any) => {
+    Object.values(funnelAnalysis).forEach((item: Record<string, any>) => {
       if (item.totalTime > 0) {
         item.avgTime = item.totalTime / item.count;
       }
     });
 
     res.json(Object.values(funnelAnalysis));
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching conversion funnel:', error);
     res.status(500).json({ error: 'Failed to fetch conversion funnel' });
   }
 });
 
 // Track custom event endpoint
-router.post('/track', async (req, res) => {
+router.post('/track', async (req: Request, res: Response) => {
   try {
     const {
       activityType,
@@ -478,9 +486,9 @@ router.post('/track', async (req, res) => {
       errorMessage
     } = req.body;
 
-    const sessionId = (req as any).sessionId;
-    const visitorId = (req as any).visitorId;
-    const userId = (req as any).userId;
+    const sessionId = (req as ExtendedRequest).sessionId;
+    const visitorId = (req as ExtendedRequest).visitorId;
+    const userId = (req as ExtendedRequest).userId;
 
     if (!sessionId || !visitorId) {
       return res.status(400).json({ error: 'Session not found' });
@@ -507,14 +515,14 @@ router.post('/track', async (req, res) => {
     });
 
     res.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error tracking custom event:', error);
     res.status(500).json({ error: 'Failed to track event' });
   }
 });
 
 // Get real-time statistics
-router.get('/real-time', async (req, res) => {
+router.get('/real-time', async (req: Request, res: Response) => {
   try {
     // Check if prisma is initialized
     if (!prisma) {
@@ -555,7 +563,7 @@ router.get('/real-time', async (req, res) => {
       recentActivity,
       timestamp: now.toISOString()
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching real-time statistics:', error);
     res.status(500).json({ error: 'Failed to fetch real-time statistics' });
   }

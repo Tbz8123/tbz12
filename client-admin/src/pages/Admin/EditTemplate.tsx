@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import { useParams } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import SnapTemplateEditor from "./SnapTemplateEditor";

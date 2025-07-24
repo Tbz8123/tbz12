@@ -6,24 +6,22 @@
       "use": "@vercel/node"
     },
     {
-      "src": "client/vite.config.ts",
-      "use": "@vercel/static",
-      "config": {
-        "distDir": "dist/client"
-      }
+      "src": "dist/client/**",
+      "use": "@vercel/static"
     },
     {
-      "src": "client-admin/vite.config.ts",
-      "use": "@vercel/static",
-      "config": {
-        "distDir": "dist/admin"
-      }
+      "src": "dist/admin/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
       "dest": "server/index.ts"
+    },
+    {
+      "src": "/admin/assets/(.*)",
+      "dest": "/dist/admin/assets/$1"
     },
     {
       "src": "/admin/(.*)",

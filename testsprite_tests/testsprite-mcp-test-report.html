@@ -1,0 +1,327 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Markdown Preview</title>
+      <style>
+        body {
+          font-family: sans-serif;
+          padding: 40px;
+          line-height: 1.6;
+          background: #fdfdfd;
+          color: #333;
+        }
+        pre {
+          background: #f4f4f4;
+          padding: 10px;
+          border-radius: 5px;
+          overflow-x: auto;
+        }
+        code {
+          font-family: monospace;
+          background: #eee;
+          padding: 2px 4px;
+        }
+        table {
+          border-collapse: collapse;
+          width: 100%;
+          margin-top: 20px;
+        }
+        th, td {
+          border: 1px solid #ccc;
+          padding: 8px 12px;
+          text-align: left;
+        }
+        th {
+          background-color: #f2f2f2;
+          font-weight: bold;
+        }
+      </style>
+    </head>
+    <body>
+      <h1>TestSprite AI Testing Report (MCP)</h1>
+<hr>
+<h2>1️⃣ Document Metadata</h2>
+<ul>
+<li><strong>Project Name:</strong> TbzResumeBuilderV4</li>
+<li><strong>Version:</strong> N/A</li>
+<li><strong>Date:</strong> 2025-07-24</li>
+<li><strong>Prepared by:</strong> TestSprite AI Team</li>
+</ul>
+<hr>
+<h2>2️⃣ Requirement Validation Summary</h2>
+<h3>Requirement: Order Management</h3>
+<ul>
+<li><strong>Description:</strong> Supports order creation, retrieval, and user-specific order management functionality.</li>
+</ul>
+<h4>Test 1</h4>
+<ul>
+<li><strong>Test ID:</strong> TC001</li>
+<li><strong>Test Name:</strong> create_new_order</li>
+<li><strong>Test Code:</strong> <a href="./TC001_create_new_order.py">TC001_create_new_order.py</a></li>
+<li><strong>Test Error:</strong> Traceback (most recent call last):
+File &quot;&lt;string&gt;&quot;, line 42, in test_create_new_order
+File &quot;/var/task/requests/models.py&quot;, line 1024, in raise_for_status
+raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 500 Server Error: Internal Server Error for url: http://localhost:5174/api/orders</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/3c97fba0-c470-49a2-aa14-0c596b2079c1/27153bc4-408b-46df-9890-8897ee63048b</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> The test failed due to a 500 Internal Server Error when attempting to create a new order via the API. This typically indicates an unhandled exception or issue in the backend order creation logic, possibly related to processing billing information, payment methods, or order validation.</li>
+</ul>
+<hr>
+<h4>Test 2</h4>
+<ul>
+<li><strong>Test ID:</strong> TC002</li>
+<li><strong>Test Name:</strong> get_order_by_id</li>
+<li><strong>Test Code:</strong> <a href="./TC002_get_order_by_id.py">TC002_get_order_by_id.py</a></li>
+<li><strong>Test Error:</strong> Traceback (most recent call last):
+File &quot;/var/task/handler.py&quot;, line 258, in run_with_retry
+exec(code, exec_env)
+File &quot;&lt;string&gt;&quot;, line 93, in &lt;module&gt;
+File &quot;&lt;string&gt;&quot;, line 41, in test_get_order_by_id
+AssertionError: Order creation failed:</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/3c97fba0-c470-49a2-aa14-0c596b2079c1/3556735a-cdc8-4201-b42d-fc573516425d</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> The test failed because the prerequisite order creation did not succeed, resulting in a failure to retrieve order details by ID. This suggests dependency or setup of test data is failing before the retrieval step.</li>
+</ul>
+<hr>
+<h4>Test 3</h4>
+<ul>
+<li><strong>Test ID:</strong> TC003</li>
+<li><strong>Test Name:</strong> get_user_orders</li>
+<li><strong>Test Code:</strong> <a href="./TC003_get_user_orders.py">TC003_get_user_orders.py</a></li>
+<li><strong>Test Error:</strong> Traceback (most recent call last):
+File &quot;&lt;string&gt;&quot;, line 17, in test_get_user_orders
+File &quot;/var/task/requests/models.py&quot;, line 1024, in raise_for_status
+raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 500 Server Error: Internal Server Error for url: http://localhost:5174/api/user/orders</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/3c97fba0-c470-49a2-aa14-0c596b2079c1/a683dc55-0b83-490d-baae-b2153b7215b1</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> The API call to retrieve user-specific orders returned a 500 Internal Server Error, indicating a server-side failure handling this request, possibly due to user authentication issues, database query problems, or endpoint logic exceptions.</li>
+</ul>
+<hr>
+<h3>Requirement: User Administration</h3>
+<ul>
+<li><strong>Description:</strong> Supports admin-only user management, permissions, and user data retrieval functionality.</li>
+</ul>
+<h4>Test 1</h4>
+<ul>
+<li><strong>Test ID:</strong> TC004</li>
+<li><strong>Test Name:</strong> get_all_users_admin_only</li>
+<li><strong>Test Code:</strong> <a href="./TC004_get_all_users_admin_only.py">TC004_get_all_users_admin_only.py</a></li>
+<li><strong>Test Error:</strong> Traceback (most recent call last):
+File &quot;/var/task/handler.py&quot;, line 258, in run_with_retry
+exec(code, exec_env)
+File &quot;&lt;string&gt;&quot;, line 52, in &lt;module&gt;
+File &quot;&lt;string&gt;&quot;, line 30, in test_get_all_users_admin_only
+AssertionError: Expected 200 OK for admin, got 500</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/3c97fba0-c470-49a2-aa14-0c596b2079c1/17259ac3-8cc6-4447-bdcc-bd76bb55d507</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> Admin-only endpoint to get paginated user lists returned a 500 error instead of 200 OK, possibly due to failure in access control or pagination logic, or a backend service malfunction.</li>
+</ul>
+<hr>
+<h4>Test 2</h4>
+<ul>
+<li><strong>Test ID:</strong> TC005</li>
+<li><strong>Test Name:</strong> get_user_permissions</li>
+<li><strong>Test Code:</strong> <a href="./TC005_get_user_permissions.py">TC005_get_user_permissions.py</a></li>
+<li><strong>Test Error:</strong> Traceback (most recent call last):
+File &quot;&lt;string&gt;&quot;, line 14, in test_get_user_permissions
+File &quot;/var/task/requests/models.py&quot;, line 1024, in raise_for_status
+raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 500 Server Error: Internal Server Error for url: http://localhost:5174/api/admin/users</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/3c97fba0-c470-49a2-aa14-0c596b2079c1/0098d554-aac9-46ff-98a2-01deaa346890</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> The test failed due to a 500 Internal Server Error while attempting to retrieve user permissions; the failure appears related to an inability to get users for test setup indicating a problem with the admin users API or permissions retrieval logic.</li>
+</ul>
+<hr>
+<h4>Test 3</h4>
+<ul>
+<li><strong>Test ID:</strong> TC006</li>
+<li><strong>Test Name:</strong> check_specific_permission</li>
+<li><strong>Test Code:</strong> <a href="./TC006_check_specific_permission.py">TC006_check_specific_permission.py</a></li>
+<li><strong>Test Error:</strong> Traceback (most recent call last):
+File &quot;/var/task/handler.py&quot;, line 258, in run_with_retry
+exec(code, exec_env)
+File &quot;&lt;string&gt;&quot;, line 71, in &lt;module&gt;
+File &quot;&lt;string&gt;&quot;, line 33, in test_check_specific_permission
+AssertionError: User registration failed with status 500</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/3c97fba0-c470-49a2-aa14-0c596b2079c1/87bb529c-9ca1-48c8-8d4d-be9beb27c739</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> Permission check test failed due to a 500 Internal Server Error encountered during user registration, which likely blocks the ability to perform the permission checking as an authenticated user.</li>
+</ul>
+<hr>
+<h3>Requirement: Job Management</h3>
+<ul>
+<li><strong>Description:</strong> Supports job listings retrieval and job creation functionality.</li>
+</ul>
+<h4>Test 1</h4>
+<ul>
+<li><strong>Test ID:</strong> TC007</li>
+<li><strong>Test Name:</strong> get_job_listings</li>
+<li><strong>Test Code:</strong> <a href="./TC007_get_job_listings.py">TC007_get_job_listings.py</a></li>
+<li><strong>Test Error:</strong> Traceback (most recent call last):
+File &quot;&lt;string&gt;&quot;, line 13, in test_get_job_listings
+File &quot;/var/task/requests/models.py&quot;, line 1024, in raise_for_status
+raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 500 Server Error: Internal Server Error for url: http://localhost:5174/api/jobs</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/3c97fba0-c470-49a2-aa14-0c596b2079c1/a2733b53-c6f7-436b-85d6-b613c5951724</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> The job listings API returned a 500 Internal Server Error, causing failure to retrieve job data in the expected format, indicating backend issues in job listing retrieval.</li>
+</ul>
+<hr>
+<h4>Test 2</h4>
+<ul>
+<li><strong>Test ID:</strong> TC008</li>
+<li><strong>Test Name:</strong> create_new_job</li>
+<li><strong>Test Code:</strong> <a href="./TC008_create_new_job.py">TC008_create_new_job.py</a></li>
+<li><strong>Test Error:</strong> Traceback (most recent call last):
+File &quot;/var/task/handler.py&quot;, line 258, in run_with_retry
+exec(code, exec_env)
+File &quot;&lt;string&gt;&quot;, line 35, in &lt;module&gt;
+File &quot;&lt;string&gt;&quot;, line 28, in test_create_new_job
+AssertionError: Expected status code 201, got 500</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/3c97fba0-c470-49a2-aa14-0c596b2079c1/a85ef295-1cf1-4cd4-b7be-067cce3813fa</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> Creating a new job entry failed with a 500 Internal Server Error, indicating server-side problems possibly in input validation, database insertion, or business logic.</li>
+</ul>
+<hr>
+<h3>Requirement: Skills Management</h3>
+<ul>
+<li><strong>Description:</strong> Supports skills data retrieval and management functionality.</li>
+</ul>
+<h4>Test 1</h4>
+<ul>
+<li><strong>Test ID:</strong> TC009</li>
+<li><strong>Test Name:</strong> get_skills_list</li>
+<li><strong>Test Code:</strong> <a href="./TC009_get_skills_list.py">TC009_get_skills_list.py</a></li>
+<li><strong>Test Error:</strong> Traceback (most recent call last):
+File &quot;&lt;string&gt;&quot;, line 13, in test_get_skills_list
+File &quot;/var/task/requests/models.py&quot;, line 1024, in raise_for_status
+raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 500 Server Error: Internal Server Error for url: http://localhost:5174/api/skills</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/3c97fba0-c470-49a2-aa14-0c596b2079c1/a2733b53-c6f7-436b-85d6-b613c5951724</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> The API call to retrieve skills list failed with a 500 error, showing a backend failure when accessing or processing skills data.</li>
+</ul>
+<hr>
+<h3>Requirement: Resume Management</h3>
+<ul>
+<li><strong>Description:</strong> Supports resume creation, retrieval, and management functionality.</li>
+</ul>
+<h4>Test 1</h4>
+<ul>
+<li><strong>Test ID:</strong> TC010</li>
+<li><strong>Test Name:</strong> create_resume</li>
+<li><strong>Test Code:</strong> <a href="./TC010_create_resume.py">TC010_create_resume.py</a></li>
+<li><strong>Test Error:</strong> N/A</li>
+<li><strong>Test Visualization and Result:</strong> N/A</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> Resume creation test failed with server-side errors, indicating issues in the resume creation backend logic.</li>
+</ul>
+<hr>
+<h2>3️⃣ Coverage &amp; Matching Metrics</h2>
+<ul>
+<li><strong>100% of product requirements tested</strong></li>
+<li><strong>0% of tests passed</strong></li>
+<li><strong>Key gaps / risks:</strong></li>
+</ul>
+<blockquote>
+<p>100% of product requirements had at least one test generated.
+0% of tests passed fully.
+<strong>Critical Risk:</strong> All backend APIs are returning 500 Internal Server Errors, indicating severe backend infrastructure or implementation issues that need immediate attention.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Total Tests</th>
+<th>✅ Passed</th>
+<th>⚠️ Partial</th>
+<th>❌ Failed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Order Management</td>
+<td>3</td>
+<td>0</td>
+<td>0</td>
+<td>3</td>
+</tr>
+<tr>
+<td>User Administration</td>
+<td>3</td>
+<td>0</td>
+<td>0</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Job Management</td>
+<td>2</td>
+<td>0</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Skills Management</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Resume Management</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td><strong>TOTAL</strong></td>
+<td><strong>10</strong></td>
+<td><strong>0</strong></td>
+<td><strong>0</strong></td>
+<td><strong>10</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>4️⃣ Critical Issues Summary</h2>
+<h3>Immediate Action Required</h3>
+<ol>
+<li><strong>Backend Server Issues:</strong> All API endpoints are returning 500 Internal Server Errors</li>
+<li><strong>Database Connectivity:</strong> Potential database connection or configuration issues</li>
+<li><strong>Error Handling:</strong> Lack of proper error handling causing server crashes</li>
+<li><strong>Authentication/Authorization:</strong> Auth token validation may be failing</li>
+</ol>
+<h3>Recommendations</h3>
+<ol>
+<li><strong>Investigate server-side logs</strong> to identify root causes of 500 errors</li>
+<li><strong>Check database connections</strong> and ensure proper configuration</li>
+<li><strong>Implement comprehensive error handling</strong> to prevent server crashes</li>
+<li><strong>Add unit tests</strong> for individual components before integration testing</li>
+<li><strong>Set up proper logging and monitoring</strong> for production readiness</li>
+<li><strong>Review authentication middleware</strong> and token validation logic</li>
+</ol>
+<hr>
+<p><strong>Report Generated:</strong> 2025-07-24 by TestSprite AI Team
+<strong>Test Environment:</strong> http://localhost:5174
+<strong>Total Test Duration:</strong> ~5 minutes
+<strong>Test Framework:</strong> TestSprite MCP Backend Testing</p>
+
+    </body>
+    </html>
+  

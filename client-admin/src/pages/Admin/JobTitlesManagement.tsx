@@ -4,7 +4,7 @@ import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { 
@@ -18,7 +18,7 @@ import {
   Briefcase,
   FileText,
   Star,
-  StarOff,
+
   ChevronDown
 } from 'lucide-react';
 import {
@@ -27,7 +27,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -184,7 +184,7 @@ export default function JobTitlesManagement() {
       console.log('Delete successful:', result);
       return result;
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       console.log('onSuccess triggered for ID:', variables);
       queryClient.invalidateQueries({ queryKey: ['job-titles'] });
       if (selectedJobTitle && selectedJobTitle.id === variables) {
@@ -256,7 +256,7 @@ export default function JobTitlesManagement() {
       console.log('Delete description successful:', result);
       return result;
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       console.log('onSuccess triggered for description ID:', variables);
       queryClient.invalidateQueries({ queryKey: ['job-descriptions'] });
       toast({ title: 'Success', description: 'Description deleted successfully' });
@@ -457,7 +457,7 @@ export default function JobTitlesManagement() {
     }
   };
 
-  const processImportInBackground = async (jobId: string, csvData: string, fileName: string) => {
+  const _processImportInBackground = async (jobId: string, csvData: string, fileName: string) => {
     try {
       console.log('=== BACKGROUND IMPORT STARTING ===');
       console.log('Job ID received:', jobId);
@@ -547,7 +547,7 @@ export default function JobTitlesManagement() {
     }
   };
 
-  const processImportFromData = async (csvData: string, fileName: string, jobId?: string) => {
+  const processImportFromData = async (csvData: string, _fileName: string, jobId?: string) => {
     const currentJobId = jobId || importJobId;
     console.log('processImportFromData called with jobId:', currentJobId);
 
@@ -719,7 +719,7 @@ export default function JobTitlesManagement() {
       const groupedDataArray = Array.from(groupedData.entries());
 
       for (let i = startFromIndex; i < groupedDataArray.length; i++) {
-        const [titleKey, group] = groupedDataArray[i];
+        const [_titleKey, group] = groupedDataArray[i];
 
         // Check for pause before processing each item
         if (currentJobId) {

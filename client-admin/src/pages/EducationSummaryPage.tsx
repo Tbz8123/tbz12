@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import Logo from '@/components/Logo';
-import { ArrowLeft, HelpCircle, Edit, Trash, ArrowRight, CheckCircle, PlusCircle, School, BookOpen } from 'lucide-react';
+
+import { ArrowLeft, HelpCircle, Edit, Trash, ArrowRight, CheckCircle, PlusCircle, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   Tooltip,

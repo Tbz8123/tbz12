@@ -87,10 +87,10 @@ const LoginPage: React.FC = () => {
         description: 'You have been logged in successfully.',
       });
       setLocation('/dashboard');
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Login Failed',
-        description: error.message || 'Please check your credentials and try again.',
+        description: error instanceof Error ? error.message : 'Please check your credentials and try again.',
         variant: 'destructive',
       });
     } finally {
@@ -107,10 +107,10 @@ const LoginPage: React.FC = () => {
         description: 'Your account has been created successfully.',
       });
       setLocation('/dashboard');
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Registration Failed',
-        description: error.message || 'Please try again.',
+        description: error instanceof Error ? error.message : 'Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -127,18 +127,20 @@ const LoginPage: React.FC = () => {
         description: 'You have been logged in with Google.',
       });
       setLocation('/dashboard');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Google login error:', error);
       
       let errorMessage = 'Please try again.';
-      if (error.message === 'Sign-in was cancelled') {
-        errorMessage = 'Sign-in was cancelled. Please try again.';
-      } else if (error.message.includes('popup')) {
-        errorMessage = 'Please allow popups and try again.';
-      } else if (error.message.includes('unauthorized-domain')) {
-        errorMessage = 'This domain is not configured for Google sign-in.';
-      } else if (error.message) {
-        errorMessage = error.message;
+      if (error instanceof Error) {
+        if (error.message === 'Sign-in was cancelled') {
+          errorMessage = 'Sign-in was cancelled. Please try again.';
+        } else if (error.message.includes('popup')) {
+          errorMessage = 'Please allow popups and try again.';
+        } else if (error.message.includes('unauthorized-domain')) {
+          errorMessage = 'This domain is not configured for Google sign-in.';
+        } else {
+          errorMessage = error.message;
+        }
       }
 
       toast({
@@ -433,4 +435,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage; 
+export default LoginPage;

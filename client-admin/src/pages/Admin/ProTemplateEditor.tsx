@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 import { motion, useAnimation } from 'framer-motion';
 import html2canvas from 'html2canvas';
@@ -14,7 +14,7 @@ import { useInView } from 'react-intersection-observer';
 
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Image, Palette, Zap, Eye, Upload, ArrowLeft } from 'lucide-react';
+import { Sparkles, Image, Upload, ArrowLeft } from 'lucide-react';
 
 // Updated sample resume data tailored for ModernATSResume and target screenshot
 const sampleUserData = {
@@ -147,7 +147,7 @@ const ProTemplateEditor = ({
     }
   }, [initialData]);
 
-  const handleEditorDidMount = (editor: any, monaco: Monaco) => {
+  const handleEditorDidMount = (_editor: any, monaco: Monaco) => {
     monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
       jsx: monaco.languages.typescript.JsxEmit.React,
       reactNamespace: "React",
@@ -996,4 +996,4 @@ const ProTemplateEditor = ({
   );
 };
 
-export default ProTemplateEditor; 
+export default ProTemplateEditor;

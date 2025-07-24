@@ -210,7 +210,6 @@ const PersonalInformationPage = () => {
 
   const clearAllData = () => {
     const clearData = {
-      id: '',
       personalInfo: {
         firstName: '',
         lastName: '',
@@ -227,9 +226,6 @@ const PersonalInformationPage = () => {
       certifications: [],
       languages: [],
       customSections: [],
-      templateId: '',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
 
     // Clear all resume data with pending updates mechanism
@@ -1052,7 +1048,7 @@ const PersonalInformationPage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-              {proTemplates.map((template, index) => (
+              {proTemplates.map((template: any, index: number) => (
                 <motion.div
                   key={template.id}
                   initial={{ opacity: 0, y: 20 }}

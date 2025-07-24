@@ -30,7 +30,7 @@ export async function setupCustomVite(app: Express, server: Server) {
   };
 
   const viteConfig = {
-    configFile: false,
+    configFile: false as const,
     customLogger: {
       ...viteLogger,
       error: (msg, options) => {

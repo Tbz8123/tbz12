@@ -178,9 +178,9 @@ const UserManagementPage: React.FC = () => {
       const data = await response.json();
       console.log('✅ User data received:', data);
       setUserData(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('❌ Network error fetching user data:', error);
-      setUserDataError(`Network error: ${error.message}`);
+      setUserDataError(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setUserDataLoading(false);
     }
@@ -838,4 +838,4 @@ const UserManagementPage: React.FC = () => {
   );
 };
 
-export default UserManagementPage; 
+export default UserManagementPage;

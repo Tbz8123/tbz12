@@ -1,9 +1,8 @@
-import React from "react";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LayoutGrid, FileText, Users, Settings, Database, Shield, Server, Palette, Layers, BookText } from "lucide-react";
+import { LayoutGrid, FileText, Users, Settings, Database, Shield, Server, Layers, BookText } from "lucide-react";
 import AuthDebug from '@/components/debug/AuthDebug';
 
 const AdminProPage = () => {

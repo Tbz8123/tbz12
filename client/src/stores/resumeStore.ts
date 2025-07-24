@@ -100,10 +100,12 @@ interface PrismaResumeTemplate {
 
 interface ResumeState {
   resumeData: ResumeData;
+  resume: ResumeData; // Alias for resumeData for backward compatibility
   proTemplates: PrismaResumeTemplate[];
   isLoadingProTemplates: boolean;
   activeProTemplateId: number | null;
   getProTemplateById: (id: number | null) => PrismaResumeTemplate | undefined;
+  updateResume: (data: Partial<ResumeData>) => void; // Alias for updateResumeData
   actions: {
     updateResumeData: (data: Partial<ResumeData>) => void;
     updatePersonalInfo: (info: Partial<PersonalInfo>) => void;
@@ -151,12 +153,14 @@ export const useResumeStore = create<ResumeState>()(
     persist(
       (set, get) => ({
         resumeData: getDefaultResumeData(),
+        get resume() { return get().resumeData; }, // Alias for resumeData
         proTemplates: [],
         isLoadingProTemplates: true,
         activeProTemplateId: null,
         getProTemplateById: (id) => {
           return get().proTemplates.find((t) => t.id === id);
         },
+        updateResume: (data) => get().actions.updateResumeData(data), // Alias for updateResumeData
         actions: {
           updateResumeData: (data) =>
             set((state) => ({ resumeData: { ...state.resumeData, ...data, updatedAt: new Date().toISOString() } })),

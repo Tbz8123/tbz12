@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { useLocation, Link } from "wouter";
+import { useState } from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +11,7 @@ import {
 
 const AdminTierSelectionPage = () => {
   const [_, setLocation] = useLocation();
-  const [selectedTier, setSelectedTier] = useState<string | null>(null);
+  const [_selectedTier, setSelectedTier] = useState<string | null>(null);
 
   const tiers = [
     {
@@ -109,4 +108,4 @@ const AdminTierSelectionPage = () => {
   );
 };
 
-export default AdminTierSelectionPage; 
+export default AdminTierSelectionPage;

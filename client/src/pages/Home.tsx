@@ -668,7 +668,7 @@ export default function Home() {
   });
 
   // Map templates to user resume cards with realistic data
-  const userResumes = templates.slice(0, 4).map((template, index) => {
+  const userResumes = templates.slice(0, 4).map((template: any, index: number) => {
     // Get the appropriate thumbnail URL
     const thumbnailUrl = template.thumbnailType === 'enhanced3d' && template.enhanced3DThumbnailUrl 
                         ? template.enhanced3DThumbnailUrl 
@@ -691,8 +691,8 @@ export default function Home() {
 
   // Debug logging for templates and userResumes
   console.log('[Home] Templates loaded:', templates.length);
-  console.log('[Home] Templates:', templates.map(t => ({ id: t.id, name: t.name })));
-  console.log('[Home] UserResumes created:', userResumes.map(r => ({ id: r.id, template: r.template })));
+  console.log('[Home] Templates:', templates.map((t: any) => ({ id: t.id, name: t.name })));
+  console.log('[Home] UserResumes created:', userResumes.map((r: any) => ({ id: r.id, template: r.template })));
 
   useEffect(() => {
     // Smooth scroll behavior

@@ -267,4 +267,4 @@ export async function generateTemplateThumbnail(
     padding: '8px',
     ...options
   });
-} 
+}

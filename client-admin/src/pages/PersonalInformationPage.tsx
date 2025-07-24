@@ -210,7 +210,6 @@ const PersonalInformationPage = () => {
 
   const clearAllData = () => {
     const clearData = {
-      id: '',
       personalInfo: {
         firstName: '',
         lastName: '',
@@ -227,9 +226,6 @@ const PersonalInformationPage = () => {
       certifications: [],
       languages: [],
       customSections: [],
-      templateId: '',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
 
     // Clear all resume data with pending updates mechanism

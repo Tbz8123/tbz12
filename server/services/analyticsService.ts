@@ -169,7 +169,7 @@ export class AnalyticsService {
   }
 
   // Track a new visitor or update existing visitor
-  async trackVisitor(data: TrackVisitorData): Promise<any> {
+  async trackVisitor(data: TrackVisitorData): Promise<Prisma.VisitorAnalyticsCreateInput | Prisma.VisitorAnalyticsUpdateInput> {
     try {
       const { sessionId, userId, ipAddress, userAgent, referrer, landingPage } = data;
 
@@ -295,7 +295,6 @@ export class AnalyticsService {
         templateName: enhancedData.templateName,
         downloadType: enhancedData.downloadType as 'pdf' | 'docx' | 'txt' | undefined,
         pageUrl: enhancedData.pageUrl,
-        tier: enhancedData.tier,
         userTier: enhancedData.userTier,
         country: enhancedData.country,
         deviceType: enhancedData.deviceType,

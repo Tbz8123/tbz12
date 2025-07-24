@@ -28,6 +28,7 @@ interface ExtendedUser extends User {
   currentTier?: string;
   subscriptionStatus?: string;
   role?: string;
+  isAdmin?: boolean;
 
   // Profile data
   userProfile?: {

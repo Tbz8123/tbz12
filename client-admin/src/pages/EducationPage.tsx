@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { ArrowLeft, HelpCircle, ChevronDown, ChevronUp, Plus, CheckCircle } from 'lucide-react';
 import {
@@ -17,7 +17,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { motion, AnimatePresence } from 'framer-motion';
-import { v4 as uuidv4 } from 'uuid';
+
 import ProgressStepper from '@/components/ProgressStepper';
 import { useResumeStore } from '@/stores/resumeStore';
 import ResumePreviewModal from '@/components/modal/ResumePreviewModal';
@@ -26,13 +26,7 @@ import ResumePreviewModal from '@/components/modal/ResumePreviewModal';
 // It includes: id, school, degree, location, startDate, endDate, description
 // Note: The form will handle startDate and endDate as separate month/year fields.
 
-// Define achievement interface (if used for description building)
-interface EducationAchievement {
-  id?: string;
-  type: 'achievement' | 'prize' | 'coursework' | 'activity' | 'study_abroad' | 'apprenticeship' | 'project';
-  title: string;
-  description?: string;
-}
+
 
 // Floating Particles Component
 const FloatingParticles = () => {
@@ -160,7 +154,7 @@ const EducationPage = () => {
   const [, setLocation] = useLocation();
   // Connect to ResumeStore with stable selectors and hydration check
   const resumeData = useResumeStore(state => state.resumeData);
-  const actions = useResumeStore(state => state.actions);
+  const _actions = useResumeStore(state => state.actions);
   const getProTemplateById = useResumeStore(state => state.getProTemplateById);
   const activeProTemplateId = useResumeStore(state => state.activeProTemplateId);
   
@@ -223,12 +217,11 @@ const EducationPage = () => {
     }
   };
   
-  // Extract updateResumeData from actions
-  const updateResumeData = actions?.updateResumeData;
+
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
   const [educationCategories, setEducationCategories] = useState<EducationCategory[]>(mockEducationCategories);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showSuccessMessage] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
   // Helper function to get initial education state
@@ -282,7 +275,7 @@ const EducationPage = () => {
     };
   };
 
-  const [initialState, setInitialState] = useState(getInitialEducation);
+  const [initialState] = useState(getInitialEducation);
 
   const [currentEducation, setCurrentEducation] = useState(initialState.formState);
   const [startMonth, setStartMonth] = useState(initialState.startMonth);

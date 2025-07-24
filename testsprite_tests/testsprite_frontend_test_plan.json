@@ -1,0 +1,285 @@
+{
+  "projectName": "TbzResumeBuilderV4",
+  "type": "frontend",
+  "baseUrl": "http://localhost:5174",
+  "authentication": {
+    "required": true,
+    "loginUrl": "/login",
+    "credentials": {
+      "email": "testuser@example.com",
+      "password": "test1234"
+    }
+  },
+  "testSuites": [
+    {
+      "id": "auth-001",
+      "name": "Authentication Flow",
+      "description": "Test user authentication and session management",
+      "priority": "high",
+      "tests": [
+        {
+          "id": "auth-001-01",
+          "name": "User Login",
+          "description": "Verify user can login with valid credentials",
+          "steps": [
+            "Navigate to login page",
+            "Enter valid email and password",
+            "Click login button",
+            "Verify successful login and redirect to dashboard"
+          ],
+          "expectedResult": "User is logged in and redirected to main application"
+        },
+        {
+          "id": "auth-001-02",
+          "name": "Google OAuth Login",
+          "description": "Test Google OAuth authentication flow",
+          "steps": [
+            "Navigate to login page",
+            "Click 'Sign in with Google' button",
+            "Complete Google OAuth flow",
+            "Verify successful authentication"
+          ],
+          "expectedResult": "User is authenticated via Google and logged into the application"
+        },
+        {
+          "id": "auth-001-03",
+          "name": "User Logout",
+          "description": "Verify user can logout successfully",
+          "steps": [
+            "Login as authenticated user",
+            "Click logout button",
+            "Verify session is terminated",
+            "Verify redirect to login page"
+          ],
+          "expectedResult": "User is logged out and redirected to login page"
+        }
+      ]
+    },
+    {
+      "id": "resume-001",
+      "name": "Resume Builder Core",
+      "description": "Test main resume building functionality",
+      "priority": "high",
+      "tests": [
+        {
+          "id": "resume-001-01",
+          "name": "Create New Resume",
+          "description": "Test creating a new resume from scratch",
+          "steps": [
+            "Login as authenticated user",
+            "Navigate to resume builder",
+            "Click 'Create New Resume'",
+            "Select a template",
+            "Verify resume builder interface loads"
+          ],
+          "expectedResult": "Resume builder interface is displayed with selected template"
+        },
+        {
+          "id": "resume-001-02",
+          "name": "Add Personal Information",
+          "description": "Test adding personal information to resume",
+          "steps": [
+            "Open resume builder",
+            "Navigate to personal information section",
+            "Fill in name, email, phone, address",
+            "Save changes",
+            "Verify information is displayed in preview"
+          ],
+          "expectedResult": "Personal information is saved and displayed correctly in resume preview"
+        },
+        {
+          "id": "resume-001-03",
+          "name": "Add Work Experience",
+          "description": "Test adding work experience entries",
+          "steps": [
+            "Open resume builder",
+            "Navigate to work experience section",
+            "Add new work experience entry",
+            "Fill in job title, company, dates, description",
+            "Save entry",
+            "Verify experience appears in preview"
+          ],
+          "expectedResult": "Work experience is added and displayed correctly in resume"
+        },
+        {
+          "id": "resume-001-04",
+          "name": "Add Education",
+          "description": "Test adding education entries",
+          "steps": [
+            "Open resume builder",
+            "Navigate to education section",
+            "Add new education entry",
+            "Fill in degree, school, graduation date",
+            "Save entry",
+            "Verify education appears in preview"
+          ],
+          "expectedResult": "Education information is added and displayed correctly"
+        },
+        {
+          "id": "resume-001-05",
+          "name": "Add Skills",
+          "description": "Test adding skills to resume",
+          "steps": [
+            "Open resume builder",
+            "Navigate to skills section",
+            "Add technical skills",
+            "Add soft skills",
+            "Save changes",
+            "Verify skills appear in preview"
+          ],
+          "expectedResult": "Skills are categorized and displayed correctly in resume"
+        }
+      ]
+    },
+    {
+      "id": "template-001",
+      "name": "Template Management",
+      "description": "Test template selection and customization",
+      "priority": "medium",
+      "tests": [
+        {
+          "id": "template-001-01",
+          "name": "Template Selection",
+          "description": "Test selecting different resume templates",
+          "steps": [
+            "Open resume builder",
+            "Browse available templates",
+            "Select a different template",
+            "Verify template change is applied",
+            "Verify content is preserved"
+          ],
+          "expectedResult": "Template is changed while preserving existing content"
+        },
+        {
+          "id": "template-001-02",
+          "name": "Template Customization",
+          "description": "Test customizing template colors and fonts",
+          "steps": [
+            "Open resume builder",
+            "Access template customization options",
+            "Change color scheme",
+            "Change font selection",
+            "Apply changes",
+            "Verify customizations in preview"
+          ],
+          "expectedResult": "Template customizations are applied and visible in preview"
+        }
+      ]
+    },
+    {
+      "id": "export-001",
+      "name": "Export and Download",
+      "description": "Test resume export functionality",
+      "priority": "high",
+      "tests": [
+        {
+          "id": "export-001-01",
+          "name": "PDF Export",
+          "description": "Test exporting resume as PDF",
+          "steps": [
+            "Complete resume with all sections",
+            "Click 'Download PDF' button",
+            "Verify PDF generation starts",
+            "Verify PDF download completes",
+            "Verify PDF content matches preview"
+          ],
+          "expectedResult": "Resume is successfully exported as PDF with correct formatting"
+        },
+        {
+          "id": "export-001-02",
+          "name": "DOCX Export",
+          "description": "Test exporting resume as Word document",
+          "steps": [
+            "Complete resume with all sections",
+            "Click 'Download DOCX' button",
+            "Verify DOCX generation starts",
+            "Verify DOCX download completes",
+            "Verify DOCX content is properly formatted"
+          ],
+          "expectedResult": "Resume is successfully exported as DOCX with correct formatting"
+        }
+      ]
+    },
+    {
+      "id": "ui-001",
+      "name": "UI/UX Testing",
+      "description": "Test user interface and user experience",
+      "priority": "medium",
+      "tests": [
+        {
+          "id": "ui-001-01",
+          "name": "Responsive Design",
+          "description": "Test application responsiveness on different screen sizes",
+          "steps": [
+            "Open application in desktop browser",
+            "Resize browser to tablet size",
+            "Verify layout adapts correctly",
+            "Resize to mobile size",
+            "Verify mobile layout is functional"
+          ],
+          "expectedResult": "Application is responsive and functional on all screen sizes"
+        },
+        {
+          "id": "ui-001-02",
+          "name": "Real-time Preview",
+          "description": "Test real-time preview functionality",
+          "steps": [
+            "Open resume builder",
+            "Make changes to any section",
+            "Verify preview updates immediately",
+            "Test multiple rapid changes",
+            "Verify preview remains synchronized"
+          ],
+          "expectedResult": "Preview updates in real-time as user makes changes"
+        },
+        {
+          "id": "ui-001-03",
+          "name": "Drag and Drop",
+          "description": "Test drag and drop functionality for sections",
+          "steps": [
+            "Open resume builder with multiple sections",
+            "Drag a section to reorder",
+            "Drop section in new position",
+            "Verify section order changes",
+            "Verify preview reflects new order"
+          ],
+          "expectedResult": "Sections can be reordered via drag and drop"
+        }
+      ]
+    },
+    {
+      "id": "validation-001",
+      "name": "Form Validation",
+      "description": "Test form validation and error handling",
+      "priority": "medium",
+      "tests": [
+        {
+          "id": "validation-001-01",
+          "name": "Required Field Validation",
+          "description": "Test validation of required fields",
+          "steps": [
+            "Open resume builder",
+            "Try to save section without required fields",
+            "Verify validation errors are displayed",
+            "Fill required fields",
+            "Verify validation errors clear"
+          ],
+          "expectedResult": "Required field validation works correctly"
+        },
+        {
+          "id": "validation-001-02",
+          "name": "Email Format Validation",
+          "description": "Test email format validation",
+          "steps": [
+            "Enter invalid email format",
+            "Try to save",
+            "Verify email validation error",
+            "Enter valid email",
+            "Verify error clears"
+          ],
+          "expectedResult": "Email format validation works correctly"
+        }
+      ]
+    }
+  ]
+}

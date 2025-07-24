@@ -7,6 +7,105 @@ import React from 'react';
 import { useLocation } from 'wouter';
 import EditableSection from '@/components/final-page/EditableSection';
 
+// --- TYPE DEFINITIONS ---
+interface PersonalInfo {
+  firstName?: string;
+  lastName?: string;
+  title?: string;
+  summary?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+}
+
+interface Experience {
+  position: string;
+  company: string;
+  location?: string;
+  startDate: string;
+  endDate: string;
+  description?: string;
+}
+
+interface Education {
+  degree: string;
+  institution?: string;
+  school?: string;
+  location?: string;
+  graduationDate?: string;
+  startDate?: string;
+  endDate?: string;
+  description?: string;
+}
+
+interface Certification {
+  name: string;
+  issuer: string;
+  date: string;
+}
+
+interface Skill {
+  name: string;
+  level?: string;
+}
+
+interface Language {
+  name: string;
+  proficiency: string;
+}
+
+interface CustomSection {
+  title: string;
+  content: string;
+  placement: 'main' | 'sidebar';
+}
+
+interface CustomColors {
+  primary?: string;
+  secondary?: string;
+  accent?: string;
+  background?: string;
+  text?: string;
+}
+
+interface UserData {
+  personalInfo?: PersonalInfo;
+  experience?: Experience[];
+  education?: Education[];
+  certifications?: Certification[];
+  skills?: Skill[];
+  languages?: Language[];
+  customSections?: CustomSection[];
+  professionalSummary?: string;
+  customization?: {
+    colors?: CustomColors;
+  };
+}
+
+interface ContentUnit {
+  type: string;
+  placement: 'main' | 'sidebar';
+  height: number;
+  id: string;
+  data?: any;
+}
+
+interface Page {
+  mainUnits: ContentUnit[];
+  sidebarUnits: ContentUnit[];
+}
+
+interface MultiPageRenderProps {
+  resumeData: UserData;
+  onUpdateResumeData?: (data: Partial<UserData>) => void;
+  onUpdateSkills?: (skills: Skill[]) => void;
+  onUpdateLanguages?: (languages: Language[]) => void;
+  onUpdateCertifications?: (certifications: Certification[]) => void;
+  onUpdateCustomSections?: (sections: CustomSection[]) => void;
+  onUpdateEducation?: (education: Education[]) => void;
+  onUpdateWorkExperience?: (experience: Experience[]) => void;
+}
+
 // --- CONSTANTS ---
 const MAIN_COL_WIDTH_CHARS = 65;
 const SIDEBAR_COL_WIDTH_CHARS = 35;
@@ -23,8 +122,8 @@ const estimateMainTextHeight = (text: string, fontSize = 14) => estimateTextHeig
 const estimateSidebarTextHeight = (text: string, fontSize = 13) => estimateTextHeight(text, fontSize, SIDEBAR_COL_WIDTH_CHARS);
 
 // --- CONTENT DISTRIBUTION ---
-export const getContentUnits = (userData: any) => {
-  const units: any[] = [];
+export const getContentUnits = (userData: UserData) => {
+  const units: ContentUnit[] = [];
 
   // Main column units
   if (userData.personalInfo?.summary) {
@@ -37,7 +136,7 @@ export const getContentUnits = (userData: any) => {
   }
 
   if (userData.experience?.length > 0) {
-    userData.experience.forEach((exp: any, index: number) => {
+    userData.experience.forEach((exp: Experience, index: number) => {
       const descHeight = exp.description ? estimateMainTextHeight(exp.description) : 0;
       units.push({
         type: 'experience',
@@ -50,7 +149,7 @@ export const getContentUnits = (userData: any) => {
   }
 
   if (userData.education?.length > 0) {
-    userData.education.forEach((edu: any, index: number) => {
+    userData.education.forEach((edu: Education, index: number) => {
       const descHeight = edu.description ? estimateMainTextHeight(edu.description) : 0;
       units.push({
         type: 'education',
@@ -63,7 +162,7 @@ export const getContentUnits = (userData: any) => {
   }
 
   if (userData.certifications?.length > 0) {
-    userData.certifications.forEach((cert: any, index: number) => {
+    userData.certifications.forEach((cert: Certification, index: number) => {
       units.push({
         type: 'certification',
         placement: 'main',
@@ -76,8 +175,8 @@ export const getContentUnits = (userData: any) => {
 
   if (userData.customSections?.length > 0) {
     userData.customSections
-      .filter((section: any) => section.placement === 'main')
-      .forEach((section: any, index: number) => {
+      .filter((section: CustomSection) => section.placement === 'main')
+      .forEach((section: CustomSection, index: number) => {
         const contentHeight = section.content ? estimateMainTextHeight(section.content) : 0;
         units.push({
           type: 'custom-main',
@@ -90,7 +189,7 @@ export const getContentUnits = (userData: any) => {
   }
 
   // Sidebar units
-  const sidebarUnits: any[] = [];
+  const sidebarUnits: ContentUnit[] = [];
 
   if (userData.personalInfo?.phone || userData.personalInfo?.email || userData.personalInfo?.address) {
     sidebarUnits.push({ type: 'contact', placement: 'sidebar', height: 120, id: 'contact' });
@@ -106,8 +205,8 @@ export const getContentUnits = (userData: any) => {
 
   if (userData.customSections?.length > 0) {
     userData.customSections
-      .filter((section: any) => section.placement === 'sidebar')
-      .forEach((section: any, index: number) => {
+      .filter((section: CustomSection) => section.placement === 'sidebar')
+      .forEach((section: CustomSection, index: number) => {
         const contentHeight = section.content ? estimateSidebarTextHeight(section.content) : 0;
         sidebarUnits.push({
           type: 'custom-sidebar',
@@ -122,14 +221,14 @@ export const getContentUnits = (userData: any) => {
   return { mainUnits: units, sidebarUnits };
 };
 
-export const distributeContentToPages = (userData: any) => {
+export const distributeContentToPages = (userData: UserData): Page[] => {
   const { mainUnits, sidebarUnits } = getContentUnits(userData);
 
   const CONTENT_HEIGHT = 950;
   const SIDEBAR_HEIGHT = 1050;
 
-  const pages = [];
-  let currentPage = { mainUnits: [], sidebarUnits: [] };
+  const pages: Page[] = [];
+  let currentPage: Page = { mainUnits: [], sidebarUnits: [] };
   let currentMainHeight = 0;
   let currentSidebarHeight = 0;
 
@@ -163,7 +262,7 @@ export const distributeContentToPages = (userData: any) => {
 };
 
 // --- COMPONENT UNITS ---
-const HeaderUnit = ({ userData, customColors }: { userData: any; customColors: any }) => {
+const HeaderUnit = ({ userData, customColors }: { userData: UserData; customColors: CustomColors }) => {
   const primaryColor = customColors?.primary || '#1e40af';
   const textColor = customColors?.text || '#111827';
 
@@ -179,7 +278,7 @@ const HeaderUnit = ({ userData, customColors }: { userData: any; customColors: a
   );
 };
 
-const AboutUnit = ({ userData, customColors }: { userData: any; customColors: any }) => {
+const AboutUnit = ({ userData, customColors }: { userData: UserData; customColors: CustomColors }) => {
   const primaryColor = customColors?.primary || '#1e40af';
   const textColor = customColors?.text || '#374151';
 
@@ -193,7 +292,7 @@ const AboutUnit = ({ userData, customColors }: { userData: any; customColors: an
   );
 };
 
-const ExperienceUnit = ({ exp, customColors }: { exp: any; customColors: any }) => {
+const ExperienceUnit = ({ exp, customColors }: { exp: Experience; customColors: CustomColors }) => {
   const primaryColor = customColors?.primary || '#1e40af';
   const textColor = customColors?.text || '#111827';
 
@@ -224,7 +323,7 @@ const ExperienceUnit = ({ exp, customColors }: { exp: any; customColors: any }) 
   );
 };
 
-const EducationUnit = ({ edu, customColors }) => {
+const EducationUnit = ({ edu, customColors }: { edu: Education; customColors: CustomColors }) => {
   const primaryColor = customColors?.primary || '#1e40af';
   const textColor = customColors?.text || '#111827';
 
@@ -246,7 +345,7 @@ const EducationUnit = ({ edu, customColors }) => {
   );
 };
 
-const CertificationUnit = ({ cert, customColors }) => {
+const CertificationUnit = ({ cert, customColors }: { cert: Certification; customColors: CustomColors }) => {
   const primaryColor = customColors?.primary || '#1e40af';
   const textColor = customColors?.text || '#111827';
 
@@ -258,7 +357,7 @@ const CertificationUnit = ({ cert, customColors }) => {
   );
 };
 
-const CustomMainUnit = ({ section, customColors }) => {
+const CustomMainUnit = ({ section, customColors }: { section: CustomSection; customColors: CustomColors }) => {
   const primaryColor = customColors?.primary || '#1e40af';
   const textColor = customColors?.text || '#374151';
 
@@ -272,7 +371,7 @@ const CustomMainUnit = ({ section, customColors }) => {
   );
 };
 
-const ContactUnit = ({ userData, customColors }) => {
+const ContactUnit = ({ userData, customColors }: { userData: UserData; customColors: CustomColors }) => {
   const accentColor = customColors?.accent || '#60a5fa';
 
   return (
@@ -287,14 +386,14 @@ const ContactUnit = ({ userData, customColors }) => {
   );
 };
 
-const SkillsUnit = ({ userData, customColors }) => {
+const SkillsUnit = ({ userData, customColors }: { userData: UserData; customColors: CustomColors }) => {
   const accentColor = customColors?.accent || '#60a5fa';
   const secondaryColor = customColors?.secondary || '#3b82f6';
 
   return (
     <div style={{ marginBottom: '40px' }}>
       <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '20px', letterSpacing: '1px', borderBottom: `2px solid ${accentColor}`, paddingBottom: '8px' }}>SKILLS</h3>
-        {userData.skills?.slice(0, 6).map((skill: any, index: number) => {
+        {userData.skills?.slice(0, 6).map((skill: Skill, index: number) => {
           const percentage = 80; // Simplified
           return (<div key={index} style={{ marginBottom: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}><span style={{ fontSize: '13px', fontWeight: '500' }}>{skill.name}</span><span style={{ fontSize: '12px', opacity: '0.9' }}>{percentage}%</span></div>
@@ -305,13 +404,13 @@ const SkillsUnit = ({ userData, customColors }) => {
   );
 };
 
-const LanguagesUnit = ({ userData, customColors }) => {
+const LanguagesUnit = ({ userData, customColors }: { userData: UserData; customColors: CustomColors }) => {
   const accentColor = customColors?.accent || '#60a5fa';
 
   return (
     <div style={{ marginBottom: '40px' }}>
       <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '20px', letterSpacing: '1px', borderBottom: `2px solid ${accentColor}`, paddingBottom: '8px' }}>LANGUAGES</h3>
-       {userData.languages.map((lang: any, index: number) => (
+       {userData.languages?.map((lang: Language, index: number) => (
          <div key={index} style={{ fontSize: '13px', marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
            <span style={{ fontWeight: '500' }}>{lang.name}</span>
            <span style={{ opacity: '0.9' }}>({lang.proficiency})</span>
@@ -321,7 +420,7 @@ const LanguagesUnit = ({ userData, customColors }) => {
   );
 };
 
-const CustomSidebarUnit = ({ section, customColors }) => {
+const CustomSidebarUnit = ({ section, customColors }: { section: CustomSection; customColors: CustomColors }) => {
   const accentColor = customColors?.accent || '#60a5fa';
 
   return (
@@ -334,7 +433,7 @@ const CustomSidebarUnit = ({ section, customColors }) => {
   );
 };
 
-export const renderUnit = (unit: any, userData: any, customColors: any) => {
+export const renderUnit = (unit: ContentUnit, userData: UserData, customColors: CustomColors) => {
     switch (unit.type) {
       case 'header': return <HeaderUnit userData={userData} customColors={customColors} />;
       case 'about': return <AboutUnit userData={userData} customColors={customColors} />;
@@ -359,7 +458,7 @@ export const renderUnit = (unit: any, userData: any, customColors: any) => {
     onUpdateCustomSections,
     onUpdateEducation,
     onUpdateWorkExperience
-  }) => {
+  }: MultiPageRenderProps) => {
     const [, setLocation] = useLocation();
     const pages = distributeContentToPages(resumeData);
     const customColors = resumeData.customization?.colors;
@@ -402,14 +501,14 @@ export const renderUnit = (unit: any, userData: any, customColors: any) => {
         case 'custom-sidebar':
           if (sectionId) {
             const sectionIndex = parseInt(sectionId.split('-').pop() || '0');
-            const updatedSections = resumeData.customSections?.filter((_, index) => index !== sectionIndex) || [];
+            const updatedSections = resumeData.customSections?.filter((_: CustomSection, index: number) => index !== sectionIndex) || [];
             onUpdateCustomSections?.(updatedSections);
           }
           break;
         case 'custom-main':
           if (sectionId) {
             const sectionIndex = parseInt(sectionId.split('-').pop() || '0');
-            const updatedSections = resumeData.customSections?.filter((_, index) => index !== sectionIndex) || [];
+            const updatedSections = resumeData.customSections?.filter((_: CustomSection, index: number) => index !== sectionIndex) || [];
             onUpdateCustomSections?.(updatedSections);
           }
           break;
@@ -446,9 +545,9 @@ export const renderUnit = (unit: any, userData: any, customColors: any) => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
         {pages.map((page, pageIndex) => {
           const isFirstPage = pageIndex === 0;
-          const experienceUnits = page.mainUnits.filter(u => u.type === 'experience');
-          const educationUnits = page.mainUnits.filter(u => u.type === 'education');
-          const certificationUnits = page.mainUnits.filter(u => u.type === 'certification');
+          const experienceUnits = page.mainUnits.filter((u: ContentUnit) => u.type === 'experience');
+          const educationUnits = page.mainUnits.filter((u: ContentUnit) => u.type === 'education');
+          const certificationUnits = page.mainUnits.filter((u: ContentUnit) => u.type === 'certification');
 
           return (
             <div key={pageIndex} className="resume-page" style={{
@@ -471,7 +570,7 @@ export const renderUnit = (unit: any, userData: any, customColors: any) => {
                 display: 'flex',
                 flexDirection: 'column',
               }}>
-                {page.sidebarUnits.map((unit, index) => {
+                {page.sidebarUnits.map((unit: ContentUnit, index: number) => {
                   const content = <div key={unit.id}>{renderUnit(unit, resumeData, customColors)}</div>;
                   const isFirstSidebarUnit = index === 0;
                   const isLastSidebarUnit = index === page.sidebarUnits.length - 1;
@@ -558,7 +657,7 @@ export const renderUnit = (unit: any, userData: any, customColors: any) => {
                   </EditableSection>
                 )}
 
-                {page.mainUnits.some(u => u.type === 'about') && (
+                {page.mainUnits.some((u: ContentUnit) => u.type === 'about') && (
                   <EditableSection 
                     sectionPath="/professional-summary"
                     navigateTo={navigateToSection}
@@ -577,7 +676,7 @@ export const renderUnit = (unit: any, userData: any, customColors: any) => {
                     sectionPath="/work-experience-details"
                     navigateTo={navigateToSection}
                     canDelete={true}
-                    canMoveUp={page.mainUnits.some(u => u.type === 'about')}
+                    canMoveUp={page.mainUnits.some((u: ContentUnit) => u.type === 'about')}
                     canMoveDown={educationUnits.length > 0 || certificationUnits.length > 0}
                     onDelete={() => handleDeleteSection('experience', 'experience-section')}
                     onMoveUp={() => handleMoveSection('experience', 'experience-section', 'up')}
@@ -585,7 +684,7 @@ export const renderUnit = (unit: any, userData: any, customColors: any) => {
                   >
                     <div style={{ marginBottom: '10px' }}>
                       <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: primaryColor, marginBottom: '20px', letterSpacing: '1px', textTransform: 'uppercase' }}>EXPERIENCE</h2>
-                      {experienceUnits.map(unit => <div key={unit.id}>{renderUnit(unit, resumeData, customColors)}</div>)}
+                      {experienceUnits.map((unit: ContentUnit) => <div key={unit.id}>{renderUnit(unit, resumeData, customColors)}</div>)}
                     </div>
                   </EditableSection>
                 )}
@@ -595,7 +694,7 @@ export const renderUnit = (unit: any, userData: any, customColors: any) => {
                     sectionPath="/education"
                     navigateTo={navigateToSection}
                     canDelete={true}
-                    canMoveUp={page.mainUnits.some(u => u.type === 'about') || experienceUnits.length > 0}
+                    canMoveUp={page.mainUnits.some((u: ContentUnit) => u.type === 'about') || experienceUnits.length > 0}
                     canMoveDown={certificationUnits.length > 0}
                     onDelete={() => handleDeleteSection('education', 'education-section')}
                     onMoveUp={() => handleMoveSection('education', 'education-section', 'up')}
@@ -603,7 +702,7 @@ export const renderUnit = (unit: any, userData: any, customColors: any) => {
                   >
                     <div style={{ marginBottom: '10px' }}>
                       <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: primaryColor, marginBottom: '20px', letterSpacing: '1px', textTransform: 'uppercase' }}>EDUCATION</h2>
-                      {educationUnits.map(unit => <div key={unit.id}>{renderUnit(unit, resumeData, customColors)}</div>)}
+                      {educationUnits.map((unit: ContentUnit) => <div key={unit.id}>{renderUnit(unit, resumeData, customColors)}</div>)}
                     </div>
                   </EditableSection>
                 )}
@@ -613,20 +712,20 @@ export const renderUnit = (unit: any, userData: any, customColors: any) => {
                     sectionPath="/section/certifications"
                     navigateTo={navigateToSection}
                     canDelete={true}
-                    canMoveUp={page.mainUnits.some(u => u.type === 'about') || experienceUnits.length > 0 || educationUnits.length > 0}
+                    canMoveUp={page.mainUnits.some((u: ContentUnit) => u.type === 'about') || experienceUnits.length > 0 || educationUnits.length > 0}
                     canMoveDown={false}
                     onDelete={() => handleDeleteSection('certifications', 'certifications-section')}
                     onMoveUp={() => handleMoveSection('certifications', 'certifications-section', 'up')}
                   >
                     <div style={{ marginBottom: '10px' }}>
                         <h2 style={{fontSize: '16px', fontWeight: 'bold', color: primaryColor, marginBottom: '20px', letterSpacing: '1px', textTransform: 'uppercase'}}>CERTIFICATIONS</h2>
-                        {certificationUnits.map(unit => <div key={unit.id}>{renderUnit(unit, resumeData, customColors)}</div>)}
+                        {certificationUnits.map((unit: ContentUnit) => <div key={unit.id}>{renderUnit(unit, resumeData, customColors)}</div>)}
                     </div>
                   </EditableSection>
                 )}
 
-                {page.mainUnits.filter(u => u.type === 'custom-main').map((unit, index) => {
-                  const customMainUnits = page.mainUnits.filter(u => u.type === 'custom-main');
+                {page.mainUnits.filter((u: ContentUnit) => u.type === 'custom-main').map((unit: ContentUnit, index: number) => {
+                  const customMainUnits = page.mainUnits.filter((u: ContentUnit) => u.type === 'custom-main');
                   const isFirstCustom = index === 0;
                   const isLastCustom = index === customMainUnits.length - 1;
 
@@ -658,4 +757,4 @@ export const renderUnit = (unit: any, userData: any, customColors: any) => {
         })}
       </div>
     );
-  }; 
+  };

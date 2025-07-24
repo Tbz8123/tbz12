@@ -27,3 +27,13 @@ attached_assets/Pasted-*
 # Environment files
 .env.*
 !.env.example
+testsprite_tests/TC001_create_new_order.py
+testsprite_tests/TC002_get_order_by_id.py
+testsprite_tests/TC003_get_user_orders.py
+testsprite_tests/TC004_get_all_users_admin_only.py
+testsprite_tests/TC005_get_user_permissions.py
+testsprite_tests/TC006_check_specific_permission.py
+testsprite_tests/TC007_get_job_listings.py
+testsprite_tests/TC008_create_new_job.py
+testsprite_tests/TC009_get_skills_list.py
+testsprite_tests/TC010_add_new_skill.py
