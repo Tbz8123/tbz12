@@ -98,7 +98,19 @@ function App() {
   //   }
   // }, []);
 
-  return <h1>Hello World</h1>;
+  return (
+    <AuthProvider>
+      <TooltipProvider>
+        <div className="min-h-screen">
+          <Header />
+          <Suspense fallback={<div className="flex items-center justify-center min-h-[400px]">Loading...</div>}>
+            <Router />
+          </Suspense>
+          <Toaster />
+        </div>
+      </TooltipProvider>
+    </AuthProvider>
+  );
 }
 
 export default App;

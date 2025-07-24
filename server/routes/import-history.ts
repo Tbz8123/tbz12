@@ -385,7 +385,7 @@ async function processImportJob(jobId: string, job: Record<string, unknown>) {
       startedAt: new Date(),
       currentOperation: 'Server-side processing started...'
     });
-    const csvData = metadata?.csvData;
+    const csvData = metadata?.csvData as string;
     const importType = metadata?.importType || 'job_titles';
 
     console.log(`📋 Import type: ${importType}`);

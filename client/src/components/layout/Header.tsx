@@ -227,6 +227,7 @@ export default function Header() {
 
             {/* Desktop Actions */}
             <div className="hidden md:flex items-center space-x-4">
+              <ThemeToggle />
               {currentUser ? (
                 <>
                   <Button
@@ -317,6 +318,9 @@ export default function Header() {
                     ))}
 
                     <div className="pt-4 border-t">
+                      <div className="flex justify-center mb-4">
+                        <ThemeToggle />
+                      </div>
                       {currentUser ? (
                         <>
                           <div className="flex items-center space-x-3 mb-4">
